@@ -29,7 +29,7 @@ Because waiting 8 seconds to install 147 packages just to echo "Hello World" is 
 
 ---
 
-## 🚀 Why Aether-PHP?
+## 🚀 Why Aether-PHP ?
 
 Modern PHP frameworks are **bloated**. Laravel needs 100+ MB of dependencies just to start. Symfony isn't much better.
 
@@ -447,12 +447,12 @@ This is **NOT** an open-source license. See [LICENSE](LICENSE) for full terms.
 
 Aether-PHP is perfect for:
 
-- 🚀 **Microservices** - Minimal footprint, maximum performance
-- 🌐 **REST APIs** - Built-in JSON response handling
-- 💼 **SaaS Applications** - Authentication and database ready
-- 📱 **Backend for mobile apps** - Fast, secure, scalable
-- 🎮 **Game servers** - Lightweight, low latency
-- 🔧 **Internal tools** - Quick setup, no dependency hell
+- **Microservices** - Minimal footprint, maximum performance
+- **REST APIs** - Built-in JSON response handling
+- **SaaS Applications** - Authentication and database ready
+- **Backend for web or mobile apps** - Fast, secure, scalable
+- **Game servers** - Lightweight, low latency
+- **Internal tools** - Quick setup, no dependency hell
 
 ---
 
@@ -462,14 +462,8 @@ Started PHP at 11. Now I'm 20.
 This is the cleanest, fastest, most embeddable thing I've ever built.
 
 **Star if you hate bloat too.**  
-**Fork if you're crazy enough to make it even faster.**
+**Fork if you're crazy enough to make it even faster**
 
-Made with ☄️ by [dawnl3ss](https://github.com/dawnl3ss)
+- [Dawnl3ss](https://github.com/dawnl3ss)
 
 ---
-
-<div align="center">
-
-**[⬆ Back to top](#️-aether-php)**
-
-</div>
