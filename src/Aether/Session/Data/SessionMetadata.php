@@ -21,32 +21,20 @@
 */
 declare(strict_types=1);
 
-namespace App\Controller;
-
-use Aether\Auth\User\UserInstance;
-use Aether\Session\SessionInstance;
+namespace Aether\Session\Data;
 
 
-class AppController {
+final class SessionMetadata extends SessionData {
 
-    /**
-     * [@method] => GET
-     * [@route] => /
-     */
-    public function index(){
-        echo "Homepage demo for automated Router/Controller<br>";
-        var_dump(UserInstance::_isLoggedIn());
-        var_dump((new SessionInstance())->_getHttpSess());
+    public function __construct(){
+        parent::__construct(array(
+            "sessid" => session_id()
+        ));
     }
 
     /**
-     * [@method] => GET
-     * [@route] => /test
+     * @return string
      */
-    public function test(){
-        echo "<pre>";
-        echo "kjlsdqd";
-        echo "</pre>";
-    }
+    public function _getSessId() : string { return $this->_get("sessid"); }
 
 }

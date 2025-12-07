@@ -21,32 +21,35 @@
 */
 declare(strict_types=1);
 
-namespace App\Controller;
+namespace Aether\Session;
+
 
 use Aether\Auth\User\UserInstance;
-use Aether\Session\SessionInstance;
+use Aether\Session\Data\SessionAppdata;
+use Aether\Session\Data\SessionMetadata;
 
+interface SessionInterface {
 
-class AppController {
 
     /**
-     * [@method] => GET
-     * [@route] => /
+     * Return UserIntance if user is logged in (cf. Auth/), null if not.
+     *
+     * @return UserInstance|null
      */
-    public function index(){
-        echo "Homepage demo for automated Router/Controller<br>";
-        var_dump(UserInstance::_isLoggedIn());
-        var_dump((new SessionInstance())->_getHttpSess());
-    }
+    public function _getUser() : ?UserInstance;
 
     /**
-     * [@method] => GET
-     * [@route] => /test
+     * Return SessionMetadata instance which contains all data related to the actual current session (id, related ips...)
+     *
+     * @return SessionMetadata
      */
-    public function test(){
-        echo "<pre>";
-        echo "kjlsdqd";
-        echo "</pre>";
-    }
+    public function _getMetadata() : SessionMetadata;
+
+    /**
+     * Return SessionAppdata instance if the custom implemented App/ needs backend cache saving.
+     *
+     * @return SessionAppdata|null
+     */
+    public function _getAppdata() : ?SessionAppdata;
 
 }

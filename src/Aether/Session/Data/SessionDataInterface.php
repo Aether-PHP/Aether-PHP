@@ -21,32 +21,30 @@
 */
 declare(strict_types=1);
 
-namespace App\Controller;
-
-use Aether\Auth\User\UserInstance;
-use Aether\Session\SessionInstance;
+namespace Aether\Session\Data;
 
 
-class AppController {
+interface SessionDataInterface {
+
 
     /**
-     * [@method] => GET
-     * [@route] => /
+     * @param string $key
+     *
+     * @return mixed
      */
-    public function index(){
-        echo "Homepage demo for automated Router/Controller<br>";
-        var_dump(UserInstance::_isLoggedIn());
-        var_dump((new SessionInstance())->_getHttpSess());
-    }
+    public function _get(string $key) : mixed;
 
     /**
-     * [@method] => GET
-     * [@route] => /test
+     * @param string $key
+     *
+     * @param $value
      */
-    public function test(){
-        echo "<pre>";
-        echo "kjlsdqd";
-        echo "</pre>";
-    }
+    public function _set(string $key, $value) : void;
 
+    /**
+     * @param string $key
+     *
+     * @return bool
+     */
+    public function _is(string $key) : bool;
 }

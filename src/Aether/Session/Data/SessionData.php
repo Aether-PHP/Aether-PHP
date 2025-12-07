@@ -21,32 +21,47 @@
 */
 declare(strict_types=1);
 
-namespace App\Controller;
-
-use Aether\Auth\User\UserInstance;
-use Aether\Session\SessionInstance;
+namespace Aether\Session\Data;
 
 
-class AppController {
+abstract class SessionData implements SessionDataInterface {
+
+
+    /** @var array $_raw */
+    protected array $_raw = [];
+
+    public function __construct(array $raw = null){
+        if (is_array($raw))
+            $this->_raw = $raw;
+    }
+
 
     /**
-     * [@method] => GET
-     * [@route] => /
+     * @param string $key
+     *
+     * @return mixed
      */
-    public function index(){
-        echo "Homepage demo for automated Router/Controller<br>";
-        var_dump(UserInstance::_isLoggedIn());
-        var_dump((new SessionInstance())->_getHttpSess());
+    public function _get(string $key) : mixed {
+        if ($this->_is($key))
+            return $this->_raw[$key];
+
+        return null;
     }
 
     /**
-     * [@method] => GET
-     * [@route] => /test
+     * @param string $key
+     * @param $value
      */
-    public function test(){
-        echo "<pre>";
-        echo "kjlsdqd";
-        echo "</pre>";
+    public function _set(string $key, $value) : void {
+        $this->_raw[$key] = $value;
     }
 
+    /**
+     * @param string $key
+     *
+     * @return bool
+     */
+    public function _is(string $key) : bool {
+        return isset($this->_raw[$key]);
+    }
 }
