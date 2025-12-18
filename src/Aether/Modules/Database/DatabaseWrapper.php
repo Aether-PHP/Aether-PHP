@@ -24,7 +24,9 @@ declare(strict_types=1);
 namespace Aether\Modules\Database;
 
 use Aether\Modules\Database\Drivers\DatabaseDriver;
-use Aether\Modules\Database\Drivers\List\DatabasePdoDriver;
+use Aether\Modules\Database\Drivers\DatabaseDriverEnum;
+use Aether\Modules\Database\Drivers\List\DatabaseMySQLDriver;
+use Aether\Modules\Database\Drivers\List\DatabaseSQLiteDriver;
 
 
 class DatabaseWrapper {
@@ -35,8 +37,8 @@ class DatabaseWrapper {
     /** @var DatabaseDriver $_driver */
     private DatabaseDriver $_driver;
 
-    public function __construct(string $database){
-        $this->_driver = $this->_getDriver();
+    public function __construct(string $database,  DatabaseDriverEnum $_driver){
+        $this->_driver = $this->_getDriver($_driver);
         $this->_database = $database;
     }
 
@@ -64,6 +66,15 @@ class DatabaseWrapper {
         }
 
         return $this->_driver->_database($this->_database)->_query($query, $assoc);
+    }
+
+    /**
+     * @param string $query
+     *
+     * @return mixed
+     */
+    public function _raw(string $query){
+        return $this->_driver->_database($this->_database)->_query($query, []);
     }
 
 
@@ -97,14 +108,16 @@ class DatabaseWrapper {
 
 
     /**
+     * @param DatabaseDriverEnum $_enum
+     *
      * @return DatabaseDriver
      */
-    private function _getDriver() : DatabaseDriver {
-        /*return match ($driverEnum){
-            DatabaseDriverEnum::PDO => new DatabasePdoDriver(),
-            default => new DatabasePdoDriver(),
-        };*/
-        return new DatabasePdoDriver();
+    private function _getDriver(DatabaseDriverEnum $_enum) : DatabaseDriver {
+        return match ($_enum){
+            DatabaseDriverEnum::MYSQL => new DatabaseMySQLDriver(),
+            DatabaseDriverEnum::SQLITE => new DatabaseSQLiteDriver(),
+            default => new DatabaseMySQLDriver(),
+        };
     }
 
 }

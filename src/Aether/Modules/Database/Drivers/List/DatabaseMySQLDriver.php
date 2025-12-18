@@ -21,69 +21,80 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Auth;
+namespace Aether\Modules\Database\Drivers\List;
 
-use Aether\Config\ProjectConfig;
-use Aether\Modules\Database\DatabaseWrapper;
+use Aether\Modules\Database\Drivers\DatabaseDriver;
 use Aether\Modules\Database\Drivers\DatabaseDriverEnum;
 
+use PDO;
 
-abstract class AuthInstance implements AuthInterface {
 
-    /** @var string $_email */
-    protected string $_email;
+final class DatabaseMySQLDriver extends DatabaseDriver {
 
-    /** @var string $_password */
-    protected string $_password;
 
-    /** @var string $_status */
-    protected string $_status;
+    /** @var PDO $_conn */
+    private PDO $_conn;
 
-    /** @var DatabaseWrapper $_dbconn */
-    protected DatabaseWrapper $_dbconn;
-
-    public function __construct(string $email, string $password){
-        $this->_email = $email;
-        $this->_password = $password;
-        $this->_status = "";
-        $this->_dbconn = new DatabaseWrapper(ProjectConfig::_get("AUTH_DATABASE_GATEWAY"), DatabaseDriverEnum::MYSQL);
+    public function __construct(){
+        parent::__construct(DatabaseDriverEnum::MYSQL);
     }
 
     /**
-     * @return string
+     * @return DatabaseDriver
      */
-    protected function _getEmail() : string { return $this->_email; }
-
-    /**
-     * @return string
-     */
-    protected function _getPassword() : string { return $this->_password; }
+    public function _connect() : self {
+        $this->_conn = new PDO("mysql:dbname={$this->_database};host={$this->_getHost()}", $this->_getIds()->_getLogin(), $this->_getIds()->_getPasskey());
+        return $this;
+    }
 
 
     /**
-     * @return bool
-     */
-    protected function _isValid() : bool { return $this->_status; }
-
-    /**
-     * @return string
-     */
-    public function _getStatus() : string { return $this->_status; }
-
-    /**
-     * @param string $message
-     * @param bool $status
+     * @param string $database
      *
-     * @return bool
+     * @return DatabaseMySQLDriver
      */
-    protected function _setStatus(string $message, bool $status) : bool {
-        $this->_status = $message;
-        return $status;
+    public function _database(string $database) : self {
+        parent::_database($database);
+        $this->_connect();
+        return $this;
     }
 
     /**
-     * @return bool
+     * @param $value
+     *
+     * @return int
      */
-    abstract public function _tryAuth() : bool;
+    private function _detectPdoType($value) : int {
+        return match (true){
+            is_int($value) => PDO::PARAM_INT,
+            is_bool($value) => PDO::PARAM_BOOL,
+            is_null($value) => PDO::PARAM_NULL,
+            default => PDO::PARAM_STR,
+        };
+    }
+
+    /**
+     * @param string $query
+     * @param array $params
+     *
+     * @return mixed
+     */
+    public function _query(string $query, array $params = []) : mixed {
+        $stmt = $this->_conn->prepare($query);
+
+        foreach ($params as $key => $value){
+            $paramKey = str_starts_with($key, ':') ? $key : ':' . $key;
+            $stmt->bindValue($paramKey, $value, $this->_detectPdoType($value));
+        }
+
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    /**
+     * @return array
+     */
+    public function _dump() : array { return []; }
 
 }

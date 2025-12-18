@@ -27,44 +27,67 @@ use Aether\Modules\Database\Drivers\DatabaseDriver;
 use Aether\Modules\Database\Drivers\DatabaseDriverEnum;
 
 use PDO;
+use PDOException;
 
 
-final class DatabasePdoDriver extends DatabaseDriver {
-
+final class DatabaseSQLiteDriver extends DatabaseDriver {
 
     /** @var PDO $_conn */
     private PDO $_conn;
 
     public function __construct(){
-        parent::__construct(DatabaseDriverEnum::PDO);
+        parent::__construct(DatabaseDriverEnum::SQLITE);
     }
 
     /**
      * @return DatabaseDriver
      */
-    public function _connect() : self {
-        $this->_conn = new PDO("mysql:dbname={$this->_database};host={$this->_getHost()}", $this->_getIds()->_getLogin(), $this->_getIds()->_getPasskey());
+    public function _connect(): self {
+        $path = $this->_getDatabasePath();
+
+        $this->_conn = new PDO("sqlite:{$path}", null, null, [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false,
+        ]);
+
         return $this;
     }
 
-
     /**
-     * @param string $database
+     * @param string $path
      *
-     * @return DatabasePdoDriver
+     * @return DatabaseSQLiteDriver
      */
-    public function _database(string $database) : self {
-        parent::_database($database);
+    public function _database(string $path) : self {
+        parent::_database($path);
         $this->_connect();
         return $this;
     }
 
     /**
-     * @param $value
+     * @return string
+     */
+    private function _getDatabasePath() : string {
+        $path = $this->_database;
+
+
+        if ($path !== ':memory:'){
+            $dir = dirname($path);
+
+            if (!is_dir($dir))
+                mkdir($dir, 0755, true);
+        }
+
+        return $path;
+    }
+
+    /**
+     * @param mixed $value
      *
      * @return int
      */
-    private function _detectPdoType($value) : int {
+    private function _detectPdoType(mixed $value) : int {
         return match (true){
             is_int($value) => PDO::PARAM_INT,
             is_bool($value) => PDO::PARAM_BOOL,
