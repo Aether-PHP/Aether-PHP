@@ -47,7 +47,7 @@ final class RegisterAuthGateway extends AuthInstance implements AuthGatewayEvent
      * @return bool
      */
     public function _tryAuth() : bool {
-        if ($this->_dbconn->_exist(ProjectConfig::AUTH_TABLE_GATEWAY, [ "email" => $this->_email ]))
+        if ($this->_dbconn->_exist(ProjectConfig::_get("AUTH_TABLE_GATEWAY"), [ "email" => $this->_email ]))
             return $this->_setStatus($this->_onFailure(), false);
 
         return $this->_setStatus($this->_onSuccess([]), true);
@@ -60,13 +60,13 @@ final class RegisterAuthGateway extends AuthInstance implements AuthGatewayEvent
      * @return string
      */
     public function _onSuccess(array $_data) : string {
-        $this->_dbconn->_insert(ProjectConfig::AUTH_TABLE_GATEWAY, [
+        $this->_dbconn->_insert(ProjectConfig::_get("AUTH_TABLE_GATEWAY"), [
             "username" => $this->_username,
             "email" => $this->_email,
             "password_hash" => $this->_hashPassword($this->_password),
             "perms" => ""
         ]);
-        $user_db = $this->_dbconn->_select(ProjectConfig::AUTH_TABLE_GATEWAY, '*', [ "email" => $this->_email ])[0];
+        $user_db = $this->_dbconn->_select(ProjectConfig::_get("AUTH_TABLE_GATEWAY"), '*', [ "email" => $this->_email ])[0];
 
         $_SESSION["user"] = serialize(new UserInstance(
             $user_db["uid"],

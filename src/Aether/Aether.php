@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace Aether;
 
+use Aether\Config\ProjectConfig;
 use Aether\Router\ControllerGateway;
 
 
@@ -53,6 +54,8 @@ class Aether {
             ini_set('display_errors', 1);
         }
 
+        # - .Env File load
+        ProjectConfig::_load();
 
         # - Cookies Security Fix
         session_set_cookie_params([
@@ -69,5 +72,7 @@ class Aether {
 
         # - Router Gateway : deliver correct controller for each route
         (new ControllerGateway())->_link();
+
+        var_dump(ProjectConfig::_get("AUTH_DATABASE_GATEWAY"));
     }
 }

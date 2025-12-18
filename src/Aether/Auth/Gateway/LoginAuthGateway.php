@@ -42,10 +42,10 @@ final class LoginAuthGateway extends AuthInstance implements AuthGatewayEventInt
      * @return bool
      */
     public function _tryAuth() : bool {
-        if (!$this->_dbconn->_exist(ProjectConfig::AUTH_TABLE_GATEWAY, [ "email" => $this->_email ]))
+        if (!$this->_dbconn->_exist(ProjectConfig::_get("AUTH_TABLE_GATEWAY"), [ "email" => $this->_email ]))
             return $this->_setStatus($this->_onFailure(), false);
 
-        $_data = $this->_dbconn->_select(ProjectConfig::AUTH_TABLE_GATEWAY, '*', [ "email" => $this->_email ])[0];
+        $_data = $this->_dbconn->_select(ProjectConfig::_get("AUTH_TABLE_GATEWAY"), '*', [ "email" => $this->_email ])[0];
 
         if (!$this->_checkPassword($this->_password, $_data["password_hash"]))
             return $this->_setStatus($this->_onFailure(), false);

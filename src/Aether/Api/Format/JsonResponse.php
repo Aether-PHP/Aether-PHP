@@ -29,6 +29,9 @@ class JsonResponse {
     /** @var array $_json */
     private array $_json;
 
+    /** @var mixed $_encoded */
+    private $_encoded;
+
     public function __construct(?array $json = []){
         $this->_json = $json;
     }
@@ -48,6 +51,10 @@ class JsonResponse {
     /**
      * @return string
      */
-    public function _encode() : string { return json_encode($this->_json); }
+    public function _encode() : string {
+        echo json_encode($this->_json);
+        exit;
+    }
+
 
 }

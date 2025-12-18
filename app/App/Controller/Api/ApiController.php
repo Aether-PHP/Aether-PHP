@@ -40,10 +40,10 @@ class ApiController {
      * [@route] => /api/v1
      */
     public function api(){
-        echo (new JsonResponse())
+        (new JsonResponse())
             ->_add("version", 1.0)
-            ->_add("name", ProjectConfig::PROJECT_NAME . " backend | Powered by Aether-PHP framework.")
-            ->_add("description", "Backend API v1 for " . ProjectConfig::PROJECT_NAME)
+            ->_add("name", ProjectConfig::_get("PROJECT_NAME") . " backend | Powered by Aether-PHP framework.")
+            ->_add("description", "Backend API v1 for " . ProjectConfig::_get("PROJECT_NAME"))
             ->_add("routes", array(
                 [
                     "method" => "GET",
@@ -82,7 +82,7 @@ class ApiController {
      * [@route] => /api/v1/test
      */
     public function test(){
-        echo (new JsonResponse())
+        (new JsonResponse())
             ->_add("test", "this is a test")
         ->_encode();
     }

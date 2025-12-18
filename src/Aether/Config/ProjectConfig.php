@@ -24,35 +24,37 @@ declare(strict_types=1);
 namespace Aether\Config;
 
 
-final class ProjectConfig implements Configable {
+final class ProjectConfig {
 
-    const string PROJECT_NAME = 'Project Name';
+    /** @var bool $_loaded */
+    private static bool $_loaded = false;
 
-    const string DATABASE_ADDRESS = '127.0.0.1';
-    const string DATABASE_USERNAME = 'root';
-    const string DATABASE_PASSWORD = 'root';
+    /** @var array $_data */
+    private static array $_data = [];
+    
 
-    const string AUTH_DATABASE_GATEWAY = "aetherphp";
-    const string AUTH_TABLE_GATEWAY = "users";
+    public static function _load(){
+        if (self::$_loaded)
+            return;
 
-    public function __construct(mixed $_data = null){
-        if (!is_null($_data) && $_data instanceof Configable)
-            $this->_unpack($_data);
+        self::$_data = (new EnvDataUnpacker())->_raw();
+        self::$_loaded = true;
     }
 
-    /**
-     * @param array $_data
-     * @return Configable
-     */
-    public function _unpack(array $_data) : Configable {
-        return $this;
-    }
 
     /**
-     * @param Configable $config
-     * @return array
+     * @param string $key
+     * @param mixed|null $default
+     *
+     * @return mixed
      */
-    public function _pack(Configable $config) : array {
-        return [];
+    public static function _get(string $key, mixed $default = null) : mixed {
+        self::_ensureLoaded();
+        return self::$_data[strtoupper($key)] ?? $default;
+    }
+
+    
+    private static function _ensureLoaded(){
+        if (!self::$_loaded) self::load();
     }
 }

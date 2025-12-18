@@ -53,14 +53,14 @@ abstract class DatabaseDriver implements DatabaseConnectable {
      * @return IdsMap
      */
     protected function _getIds() : IdsMap {
-        return new IdsMap(ProjectConfig::DATABASE_USERNAME, ProjectConfig::DATABASE_PASSWORD);
+        return new IdsMap(ProjectConfig::_get("DATABASE_USERNAME"), ProjectConfig::_get("DATABASE_PASSWORD"));
     }
 
     /**
      * @return string
      */
     protected function _getHost() : string {
-        return ProjectConfig::DATABASE_ADDRESS;
+        return ProjectConfig::_get("DATABASE_ADDRESS");
     }
 
     /**

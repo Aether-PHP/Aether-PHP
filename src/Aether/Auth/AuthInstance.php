@@ -45,7 +45,7 @@ abstract class AuthInstance implements AuthInterface {
         $this->_email = $email;
         $this->_password = $password;
         $this->_status = "";
-        $this->_dbconn = new DatabaseWrapper(ProjectConfig::AUTH_DATABASE_GATEWAY);
+        $this->_dbconn = new DatabaseWrapper(ProjectConfig::_get("AUTH_DATABASE_GATEWAY"));
     }
 
     /**

@@ -27,13 +27,3 @@ require_once __DIR__ . '/autoload.php';
 
 # - Core init
 \Aether\Aether::_init();
-
-
-
-
-
-$s = \Aether\IO\IOStream::_open(\Aether\IO\IOTypeEnum::ENV, ".env");
-
-echo "<pre>";
-var_dump($s->_readDecoded());
-echo "</pre>";
