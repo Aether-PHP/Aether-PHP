@@ -43,7 +43,10 @@ final class DatabaseMySQLDriver extends DatabaseDriver {
      * @return DatabaseDriver
      */
     public function _connect() : self {
-        $this->_conn = new PDO("mysql:dbname={$this->_database};host={$this->_getHost()}", $this->_getIds()->_getLogin(), $this->_getIds()->_getPasskey());
+        $this->_conn = new PDO("mysql:dbname={$this->_database};host={$this->_getHost()}", $this->_getIds()->_getLogin(), $this->_getIds()->_getPasskey(), [
+            PDO::ATTR_PERSISTENT => true,
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+        ]);
         return $this;
     }
 

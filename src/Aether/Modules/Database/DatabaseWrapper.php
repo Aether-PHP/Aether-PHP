@@ -37,8 +37,9 @@ class DatabaseWrapper {
     /** @var DatabaseDriver $_driver */
     private DatabaseDriver $_driver;
 
-    public function __construct(string $database,  DatabaseDriverEnum $_driver){
-        $this->_driver = $this->_getDriver($_driver);
+
+    public function __construct(string $database, DatabaseDriverEnum $_driver){
+        $this->_driver = $this->_getDriver($_driver)->_database($database);
         $this->_database = $database;
     }
 
@@ -65,7 +66,7 @@ class DatabaseWrapper {
             $query .= " WHERE " . implode(" AND ", $conditions);
         }
 
-        return $this->_driver->_database($this->_database)->_query($query, $assoc);
+        return $this->_driver->_query($query, $assoc);
     }
 
     /**
@@ -74,7 +75,7 @@ class DatabaseWrapper {
      * @return mixed
      */
     public function _raw(string $query){
-        return $this->_driver->_database($this->_database)->_query($query, []);
+        return $this->_driver->_query($query, []);
     }
 
 
@@ -89,7 +90,7 @@ class DatabaseWrapper {
      */
     public function _insert(string $table, array $assoc){
         $query = "INSERT INTO {$table} (" . implode(',', array_keys($assoc)) . ") VALUES (:" . implode(',:', array_keys($assoc)) . ")";
-        return $this->_driver->_database($this->_database)->_query($query, $assoc);
+        return $this->_driver->_query($query, $assoc);
     }
 
 

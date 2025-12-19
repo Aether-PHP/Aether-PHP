@@ -23,9 +23,9 @@ declare(strict_types=1);
 
 namespace Aether\Config;
 
-
 use Aether\IO\IOStream;
 use Aether\IO\IOTypeEnum;
+
 
 final class EnvDataUnpacker {
 

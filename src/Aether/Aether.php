@@ -23,13 +23,11 @@ declare(strict_types=1);
 
 namespace Aether;
 
-use Aether\Auth\Gateway\LoginAuthGateway;
-use Aether\Auth\User\UserInstance;
+
 use Aether\Config\ProjectConfig;
 use Aether\Modules\Database\DatabaseWrapper;
 use Aether\Modules\Database\Drivers\DatabaseDriverEnum;
 use Aether\Router\ControllerGateway;
-use Aether\Session\SessionInstance;
 
 
 /*
