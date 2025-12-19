@@ -23,10 +23,12 @@ declare(strict_types=1);
 
 namespace Aether\Auth\User;
 
+use Aether\Auth\User\Permission\PermissionEnum;
+use Aether\Auth\User\Permission\PermissionLayer;
 use Aether\Security\UserInputValidatorTrait;
 
 
-class UserInstance implements UserInterface {
+class UserInstance extends PermissionLayer implements UserInterface {
     use UserInputValidatorTrait;
 
     /** @var int $_uid */
@@ -38,14 +40,12 @@ class UserInstance implements UserInterface {
     /** @var string $_email */
     private string $_email;
 
-    /** @var array $_perms */
-    private array $_perms;
 
     public function __construct(int $uid, string $username, string $email, string $_perms){
         $this->_uid = $uid;
         $this->_username = $username;
         $this->_email = $email;
-        $this->_perms = explode(',', $_perms);
+        $this->_perms = json_decode($_perms, true);
     }
 
     /**
@@ -76,7 +76,36 @@ class UserInstance implements UserInterface {
     public function _getEmail() : string { return $this->_sanitizeInput($this->_email); }
 
     /**
+     * @return bool
+     */
+    public function _isAdmin() : bool { return $this->_hasPerm(PermissionEnum::PERM_ADMIN); }
+
+    /**
+     * @param mixed $_perm
+     *
+     * @return bool
+     */
+    public function _hasPerm(mixed $_perm) : bool {
+        return $this->_hasPermission($_perm);
+    }
+
+    /**
+     * @param mixed $_perm
+     * @param int $uid
+     *
+     * @return UserInstance
+     */
+    public function _setPerm(mixed $_perm) : UserInstance {
+        if ($this->_hasPerm($_perm))
+            return $this;
+
+        $this->_setPermission($_perm, $this->_getUid());
+        return $this;
+    }
+
+    /**
      * @return array
      */
     public function _getPerms() : array { return $this->_perms; }
+
 }

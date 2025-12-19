@@ -95,6 +95,44 @@ class DatabaseWrapper {
 
 
     /**
+     * Operate a SQL 'UPDATE' query
+     *
+     * @param string $table
+     * @param array $assoc
+     * @param array $conditions
+     *
+     * @return mixed
+     */
+    public function _update(string $table, array $assoc, array $conditions = []) : mixed {
+        $setClauses = [];
+
+        foreach ($assoc as $key => $value){
+            $setClauses[] = "{$key} = :set_{$key}";
+        }
+
+        $query = "UPDATE {$table} SET " . implode(", ", $setClauses);
+        $params = [];
+
+        foreach ($assoc as $key => $value){
+            $params["set_{$key}"] = $value;
+        }
+
+        if (!empty($conditions)){
+            $whereClauses = [];
+
+            foreach ($conditions as $key => $value){
+                $whereClauses[] = "{$key} = :where_{$key}";
+                $params["where_{$key}"] = $value;
+            }
+
+            $query .= " WHERE " . implode(" AND ", $whereClauses);
+        }
+
+        return $this->_driver->_query($query, $params);
+    }
+
+
+    /**
      * Check if a value is in a table
      *
      * @param $table

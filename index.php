@@ -31,4 +31,4 @@ $boot_time = \testing\BootTimeTest::_wrap(function (){
     \Aether\Aether::_init();
 });
 
-print_r($boot_time . " ms");
+print_r("<br><br>" . $boot_time . " ms");
