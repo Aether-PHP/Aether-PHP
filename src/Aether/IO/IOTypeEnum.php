@@ -31,6 +31,8 @@ enum IOTypeEnum : string {
     case YAML = 'yaml';
     case ENV  = 'env';
     case CSV  = 'csv';
+    case PNG  = 'png';
+    case JPG  = 'jpg';
     case OTHER  = 'other';
 
 }

@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace Aether\Config;
 
-use Aether\IO\IOStream;
+use Aether\IO\IOFile;
 use Aether\IO\IOTypeEnum;
 
 
@@ -34,7 +34,7 @@ final class EnvDataUnpacker {
 
 
     public function __construct(){
-        $this->_envData = IOStream::_open(IOTypeEnum::ENV, ".env")->_readDecoded();
+        $this->_envData = IOFile::_open(IOTypeEnum::ENV, ".env")->_readDecoded();
     }
 
 

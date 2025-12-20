@@ -39,8 +39,6 @@ final class EnvParser implements ParserInterface {
 
         foreach ($_data as $key => $value){
             $value = is_array($value) ? json_encode($value) : $value;
-            var_dump($key);
-            var_dump($value);
             $lines[] = $key . '=' . $value;
         }
         return implode(PHP_EOL, $lines) . PHP_EOL;

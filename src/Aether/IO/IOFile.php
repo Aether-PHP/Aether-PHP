@@ -28,7 +28,7 @@ use Aether\IO\Parser\JsonParser;
 use Aether\IO\Parser\ParserInterface;
 
 
-final class IOStream {
+final class IOFile {
 
     /** @var IOTypeEnum $_type */
     private IOTypeEnum $_type;
@@ -61,19 +61,14 @@ final class IOStream {
      * @param mixed $_content
      * @param bool $_append
      *
-     * @return IOStream|null
+     * @return IOFile|null
      */
-    public function _write(mixed $_content, bool $_append = false) : ?IOStream {
+    public function _write(mixed $_content, bool $_append = false) : ?IOFile {
         $data = $this->_getParser()->_encode($_content);
-        $mode = $_append ? 'ab' : 'wb';
+        $flags = $_append ? FILE_APPEND | LOCK_EX : LOCK_EX;
 
-        $fp = fopen($this->_path, $mode);
-        if ($fp === false) return null;
-
-        flock($fp, LOCK_EX);
-        fwrite($fp, $data);
-        flock($fp, LOCK_UN);
-        fclose($fp);
+        if (!file_put_contents($this->_path, $data, $flags))
+            return null;
 
         return $this;
     }
@@ -82,15 +77,14 @@ final class IOStream {
      * @param string $line
      * @param int|null $lineNumber
      *
-     * @return IOStream|null
+     * @return IOFile|null
      */
-    public function _writeLine(string $line, ?int $lineNumber = null) : ?IOStream {
+    public function _writeLine(string $line, ?int $lineNumber = null) : ?IOFile {
         if (is_null($lineNumber))
             return $this->_write($line . PHP_EOL, true);
 
-        $lines = file_exists($this->_path) ? $this->_readLines() : [];
+        $lines = file_exists($this->_path) ? explode(PHP_EOL, $this->_read()) : [];
         $lines[$lineNumber] = $line;
-
         return $this->_write(implode(PHP_EOL, $lines));
     }
 
@@ -102,70 +96,14 @@ final class IOStream {
         if (!file_exists($this->_path))
             return null;
 
-        $fp = fopen($this->_path, 'rb');
-        if ($fp === false) return null;
-
-        flock($fp, LOCK_SH);
-        $content = stream_get_contents($fp);
-        flock($fp, LOCK_UN);
-        fclose($fp);
-
-        return $content;
+        return file_get_contents($this->_path);
     }
 
     /**
      * @return array
      */
     public function _readLines() : array {
-        if (!file_exists($this->_path))
-            return [];
-
-        $lines = [];
-        $fp = fopen($this->_path, 'rb');
-
-        if ($fp === false) return [];
-        flock($fp, LOCK_SH);
-
-        while (($line = fgets($fp)) !== false){
-            $lines[] = rtrim($line, "\r\n");
-        }
-        flock($fp, LOCK_UN);
-        fclose($fp);
-
-        return $lines;
-    }
-
-    /**
-     * Stream line by line with a callback (receives the current line and the line number (starting at 0))
-     * If the callback returns false, reading stops early
-     *
-     * @param callable $callback fn(string $line, int $lineNumber): bool|null
-     *
-     * @return IOStream
-     */
-    public function _readEachLine(callable $callback) : IOStream {
-        if (!file_exists($this->_path))
-            return $this;
-
-        $fp = fopen($this->_path, 'rb');
-        if ($fp === false) return $this;
-
-        flock($fp, LOCK_SH);
-
-        $lineNumber = 0;
-        while (($rawLine = fgets($fp)) !== false){
-            $line = rtrim($rawLine, "\r\n");
-
-            if ($callback($line, $lineNumber) === false)
-                break;
-
-            $lineNumber++;
-        }
-
-        flock($fp, LOCK_UN);
-        fclose($fp);
-
-        return $this;
+        return file_exists($this->_path) ? file($this->_path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) : [];
     }
 
     /**
@@ -191,9 +129,9 @@ final class IOStream {
      * @param IOTypeEnum $_type
      * @param string $_path
      *
-     * @return IOStream
+     * @return IOFile
      */
-    public static function _open(IOTypeEnum $_type, string $_path) : IOStream {
+    public static function _open(IOTypeEnum $_type, string $_path) : IOFile {
         return new self($_type, $_path);
     }
 
