@@ -21,22 +21,47 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Middleware;
+namespace Aether\Middleware\Stack;
+
+use Aether\Api\Format\JsonResponse;
+use Aether\Middleware\MiddlewareInterface;
+use Aether\Security\Token\CsrfToken;
 
 
-final class Pipeline {
+final class CsrfMiddleware implements MiddlewareInterface {
 
     /**
-     * @param MiddlewareInterface[] $_middlewares
-     * @param callable $_finalHandler
+     * @param callable $_next
      */
-    public static function _run(array $_middlewares, callable $_finalHandler){
-        $pipeline = array_reduce(
-            array_reverse($_middlewares),
-            fn(callable $next, string $middleware) => fn() => (new $middleware())->_handle($next),
-            $_finalHandler
-        );
+    public function _handle(callable $_next){
 
-        $pipeline();
+        # - We expose the token when http req is GET|HEAD|OPTIONS
+        if (in_array($_SERVER['REQUEST_METHOD'], ['GET', 'HEAD', 'OPTIONS'])){
+            CsrfToken::_exposeHeader();
+            $_next();
+            return;
+        }
+
+        # - Stricter verification when http req is POST|PUT|DELETE|PATCH
+        $submitted = $_POST['csrf_token']
+            ?? $_SERVER['HTTP_X_CSRF_TOKEN']
+            ?? '';
+
+        if (!CsrfToken::_verify($submitted)){
+            http_response_code(403);
+
+            if (str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json')){
+                (new JsonResponse())
+                    ->_add('error', 'Invalid or missing CSRF token')
+                    ->_add('code', 403)
+                    ->_encode();
+                return;
+            }
+
+            echo '<h1>403 - Forbidden</h1><p>Invalid CSRF token.</p>';
+            return;
+        }
+
+        $_next();
     }
 }

@@ -24,7 +24,10 @@ declare(strict_types=1);
 namespace Aether;
 
 use Aether\Config\ProjectConfig;
+use Aether\Middleware\Pipeline;
+use Aether\Middleware\Stack\CsrfMiddleware;
 use Aether\Router\ControllerGateway;
+use Aether\Session\SessionInstance;
 
 
 /*
@@ -67,7 +70,10 @@ class Aether {
         ini_set('session.gc_maxlifetime', 60 * 60 * 24 * 10);
         session_start();
 
-        # - Router Gateway : deliver correct controller for each route
-        (new ControllerGateway())->_link();
+        # - Middleware
+        Pipeline::_run([ CsrfMiddleware::class ], function (){
+            # - Router Gateway : deliver correct controller for each route
+            (new ControllerGateway())->_link();
+        });
     }
 }

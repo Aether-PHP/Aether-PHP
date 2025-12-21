@@ -24,19 +24,11 @@ declare(strict_types=1);
 namespace Aether\Middleware;
 
 
-final class Pipeline {
+interface MiddlewareInterface {
 
     /**
-     * @param MiddlewareInterface[] $_middlewares
-     * @param callable $_finalHandler
+     * @param callable $_next
      */
-    public static function _run(array $_middlewares, callable $_finalHandler){
-        $pipeline = array_reduce(
-            array_reverse($_middlewares),
-            fn(callable $next, string $middleware) => fn() => (new $middleware())->_handle($next),
-            $_finalHandler
-        );
+    public function _handle(callable $_next);
 
-        $pipeline();
-    }
 }

@@ -21,22 +21,53 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Middleware;
+namespace Aether\Security\Token;
 
 
-final class Pipeline {
+final class CsrfToken {
+
+    private const KEY = 'csrf_token';
 
     /**
-     * @param MiddlewareInterface[] $_middlewares
-     * @param callable $_finalHandler
+     * @return string
      */
-    public static function _run(array $_middlewares, callable $_finalHandler){
-        $pipeline = array_reduce(
-            array_reverse($_middlewares),
-            fn(callable $next, string $middleware) => fn() => (new $middleware())->_handle($next),
-            $_finalHandler
-        );
-
-        $pipeline();
+    public static function _generate() : string {
+        $token = bin2hex(random_bytes(32));
+        $_SESSION[self::KEY] = $token;
+        return $token;
     }
+
+    /**
+     * @return string
+     */
+    public static function _get() : string {
+        if (!isset($_SESSION[self::KEY]))
+            return self::_generate();
+
+        return $_SESSION[self::KEY];
+    }
+
+    /**
+     * @param string $_submitted
+     *
+     * @return bool
+     */
+    public static function _verify(string $_submitted) : bool {
+        if (!isset($_SESSION[self::KEY]))
+            return false;
+
+        $valid = hash_equals($_SESSION[self::KEY], $_submitted);
+
+        # - Anti replay : the goal here is to regenerate the csrf token to avoid potential token replaying
+        if ($valid)
+            self::generate();
+
+        return $valid;
+    }
+
+    /**
+     * @return null
+     */
+    public static function _exposeHeader() { return header('X-CSRF-Token: ' . self::_get()); }
+
 }

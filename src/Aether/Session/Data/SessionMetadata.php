@@ -24,11 +24,14 @@ declare(strict_types=1);
 namespace Aether\Session\Data;
 
 
+use Aether\Security\Token\CsrfToken;
+
 final class SessionMetadata extends SessionData {
 
     public function __construct(){
         parent::__construct(array(
-            "sessid" => session_id()
+            "sessid" => session_id(),
+            "csrf_token" => CsrfToken::_get()
         ));
     }
 
@@ -36,5 +39,10 @@ final class SessionMetadata extends SessionData {
      * @return string
      */
     public function _getSessId() : string { return $this->_get("sessid"); }
+
+    /**
+     * @return string
+     */
+    public function _getCsrfToken() : string { return $this->_get("csrf_token"); }
 
 }
