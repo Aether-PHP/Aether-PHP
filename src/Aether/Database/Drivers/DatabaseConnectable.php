@@ -21,83 +21,35 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Modules\Database\Drivers\List;
-
-use Aether\Modules\Database\Drivers\DatabaseDriver;
-use Aether\Modules\Database\Drivers\DatabaseDriverEnum;
-
-use PDO;
+namespace Aether\Database\Drivers;
 
 
-final class DatabaseMySQLDriver extends DatabaseDriver {
+interface DatabaseConnectable {
 
-
-    /** @var PDO $_conn */
-    private PDO $_conn;
-
-    public function __construct(){
-        parent::__construct(DatabaseDriverEnum::MYSQL);
-    }
 
     /**
+     * Initiate the connection with the database
+     *
      * @return DatabaseDriver
      */
-    public function _connect() : self {
-        $this->_conn = new PDO("mysql:dbname={$this->_database};host={$this->_getHost()}", $this->_getIds()->_getLogin(), $this->_getIds()->_getPasskey(), [
-            PDO::ATTR_PERSISTENT => true,
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-        ]);
-        return $this;
-    }
+    public function _connect() : DatabaseDriver;
 
 
     /**
-     * @param string $database
+     * Send a query to the database
      *
-     * @return DatabaseMySQLDriver
-     */
-    public function _database(string $database) : self {
-        parent::_database($database);
-        $this->_connect();
-        return $this;
-    }
-
-    /**
-     * @param $value
-     *
-     * @return int
-     */
-    private function _detectPdoType($value) : int {
-        return match (true){
-            is_int($value) => PDO::PARAM_INT,
-            is_bool($value) => PDO::PARAM_BOOL,
-            is_null($value) => PDO::PARAM_NULL,
-            default => PDO::PARAM_STR,
-        };
-    }
-
-    /**
      * @param string $query
      * @param array $params
      *
      * @return mixed
      */
-    public function _query(string $query, array $params = []) : mixed {
-        $stmt = $this->_conn->prepare($query);
-
-        foreach ($params as $key => $value){
-            $paramKey = str_starts_with($key, ':') ? $key : ':' . $key;
-            $stmt->bindValue($paramKey, $value, $this->_detectPdoType($value));
-        }
-
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+    public function _query(string $query, array $params) : mixed;
 
 
     /**
+     * Return a string which contain database dump
+     *
      * @return array
      */
-    public function _dump() : array { return []; }
-
+    public function _dump() : array;
 }

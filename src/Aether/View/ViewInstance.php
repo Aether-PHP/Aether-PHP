@@ -39,7 +39,7 @@ final class ViewInstance implements  ViewInterface {
 
     public function _render(){
         # - We extract and translate data from self::$_vars into php variables
-        extract($this->_vars, EXTR_SKIP);
+        extract($this->_vars, EXTR_SKIP | EXTR_REFS);
 
         $fullpath = "public/" . $this->_path . ".php";
 
@@ -47,7 +47,7 @@ final class ViewInstance implements  ViewInterface {
             die("[View] - Error - Template not found : {$fullpath}");
 
         # - We turn output bufferin on and we include the given view page
-        ob_start();
+
         require_once $fullpath;
     }
 

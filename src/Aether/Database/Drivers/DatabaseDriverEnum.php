@@ -21,66 +21,12 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Modules\Database\Drivers;
-
-use Aether\Config\ProjectConfig;
-use Aether\Utils\IdsMap;
+namespace Aether\Database\Drivers;
 
 
-abstract class DatabaseDriver implements DatabaseConnectable {
+enum DatabaseDriverEnum: string {
 
-    /** @var string $_database */
-    protected string $_database;
-
-    /** @var DatabaseDriverEnum $_driver */
-    protected DatabaseDriverEnum $_driver;
-
-    public function __construct(DatabaseDriverEnum $driver){
-        $this->_driver = $driver;
-    }
-
-    /**
-     * @param string $database
-     *
-     * @return DatabaseDriver
-     */
-    public function _database(string $database) : self {
-        $this->_database = $database;
-        return $this;
-    }
-
-    /**
-     * @return IdsMap
-     */
-    protected function _getIds() : IdsMap {
-        return new IdsMap(ProjectConfig::_get("DATABASE_USERNAME"), ProjectConfig::_get("DATABASE_PASSWORD"));
-    }
-
-    /**
-     * @return string
-     */
-    protected function _getHost() : string {
-        return ProjectConfig::_get("DATABASE_ADDRESS");
-    }
-
-    /**
-     * @return mixed
-     */
-    abstract public function _connect() : DatabaseDriver;
-
-
-    /**
-     * @param string $query
-     * @param array $params
-     *
-     * @return mixed
-     */
-    abstract public function _query(string $query, array $params) : mixed;
-
-
-    /**
-     * @return array
-     */
-    abstract public function _dump() : array;
+    case MYSQL = 'mysql';
+    case SQLITE = 'sqlite';
 
 }

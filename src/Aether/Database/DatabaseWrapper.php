@@ -21,12 +21,12 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Modules\Database;
+namespace Aether\Database;
 
-use Aether\Modules\Database\Drivers\DatabaseDriver;
-use Aether\Modules\Database\Drivers\DatabaseDriverEnum;
-use Aether\Modules\Database\Drivers\List\DatabaseMySQLDriver;
-use Aether\Modules\Database\Drivers\List\DatabaseSQLiteDriver;
+use Aether\Database\Drivers\DatabaseDriver;
+use Aether\Database\Drivers\DatabaseDriverEnum;
+use Aether\Database\Drivers\List\DatabaseMySQLDriver;
+use Aether\Database\Drivers\List\DatabaseSQLiteDriver;
 
 
 class DatabaseWrapper {

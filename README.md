@@ -246,7 +246,7 @@ The `DatabaseWrapper` provides a clean, secure interface to your database.
 
 ```php
 <?php
-use Aether\Modules\Database\DatabaseWrapper;
+use Aether\Database\DatabaseWrapper;
 
 // Initialize wrapper
 $db = new DatabaseWrapper("your_database_name");

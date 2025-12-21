@@ -24,8 +24,8 @@ declare(strict_types=1);
 namespace Aether\Auth\User\Permission;
 
 use Aether\Config\ProjectConfig;
-use Aether\Modules\Database\DatabaseWrapper;
-use Aether\Modules\Database\Drivers\DatabaseDriverEnum;
+use Aether\Database\DatabaseWrapper;
+use Aether\Database\Drivers\DatabaseDriverEnum;
 
 
 class PermissionLayer {

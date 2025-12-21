@@ -21,13 +21,11 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Modules\Database\Drivers\List;
+namespace Aether\Database\Drivers\List;
 
-use Aether\Modules\Database\Drivers\DatabaseDriver;
-use Aether\Modules\Database\Drivers\DatabaseDriverEnum;
-
+use Aether\Database\Drivers\DatabaseDriver;
+use Aether\Database\Drivers\DatabaseDriverEnum;
 use PDO;
-use PDOException;
 
 
 final class DatabaseSQLiteDriver extends DatabaseDriver {
