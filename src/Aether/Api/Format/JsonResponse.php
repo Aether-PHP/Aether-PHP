@@ -48,10 +48,8 @@ class JsonResponse {
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function _encode() : string {
+
+    public function _encode(){
         echo json_encode($this->_json);
         exit;
     }

@@ -48,34 +48,38 @@ class AuthApiController {
      */
     public function login(){
         $http_params = new HttpParameterUnpacker();
+        $json = new JsonResponse();
 
         $email = $http_params->_getAttribute("email") == false ? "" : $http_params->_getAttribute("email");
         $password = $http_params->_getAttribute("password") == false ? "" : $http_params->_getAttribute("password");
 
         if ($email == "" || $password == ""){
-            $json_response->_add("status", "failed")->_add("message", "wrong credentials provided.");
-            echo $json_response->_encode();
-            return;
+            return $json
+                ->_add("status", "failed")
+                ->_add("message", "Credentials should not be empty.")
+            ->_encode();
+        }
+
+        if (UserInstance::_isLoggedIn()){
+            return $json
+                ->_add("status", "failed")
+                ->_add("message", "user aldready logged-in.")
+            ->_encode();
         }
 
         $gateway = new LoginAuthGateway($email, $password);
-        $json_response = new JsonResponse();
-
-
-        if (UserInstance::_isLoggedIn()){
-            $json_response->_add("status", "failed")->_add("message", "user aldready logged-in.");
-            echo $json_response->_encode();
-            return;
-        }
 
         if (!$gateway->_tryAuth()){
-            $json_response->_add("status", "failed")->_add("message", $gateway->_getStatus());
-            echo $json_response->_encode();
-            return;
+            return $json
+                ->_add("status", "failed")
+                ->_add("message", $gateway->_getStatus())
+            ->_encode();
         }
 
-        $json_response->_add("status", "success")->_add("message", $gateway->_getStatus());
-        echo $json_response->_encode();
+        return $json
+            ->_add("status", "success")
+            ->_add("message", $gateway->_getStatus())
+        ->_encode();
     }
 
 
@@ -88,35 +92,39 @@ class AuthApiController {
      */
     public function register(){
         $http_params = new HttpParameterUnpacker();
+        $json = new JsonResponse();
 
         $username = $this->_sanitizeInput($http_params->_getAttribute("username") == false ? "" : $http_params->_getAttribute("username"));
         $email = $http_params->_getAttribute("email") == false ? "" : $http_params->_getAttribute("email");
         $password = $http_params->_getAttribute("password") == false ? "" : $http_params->_getAttribute("password");
 
         if ($username == "" || $email == "" || $password == ""){
-            $json_response->_add("status", "failed")->_add("message", "wrong data provided.");
-            echo $json_response->_encode();
-            return;
+            return $json
+                ->_add("status", "failed")
+                ->_add("message", "wrong data provided.")
+            ->_encode();
+        }
+
+        if (UserInstance::_isLoggedIn()){
+            return $json
+                ->_add("status", "failed")
+                ->_add("message", "can not register while being already logged in.")
+            ->_encode();
         }
 
         $gateway = new RegisterAuthGateway($username, $email, $password);
-        $json_response = new JsonResponse();
-
-
-        if (UserInstance::_isLoggedIn()){
-            $json_response->_add("status", "failed")->_add("message", "can not register while being already logged in.");
-            echo $json_response->_encode();
-            return;
-        }
 
         if (!$gateway->_tryAuth()){
-            $json_response->_add("status", "failed")->_add("message", $gateway->_getStatus());
-            echo $json_response->_encode();
-            return;
+            return $json
+                ->_add("status", "failed")
+                ->_add("message", $gateway->_getStatus())
+            ->_encode();
         }
 
-        $json_response->_add("status", "success")->_add("message", $gateway->_getStatus());
-        echo $json_response->_encode();
+        return $json
+            ->_add("status", "success")
+            ->_add("message", $gateway->_getStatus())
+        ->_encode();
     }
 
 
@@ -129,15 +137,18 @@ class AuthApiController {
      */
     public function logout(){
         $gateway = new LogoutAuthGateway();
-        $json_response = new JsonResponse();
+        $json = new JsonResponse();
 
         if (!$gateway->_tryAuth()){
-            $json_response->_add("status", "failed")->_add("message", $gateway->_getStatus());
-            echo $json_response->_encode();
-            return;
+            return $json
+                ->_add("status", "failed")
+                ->_add("message", $gateway->_getStatus())
+            ->_encode();
         }
 
-        $json_response->_add("status", "success")->_add("message", $gateway->_getStatus());
-        echo $json_response->_encode();
+        return $json
+            ->_add("status", "success")
+            ->_add("message", $gateway->_getStatus())
+        ->_encode();
     }
 }

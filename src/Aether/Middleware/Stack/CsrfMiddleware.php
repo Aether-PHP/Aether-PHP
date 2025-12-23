@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace Aether\Middleware\Stack;
 
+use Aether\Api\Format\HttpParameterUnpacker;
 use Aether\Api\Format\JsonResponse;
 use Aether\Middleware\MiddlewareInterface;
 use Aether\Security\Token\CsrfToken;
@@ -43,7 +44,7 @@ final class CsrfMiddleware implements MiddlewareInterface {
         }
 
         # - Stricter verification when http req is POST|PUT|DELETE|PATCH
-        $submitted = $_POST['csrf_token']
+        $submitted = (new HttpParameterUnpacker())->_getAttribute("csrf_token")
             ?? $_SERVER['HTTP_X_CSRF_TOKEN']
             ?? '';
 
@@ -51,11 +52,10 @@ final class CsrfMiddleware implements MiddlewareInterface {
             http_response_code(403);
 
             if (str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json')){
-                (new JsonResponse())
+                return (new JsonResponse())
                     ->_add('error', 'Invalid or missing CSRF token')
                     ->_add('code', 403)
-                    ->_encode();
-                return;
+                ->_encode();
             }
 
             echo '<h1>403 - Forbidden</h1><p>Invalid CSRF token.</p>';

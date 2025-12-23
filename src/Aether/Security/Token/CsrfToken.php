@@ -26,6 +26,7 @@ namespace Aether\Security\Token;
 
 final class CsrfToken {
 
+    /** @var string KEY */
     private const KEY = 'csrf_token';
 
     /**
@@ -60,7 +61,7 @@ final class CsrfToken {
 
         # - Anti replay : the goal here is to regenerate the csrf token to avoid potential token replaying
         if ($valid)
-            self::generate();
+            self::_generate();
 
         return $valid;
     }
