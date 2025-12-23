@@ -36,10 +36,10 @@ class Route implements RouteInterface {
     private $_callable;
 
 
-    public function __construct(string $method, string $route, $callable){
-        $this->_method = $method;
-        $this->_route = $route;
-        $this->_callable = $callable;
+    public function __construct(string $_method, string $_route, $_callable){
+        $this->_method = $_method;
+        $this->_route = $_route;
+        $this->_callable = $_callable;
     }
 
     /**

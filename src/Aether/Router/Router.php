@@ -29,7 +29,7 @@ use Aether\Router\Route\Route;
 use Aether\Security\UserInputValidatorTrait;
 
 
-final class Router implements  RouterInterface {
+final class Router implements RouterInterface {
     use UserInputValidatorTrait;
 
 
@@ -57,7 +57,6 @@ final class Router implements  RouterInterface {
 
     /**
      * @return bool
-     * @throws \Exception
      */
     public function _run() : bool {
         $req_uri = RouterHttpGateway::_getHttpRequestUri();
@@ -78,7 +77,7 @@ final class Router implements  RouterInterface {
 
 
                 # - Case 2 : URI contains params - only for HTTP GET
-                if ($req_method !== HttpStandardsEnum::HTTP_GET)
+                if ($req_method !== HttpStandardsEnum::HTTP_GET->value)
                     continue;
 
                 $path = preg_replace('#{([\w])+}#', '([^/]+)', trim($route->_getRoute(), '/'));
@@ -98,35 +97,34 @@ final class Router implements  RouterInterface {
 
 
     /**
-     * @param $callback
-     * @param array|null $matche
+     * @param $_callback
+     * @param array|null $_params
      *
      * @return mixed
-     * @throws \Exception
      */
-    private function _execute($callback, ?array $params = []){
+    private function _execute($_callback, ?array $_params = []){
         $matches = [];
 
-        foreach($params as $key => $value){
+        foreach($_params as $key => $value){
             if ($key != 0)
                 array_push($matches, $this->_sanitizeInput($value[0]));
         }
 
-        if (is_callable($callback))
-            return call_user_func_array($callback, $matches);
+        if (is_callable($_callback))
+            return call_user_func_array($_callback, $matches);
 
-        if (is_string($callback))
-            $callback = explode('@', $callback);
+        if (is_string($_callback))
+            $_callback = explode('@', $_callback);
 
-        if (!class_exists($callback[0]))
-            throw new \Exception("Class {$callback[0]} not found");
+        if (!class_exists($_callback[0]))
+            throw new \Exception("Class {$_callback[0]} not found");
 
-        $class = new $callback[0];
+        $class = new $_callback[0];
 
-        if (!method_exists($class, $callback[1]))
-            throw new \Exception("Method $callback[1] not found in class $callback[0]");
+        if (!method_exists($class, $_callback[1]))
+            throw new \Exception("Method $_callback[1] not found in class $_callback[0]");
 
-        return call_user_func_array([$class, $callback[1]], $matches);
+
+        return call_user_func_array([$class, $_callback[1]], $matches);
     }
-
 }
