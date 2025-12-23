@@ -21,24 +21,20 @@
 */
 declare(strict_types=1);
 
-namespace App\Controller;
+namespace Aether\Router\Controller;
 
-use Aether\Auth\User\UserInstance;
-use Aether\Router\Controller\Controller;
-use Aether\Session\SessionInstance;
+use Aether\View\ViewInstance;
 
 
-class AppController extends Controller {
+class Controller {
 
     /**
-     * [@method] => GET
-     * [@route] => /
+     * Render the provided view (with parameters)
+     *
+     * @param string $view
+     * @param array $params
      */
-    public function index(){
-        $this->_render("index", [
-            "loggedin" => UserInstance::_isLoggedIn(),
-            "sessid" => SessionInstance::_get()->_getMetadata()->_getSessId(),
-        ]);
+    protected function _render(string $view, array $params = []) {
+        ViewInstance::_make($view, $params);
     }
-
 }

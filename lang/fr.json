@@ -1,5 +1,5 @@
 {
-  "welcome": "Bienvenue sur Aether",
+  "welcome": "Page d'accueil demo pour Router/Controller",
   "price_total": "Total : {price} €",
   "admin": {
     "users": "Utilisateurs",

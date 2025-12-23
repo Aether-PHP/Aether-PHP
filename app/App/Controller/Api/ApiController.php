@@ -83,7 +83,7 @@ class ApiController {
      */
     public function test(){
         (new JsonResponse())
-            ->_add("test", "this is a test")
+            ->_add("test", "This is a test")
         ->_encode();
     }
 }

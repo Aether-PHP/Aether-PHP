@@ -26,10 +26,9 @@ namespace Aether;
 use Aether\Config\ProjectConfig;
 use Aether\Middleware\Pipeline;
 use Aether\Middleware\Stack\CsrfMiddleware;
-use Aether\Router\ControllerGateway;
-
-use Aether\Modules\ModuleFactory;
 use Aether\Modules\I18n\I18N;
+use Aether\Modules\ModuleFactory;
+use Aether\Router\Controller\ControllerGateway;
 
 /*
  * Pure PHP 8.3+ framework built from scratch.
@@ -84,7 +83,7 @@ class Aether {
         # - Middleware
         Pipeline::_run([ CsrfMiddleware::class ], function (){
             # - Router Gateway : deliver correct controller for each route
-            (new ControllerGateway())->_link();
+            ControllerGateway::_link();
         });
     }
 }

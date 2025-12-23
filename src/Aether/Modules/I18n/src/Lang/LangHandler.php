@@ -23,9 +23,9 @@ declare(strict_types=1);
 
 namespace Aether\Modules\I18n\Lang;
 
-
 use Aether\IO\IOFile;
 use Aether\IO\IOTypeEnum;
+
 
 final class LangHandler {
 

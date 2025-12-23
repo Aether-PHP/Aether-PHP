@@ -21,10 +21,12 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Router;
+namespace Aether\Router\Controller;
 
+use Aether\Router\Router;
 use \ReflectionClass;
 use \ReflectionException;
+use \ReflectionMethod;
 
 
 final class ControllerGateway {
@@ -32,8 +34,8 @@ final class ControllerGateway {
     /**
      * Router => Controller Gateway | & API integration
      */
-    public function _link() : void {
-        $directory = __DIR__ . '/../../../app/App/Controller/*.php';
+    public static function _link() : void {
+        $directory = __DIR__ . '/../../../../app/App/Controller/*.php';
         $controllerFiles = glob($directory);
         $router = new Router();
 
@@ -47,12 +49,12 @@ final class ControllerGateway {
                 continue;
             }
 
-            foreach ($reflection->getMethods() as $method){
+            foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method){
                 $doc = $method->getDocComment();
                 if (!$doc) continue;
 
-                $method_type = $this->extractAnnotation($doc, 'method');
-                $route = $this->extractAnnotation($doc, 'route');
+                $method_type = self::extractAnnotation($doc, 'method');
+                $route = self::extractAnnotation($doc, 'route');
 
                 if (!$method_type || !$route){
                     echo "[ControllerGateway] - ERROR - Wrong PHP Doc for {$class_name} Controller, method {$method->getName()}";
@@ -63,7 +65,7 @@ final class ControllerGateway {
             }
         }
 
-        $directory = __DIR__ . '/../../../app/App/Controller/Api/*.php';
+        $directory = __DIR__ . '/../../../../app/App/Controller/Api/*.php';
         $controllerFiles = glob($directory);
 
         foreach ($controllerFiles as $file){
@@ -80,8 +82,8 @@ final class ControllerGateway {
                 $doc = $method->getDocComment();
                 if (!$doc) continue;
 
-                $method_type = $this->extractAnnotation($doc, 'method');
-                $route = $this->extractAnnotation($doc, 'route');
+                $method_type = self::extractAnnotation($doc, 'method');
+                $route = self::extractAnnotation($doc, 'route');
 
                 if (!$method_type || !$route){
                     echo "[ControllerGateway] - ERROR - Wrong PHP Doc for {$class_name} Controller, method {$method->getName()}";
@@ -104,7 +106,7 @@ final class ControllerGateway {
      *
      * @return string|null
      */
-    private function extractAnnotation(string $docComment, string $annotation) : ?string {
+    private static function extractAnnotation(string $docComment, string $annotation) : ?string {
         if (preg_match("/\\[@{$annotation}\\]\\s*=>\\s*(\\S+)/", $docComment, $matches))
             return $matches[1];
 
