@@ -11,3 +11,5 @@ var_dump($loggedin);
 /** @var string $sessid */
 var_dump($sessid);
 echo "</pre>";
+
+echo __("welcome");
