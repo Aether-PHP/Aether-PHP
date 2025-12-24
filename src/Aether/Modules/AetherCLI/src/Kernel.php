@@ -28,6 +28,7 @@ use Aether\Modules\AetherCLI\Cli\CliColorEnum;
 use Aether\Modules\AetherCLI\Cli\CliLogger;
 use Aether\Modules\AetherCLI\Command\CommandDispatcher;
 use Aether\Modules\AetherCLI\Command\List\MakeCommand;
+use Aether\Modules\AetherCLI\src\Command\List\SetupCommand;
 use Aether\Modules\AetherModule;
 
 
@@ -46,8 +47,8 @@ final class Kernel extends AetherModule {
     public function _onLoad(){
         echo PHP_EOL . PHP_EOL . CliColorEnum::FG_BRIGHT_CYAN->_paint($this->_logger->_getAscii()) . PHP_EOL . PHP_EOL;
 
-        echo CliColorEnum::FG_BRIGHT_GREEN->_paint("✦ AetherCLI ready – divine command-line interface ☄️") . PHP_EOL;
-        echo CliColorEnum::FG_BRIGHT_MAGENTA->_paint("✦ Run ./bin/aether setup to initialize your project in seconds") . PHP_EOL . PHP_EOL;
+        echo CliColorEnum::FG_WHITE->_paint("✦ AetherCLI ready – divine command-line interface ☄️") . PHP_EOL;
+        echo CliColorEnum::FG_WHITE->_paint("✦ Run ./bin/aether setup to initialize your project in seconds") . PHP_EOL . PHP_EOL;
 
         $args = CliArgParser::_parse();
 
@@ -61,11 +62,15 @@ final class Kernel extends AetherModule {
         # - Command Dispatcher
         $cmdState = CommandDispatcher::_match(
             # - Register all commands
-            CommandDispatcher::_register([ MakeCommand::class ], $extra),
+            CommandDispatcher::_register([
+                MakeCommand::class,
+                SetupCommand::class,
+            ], $extra),
             $args
         );
 
-        var_dump($cmdState);
+        if (!$cmdState)
+            die(CliColorEnum::FG_RED->_paint("[CommandDispatcher] - Error - Command did not succeed.") .  PHP_EOL);
     }
 
     /**

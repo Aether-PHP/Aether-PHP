@@ -4,6 +4,7 @@ namespace Aether\Modules\AetherCLI\Command\List;
 
 use Aether\IO\IOFile;
 use Aether\IO\IOTypeEnum;
+use Aether\Modules\AetherCLI\Cli\CliColorEnum;
 use Aether\Modules\AetherCLI\Command\Command;
 
 class MakeCommand extends Command {
@@ -17,9 +18,15 @@ class MakeCommand extends Command {
         );
     }
 
-    public function _execute(string $_prototype) : bool {
+    public function _execute(?string $_prototype) : bool {
+        if (is_null($_prototype))
+            die(CliColorEnum::FG_RED->_paint("[MakeCommand] - Error - Missing argument(s).") . PHP_EOL);
+
         # - Controller prototype
         if ($_prototype === "controller"){
+            if ($this->_getExtra() === [])
+                die(CliColorEnum::FG_RED->_paint("[MakeCommand:Controller] - Error - Missing controller name.") . PHP_EOL);
+
             $path = $this->_getExtra()[0];
             $pathlower = strtolower($path);
 
@@ -52,9 +59,7 @@ class MakeCommand extends Command {
             
             namespace App\Controller;
             
-            use Aether\Auth\User\UserInstance;
             use Aether\Router\Controller\Controller;
-            use Aether\Session\SessionInstance;
             
             
             class {{CLASSNAME}} extends Controller {
@@ -74,11 +79,13 @@ class MakeCommand extends Command {
             $baseControllerContent = str_replace("{{FUNCNAME}}", strtolower($name), $baseControllerContent);
             $baseControllerContent = str_replace("{{ROUTE}}", strtolower($path), $baseControllerContent);
 
+
             IOFile::_open(
                 IOTypeEnum::PHP,
                 __DIR__ . "/../../../../../../../app/App/Controller/{$path}Controller.php"
             )->_write($baseControllerContent);
 
+            echo CliColorEnum::FG_BRIGHT_GREEN->_paint("[MakeCommand:Controller] - Successfully created controller '{$name}'." . PHP_EOL);
             return true;
         } else if ($_prototype === "file"){
             return true;

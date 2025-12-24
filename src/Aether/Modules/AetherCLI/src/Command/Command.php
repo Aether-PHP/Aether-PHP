@@ -86,9 +86,9 @@ abstract class Command extends CliLogger {
     public function _getSignature() : string { return $this->_signature; }
 
     /**
-     * @param string $_prototype
+     * @param ?string $_prototype
      *
      * @return bool
      */
-    abstract public function _execute(string $_prototype) : bool;
+    abstract public function _execute(?string $_prototype) : bool;
 }

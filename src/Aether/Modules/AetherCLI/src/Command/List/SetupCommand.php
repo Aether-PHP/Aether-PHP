@@ -21,21 +21,47 @@
 */
 declare(strict_types=1);
 
-namespace App\Controller;
+namespace Aether\Modules\AetherCLI\src\Command\List;
 
-use Aether\Auth\User\UserInstance;
-use Aether\Router\Controller\Controller;
-use Aether\Session\SessionInstance;
+use Aether\IO\IOFile;
+use Aether\IO\IOTypeEnum;
+use Aether\Modules\AetherCLI\Cli\CliColorEnum;
+use Aether\Modules\AetherCLI\Command\Command;
 
 
-class HomeController extends Controller {
+class SetupCommand extends Command {
 
-    /**
-     * [@method] => GET
-     * [@route] => /home
-     */
-    public function home(){
-        echo "HomeController Route created.";
+    /** @var string $_binPath */
+    private static $_binPath = "./bin/aether";
+
+    public function __construct(array $_extra){
+        parent::__construct(
+            "setup",
+            [ "dev", "prod" ],
+            $_extra,
+            "./aether setup | ./aether setup:dev|prod"
+        );
     }
 
+    public function _execute(?string $_prototype) : bool {
+        $ext = "";
+
+        if ($_prototype === "dev" || $_prototype === "prod")
+            $ext = '.' . $_prototype;
+
+        if (!file_exists("./Aetherfile" . $ext))
+            die(CliColorEnum::FG_RED->_paint("[SetupCommand] - Error - Aetherfile{$ext} not found.") . PHP_EOL);
+
+        $lines = IOFile::_open(IOTypeEnum::OTHER, "./Aetherfile" . $ext)->_readLines();
+
+        foreach ($lines as $line){
+            if (str_contains($line, '#') || str_starts_with($line, "//"))
+                continue;
+
+            if (!shell_exec(self::$_binPath . ' ' . $line))
+                return false;
+        }
+
+        return true;
+    }
 }
