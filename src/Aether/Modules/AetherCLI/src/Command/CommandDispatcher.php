@@ -21,19 +21,59 @@
 */
 declare(strict_types=1);
 
-namespace Aether\IO;
+namespace Aether\Modules\AetherCLI\Command;
+
+use Aether\Modules\AetherCLI\Cli\CliColorEnum;
 
 
-enum IOTypeEnum : string {
+class CommandDispatcher {
 
-    case TEXT = 'text';
-    case JSON = 'json';
-    case YAML = 'yaml';
-    case ENV  = 'env';
-    case CSV  = 'csv';
-    case PNG  = 'png';
-    case PHP  = 'php';
-    case JPG  = 'jpg';
-    case OTHER  = 'other';
 
+    /**
+     * Register array of commands
+     *
+     * @param array $_commands
+     * @param array $_extra
+     *
+     * @return Command[]
+     */
+    public static function _register(array $_commands, array $_extra) : array {
+        $cmds = [];
+
+        foreach ($_commands as $command){
+            $cmdInstance = new $command($_extra);
+
+            if (!$cmdInstance instanceof Command)
+                die(CliColorEnum::FG_RED->_paint("[CommandDispatcher] - Error - {$command} is not an instance of Command."));
+            
+            array_push($cmds, $cmdInstance);
+        }
+
+        return $cmds;
+    }
+
+    /**
+     * @param Command[] $_commands
+     *
+     * @param array $_args
+     *
+     * @return bool
+     */
+    public static function _match(array $_commands, array $_args) : bool {
+        $directives = explode(':', $_args[0]);
+        $identifier = $directives[0];
+        $prototype = $directives[1] ?? null;
+
+        foreach ($_commands as $command){
+            if ($identifier !== $command->_getIdentifier())
+                continue;
+
+            if (!is_null($prototype) && !in_array($prototype, $command->_getPrototypes()))
+                continue;
+
+            $command->_execute($prototype);
+            return true;
+        }
+        return false;
+    }
 }

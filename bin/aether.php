@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 
 /*
@@ -21,19 +22,17 @@
 */
 declare(strict_types=1);
 
-namespace Aether\IO;
+# - Autoload
+require_once __DIR__ . '/../autoload.php';
 
+use Aether\Config\ProjectConfig;
+use Aether\Modules\ModuleFactory;
+use Aether\Modules\AetherCLI\Kernel as CliKernel;
 
-enum IOTypeEnum : string {
+# - .Env File load
+ProjectConfig::_load();
 
-    case TEXT = 'text';
-    case JSON = 'json';
-    case YAML = 'yaml';
-    case ENV  = 'env';
-    case CSV  = 'csv';
-    case PNG  = 'png';
-    case PHP  = 'php';
-    case JPG  = 'jpg';
-    case OTHER  = 'other';
-
-}
+# - Modules load
+ModuleFactory::_load([
+    CliKernel::class
+]);

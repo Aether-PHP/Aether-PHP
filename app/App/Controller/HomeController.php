@@ -21,19 +21,21 @@
 */
 declare(strict_types=1);
 
-namespace Aether\IO;
+namespace App\Controller;
+
+use Aether\Auth\User\UserInstance;
+use Aether\Router\Controller\Controller;
+use Aether\Session\SessionInstance;
 
 
-enum IOTypeEnum : string {
+class HomeController extends Controller {
 
-    case TEXT = 'text';
-    case JSON = 'json';
-    case YAML = 'yaml';
-    case ENV  = 'env';
-    case CSV  = 'csv';
-    case PNG  = 'png';
-    case PHP  = 'php';
-    case JPG  = 'jpg';
-    case OTHER  = 'other';
+    /**
+     * [@method] => GET
+     * [@route] => /home
+     */
+    public function home(){
+        echo "HomeController Route created.";
+    }
 
 }
