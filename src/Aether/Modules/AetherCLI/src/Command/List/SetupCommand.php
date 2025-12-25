@@ -62,6 +62,7 @@ class SetupCommand extends Command {
                 return false;
         }
 
+        echo CliColorEnum::FG_BRIGHT_GREEN->_paint("[SetupCommand] - Aetherfile{$ext} has been successfuly setup.") . PHP_EOL;
         return true;
     }
 }

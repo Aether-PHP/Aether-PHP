@@ -28,6 +28,7 @@ use Aether\Modules\AetherCLI\Cli\CliColorEnum;
 use Aether\Modules\AetherCLI\Cli\CliLogger;
 use Aether\Modules\AetherCLI\Command\CommandDispatcher;
 use Aether\Modules\AetherCLI\Command\List\MakeCommand;
+use Aether\Modules\AetherCLI\Command\List\SourceCommand;
 use Aether\Modules\AetherCLI\src\Command\List\SetupCommand;
 use Aether\Modules\AetherModule;
 
@@ -59,18 +60,18 @@ final class Kernel extends AetherModule {
         unset($extra[0]);
         $extra = array_values($extra);
 
-        # - Command Dispatcher
-        $cmdState = CommandDispatcher::_match(
-            # - Register all commands
-            CommandDispatcher::_register([
-                MakeCommand::class,
-                SetupCommand::class,
-            ], $extra),
-            $args
-        );
+        # - Register all commands
+        $registered = CommandDispatcher::_register([
+            MakeCommand::class,
+            SetupCommand::class,
+            SourceCommand::class
+        ], $extra);
+
+        # - Dispatch all commands
+        $cmdState = CommandDispatcher::_match($registered, $args);
 
         if (!$cmdState)
-            die(CliColorEnum::FG_RED->_paint("[CommandDispatcher] - Error - Command did not succeed.") .  PHP_EOL);
+            die(CliColorEnum::FG_RED->_paint("[CommandDispatcher] - Error - Command did not succeed. Probably wrong usage.") .  PHP_EOL);
     }
 
     /**

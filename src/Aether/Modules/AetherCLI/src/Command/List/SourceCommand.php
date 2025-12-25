@@ -1,4 +1,3 @@
-#!/usr/bin/env php
 <?php
 
 /*
@@ -22,20 +21,45 @@
 */
 declare(strict_types=1);
 
-# - Autoload
-if (str_contains(__DIR__, "/bin"))
-    require_once __DIR__ . '/../autoload.php';
-else
-    require_once __DIR__ . '/autoload.php';
+namespace Aether\Modules\AetherCLI\Command\List;
 
-use Aether\Config\ProjectConfig;
-use Aether\Modules\ModuleFactory;
-use Aether\Modules\AetherCLI\Kernel as CliKernel;
+use Aether\Modules\AetherCLI\Cli\CliColorEnum;
+use Aether\Modules\AetherCLI\Command\Command;
 
-# - .Env File load
-ProjectConfig::_load();
 
-# - Modules load
-ModuleFactory::_load([
-    CliKernel::class
-]);
+class SourceCommand extends Command {
+
+    public function __construct(array $_extra){
+        parent::__construct(
+            "source",
+            [ "script", "db" ],
+            $_extra,
+            "./aether source:[script|db] {name}"
+        );
+    }
+
+    public function _execute(?string $_prototype) : bool {
+        if (is_null($_prototype))
+            die(CliColorEnum::FG_RED->_paint("[SourceCommand] - Error - Missing prototype (script|db).") . PHP_EOL);
+
+        if (count($this->_getExtra()) < 1)
+            die(CliColorEnum::FG_RED->_paint("[SourceCommand] - Error - Missing source file.") . PHP_EOL);
+
+        if ($_prototype === "script"){
+            $script = $this->_getExtra()[0];
+
+            if (!file_exists($script))
+                die(CliColorEnum::FG_RED->_paint("[SourceCommand] - Error - Source file '{$script}' does not exists.") . PHP_EOL);
+
+            if (strtolower(pathinfo($script, PATHINFO_EXTENSION)) !== 'php')
+                die(CliColorEnum::FG_RED->_paint("[SourceCommand] - Error - Source file '{$script}' needs to be a php file.") . PHP_EOL);
+
+            require_once $script;
+            echo CliColorEnum::FG_BRIGHT_GREEN->_paint("[SourceCommand] - Successfully imported source file '{$script}'.") . PHP_EOL;
+        } else if ($_prototype === "db"){
+
+        }
+
+        return true;
+    }
+}
