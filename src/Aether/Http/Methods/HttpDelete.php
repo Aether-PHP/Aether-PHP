@@ -12,41 +12,41 @@
  *                      The divine lightweight PHP framework
  *                  < 1 Mo • Zero dependencies • Pure PHP 8.3+
  *
- *  Built from scratch. No bloat. POO Embedded.
+ *  Built from scratch. No bloat. OOP Embedded.
  *
- *  @author: dawnl3ss (Alex') ©2025 — All rights reserved
+ *  @author: dawnl3ss (Alex') ©2026 — All rights reserved
  *  Source available • Commercial license required for redistribution
  *  → github.com/dawnl3ss/Aether-PHP
  *
 */
 declare(strict_types=1);
 
-namespace Aether\Api\Format;
+namespace Aether\Http\Methods;
 
 
-class HttpParameterUnpacker {
+final class HttpDelete extends HttpMethod {
 
-    /** @var array $_decoded */
-    private array $_decoded;
-
-    /**
-     * The goal here is to extract data from php://input stream to translate it to class object.
-     */
     public function __construct(){
-        $this->_decoded = json_decode(file_get_contents('php://input'), true);
+        parent::__construct(HttpMethodEnum::DELETE->value);
     }
 
     /**
-     * Check if _attr is in the decoded arr before returning it.
-     *
-     * @param string $_attr
-     *
-     * @return mixed
+     * @return bool
      */
-    public function _getAttribute(string $_attr) : mixed {
-        if (!isset($this->_decoded[$_attr]))
-            return false;
+    public function _isSafe() : bool { return false; }
 
-        return $this->_decoded[$_attr];
-    }
+    /**
+     * @return bool
+     */
+    public function _isCacheable() : bool { return false; }
+
+    /**
+     * @return bool
+     */
+    public function _allowsBody() : bool { return true; }
+
+    /**
+     * @return bool
+     */
+    public function _requiresBody() : bool { return false; }
 }

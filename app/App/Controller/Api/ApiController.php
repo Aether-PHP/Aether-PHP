@@ -12,7 +12,7 @@
  *                      The divine lightweight PHP framework
  *                  < 1 Mo • Zero dependencies • Pure PHP 8.3+
  *
- *  Built from scratch. No bloat. POO Embedded.
+ *  Built from scratch. No bloat. OOP Embedded.
  *
  *  @author: dawnl3ss (Alex') ©2025 — All rights reserved
  *  Source available • Commercial license required for redistribution
@@ -24,14 +24,12 @@ declare(strict_types=1);
 namespace App\Controller\Api;
 
 use Aether\Config\ProjectConfig;
-use Aether\Api\Format\JsonResponse;
+use Aether\Http\Response\Format\HttpResponseFormatEnum;
+use Aether\Http\ResponseFactory;
 
 
 class ApiController {
 
-    public function __construct(){
-        header('Content-Type: application/json');
-    }
 
 
     /**
@@ -41,11 +39,11 @@ class ApiController {
      * [@route] => /api/v1
      */
     public function api(){
-        (new JsonResponse())
-            ->_add("version", 1.0)
-            ->_add("name", ProjectConfig::_get("PROJECT_NAME") . " backend | Powered by Aether-PHP framework.")
-            ->_add("description", "Backend API v1 for " . ProjectConfig::_get("PROJECT_NAME"))
-            ->_add("routes", array(
+        ResponseFactory::_create(HttpResponseFormatEnum::JSON, [
+            "name" => ProjectConfig::_get("PROJECT_NAME") . " backend | Powered by Aether-PHP framework.",
+            "version" => 1.0,
+            "description" => "Backend API v1 for " . ProjectConfig::_get("PROJECT_NAME"),
+            "routes" => array(
                 [
                     "method" => "GET",
                     "path" => "/api/v1",
@@ -71,8 +69,8 @@ class ApiController {
                     "path" => "/api/v1/auth/logout",
                     "description" => "Auth Logout route"
                 ]
-            ))
-        ->_encode();
+            )
+        ], 200)->_send();
     }
 
 
@@ -83,8 +81,8 @@ class ApiController {
      * [@route] => /api/v1/test
      */
     public function test(){
-        (new JsonResponse())
-            ->_add("test", "This is a test")
-        ->_encode();
+        ResponseFactory::_create(HttpResponseFormatEnum::JSON, [
+            "test" => "This is a test v22"
+        ], 200)->_send();
     }
 }

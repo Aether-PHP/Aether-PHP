@@ -12,7 +12,7 @@
  *                      The divine lightweight PHP framework
  *                  < 1 Mo • Zero dependencies • Pure PHP 8.3+
  *
- *  Built from scratch. No bloat. OOP Embedded.
+ *  Built from scratch. No bloat. POO Embedded.
  *
  *  @author: dawnl3ss (Alex') ©2026 — All rights reserved
  *  Source available • Commercial license required for redistribution
@@ -21,32 +21,35 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Http\Methods;
+namespace Aether\Http\Request;
+
+use Aether\Http\Methods\HttpMethod;
+use Aether\Http\Response\HttpResponse;
 
 
-final class HttpGet extends HttpMethod {
-
-    public function __construct(){
-        parent::__construct(HttpMethodEnum::GET->value);
-    }
-
-    /**
-     * @return bool
-     */
-    public function _isSafe() : bool { return true; }
+interface RequestInterface {
 
     /**
-     * @return bool
+     * Get request destination url.
+     *
+     * @return string
      */
-    public function _isCacheable() : bool { return true; }
+    public function _getDestination() : string;
 
     /**
-     * @return bool
+     * Get request HTTP method.
+     *
+     * @return HttpMethod
      */
-    public function _allowsBody() : bool { return false; }
+    public function _getMethod() : HttpMethod;
+
 
     /**
-     * @return bool
+     * Send HTTP request to $_destination.
+     * -> Return null if no response.
+     *
+     * @return null|HttpResponse
      */
-    public function _requiresBody() : bool { return false; }
+    public function _send() : ?HttpResponse;
+
 }

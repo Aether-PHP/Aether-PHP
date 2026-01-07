@@ -21,32 +21,54 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Http\Methods;
+namespace Aether\Http\Response;
+
+use Aether\Http\Methods\HttpMethod;
+use Aether\Http\Response\Format\HttpResponseFormat;
 
 
-final class HttpGet extends HttpMethod {
-
-    public function __construct(){
-        parent::__construct(HttpMethodEnum::GET->value);
-    }
-
-    /**
-     * @return bool
-     */
-    public function _isSafe() : bool { return true; }
+interface ResponseInterface {
 
     /**
-     * @return bool
+     * Get response's requested url.
+     *
+     * @return string
      */
-    public function _isCacheable() : bool { return true; }
+    public function _getUrl() : string;
 
     /**
-     * @return bool
+     * Get response's requested method.
+     *
+     * @return HttpMethod
      */
-    public function _allowsBody() : bool { return false; }
+    public function _getMethod() : HttpMethod;
 
     /**
-     * @return bool
+     * Return the provided format.
+     *
+     * @return HttpResponseFormat
      */
-    public function _requiresBody() : bool { return false; }
+    public function _getFormat() : HttpResponseFormat;
+
+    /**
+     * Return response's body.
+     *
+     * @return string|array
+     */
+    public function _getBody() : string|array;
+
+    /**
+     * Return response's http status.
+     *
+     * @return int
+     */
+    public function _getStatus() : int;
+
+    /**
+     * Send the Response formatted body to server.
+     *
+     * @return void
+     */
+    public function _send() : void;
+
 }

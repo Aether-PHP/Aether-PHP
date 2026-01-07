@@ -21,32 +21,28 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Http\Methods;
+namespace Aether\Http\Response\Format;
 
 
-final class HttpGet extends HttpMethod {
+enum HttpResponseFormatEnum : string {
 
-    public function __construct(){
-        parent::__construct(HttpMethodEnum::GET->value);
+    case JSON = 'json';
+    case XML = 'xml';
+    case TEXT = 'text';
+
+    /**
+     * @return string
+     */
+    public function _get() : string { return $this->value; }
+
+    /**
+     * @return HttpResponseFormat
+     */
+    public function _make() : HttpResponseFormat {
+        return match($this){
+            self::JSON => new HttpResponseFormatJson(),
+            self::XML => new HttpResponseFormatXml(),
+            self::TEXT => new HttpResponseFormatText()
+        };
     }
-
-    /**
-     * @return bool
-     */
-    public function _isSafe() : bool { return true; }
-
-    /**
-     * @return bool
-     */
-    public function _isCacheable() : bool { return true; }
-
-    /**
-     * @return bool
-     */
-    public function _allowsBody() : bool { return false; }
-
-    /**
-     * @return bool
-     */
-    public function _requiresBody() : bool { return false; }
 }

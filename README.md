@@ -189,8 +189,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Api;
 
-use Aether\Api\Format\JsonResponse;
-use Aether\Api\Format\HttpParameterUnpacker;
+use Aether\Api\Format\JsonResponse;use Aether\Http\HttpParameterUnpacker;
 
 class ProductApiController {
     

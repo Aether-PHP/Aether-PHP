@@ -21,32 +21,22 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Http\Methods;
+namespace Aether\Http;
+
+use Aether\Http\Methods\HttpMethodEnum;
+use Aether\Http\Request\HttpRequest;
 
 
-final class HttpGet extends HttpMethod {
+class RequestFactory {
 
-    public function __construct(){
-        parent::__construct(HttpMethodEnum::GET->value);
+    /**
+     * @param HttpMethodEnum $_method
+     * @param string $_destination
+     *
+     * @return HttpRequest
+     */
+    public static function _create(HttpMethodEnum $_method, string $_destination) : HttpRequest {
+        return new HttpRequest($_destination, $_method->_make());
     }
 
-    /**
-     * @return bool
-     */
-    public function _isSafe() : bool { return true; }
-
-    /**
-     * @return bool
-     */
-    public function _isCacheable() : bool { return true; }
-
-    /**
-     * @return bool
-     */
-    public function _allowsBody() : bool { return false; }
-
-    /**
-     * @return bool
-     */
-    public function _requiresBody() : bool { return false; }
 }

@@ -21,32 +21,28 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Http\Methods;
+namespace Aether\Http\Response\Format;
 
+class HttpResponseFormat {
 
-final class HttpGet extends HttpMethod {
+    /** @var string $_name */
+    private string $_name;
 
-    public function __construct(){
-        parent::__construct(HttpMethodEnum::GET->value);
+    /** @var string $_header */
+    private string $_header;
+
+    public function __construct(string $_name, string $_header){
+        $this->_name = $_name;
+        $this->_header = $_header;
     }
 
     /**
-     * @return bool
+     * @return string
      */
-    public function _isSafe() : bool { return true; }
+    public function _getName(): string { return $this->_name; }
 
     /**
-     * @return bool
+     * @return string
      */
-    public function _isCacheable() : bool { return true; }
-
-    /**
-     * @return bool
-     */
-    public function _allowsBody() : bool { return false; }
-
-    /**
-     * @return bool
-     */
-    public function _requiresBody() : bool { return false; }
+    public function _getHeader(): string { return $this->_header; }
 }

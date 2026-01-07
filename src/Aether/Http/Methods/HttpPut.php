@@ -24,29 +24,29 @@ declare(strict_types=1);
 namespace Aether\Http\Methods;
 
 
-final class HttpGet extends HttpMethod {
+final class HttpPut extends HttpMethod {
 
     public function __construct(){
-        parent::__construct(HttpMethodEnum::GET->value);
+        parent::__construct(HttpMethodEnum::PUT->value);
     }
 
     /**
      * @return bool
      */
-    public function _isSafe() : bool { return true; }
+    public function _isSafe() : bool { return false; }
 
     /**
      * @return bool
      */
-    public function _isCacheable() : bool { return true; }
+    public function _isCacheable() : bool { return false; }
 
     /**
      * @return bool
      */
-    public function _allowsBody() : bool { return false; }
+    public function _allowsBody() : bool { return true; }
 
     /**
      * @return bool
      */
-    public function _requiresBody() : bool { return false; }
+    public function _requiresBody() : bool { return true; }
 }

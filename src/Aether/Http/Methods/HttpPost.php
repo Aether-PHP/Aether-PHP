@@ -12,7 +12,7 @@
  *                      The divine lightweight PHP framework
  *                  < 1 Mo • Zero dependencies • Pure PHP 8.3+
  *
- *  Built from scratch. No bloat. POO Embedded.
+ *  Built from scratch. No bloat. OOP Embedded.
  *
  *  @author: dawnl3ss (Alex') ©2026 — All rights reserved
  *  Source available • Commercial license required for redistribution
@@ -24,30 +24,29 @@ declare(strict_types=1);
 namespace Aether\Http\Methods;
 
 
-class HttpPost extends HttpMethod {
+final class HttpPost extends HttpMethod {
 
-
-    public function __construct(string $_name){
-        parent::__construct($_name);
+    public function __construct(){
+        parent::__construct(HttpMethodEnum::POST->value);
     }
 
     /**
      * @return bool
      */
-    public function _isSafe() : bool { return true; }
+    public function _isSafe() : bool { return false; }
 
     /**
      * @return bool
      */
-    public function _isCacheable() : bool { return true; }
+    public function _isCacheable() : bool { return false; }
 
     /**
      * @return bool
      */
-    public function _allowsBody() : bool { return false; }
+    public function _allowsBody() : bool { return true; }
 
     /**
      * @return bool
      */
-    public function _requiresBody() : bool { return false; }
+    public function _requiresBody() : bool { return true; }
 }

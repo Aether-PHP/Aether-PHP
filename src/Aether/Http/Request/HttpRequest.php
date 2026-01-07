@@ -12,7 +12,7 @@
  *                      The divine lightweight PHP framework
  *                  < 1 Mo • Zero dependencies • Pure PHP 8.3+
  *
- *  Built from scratch. No bloat. OOP Embedded.
+ *  Built from scratch. No bloat. POO Embedded.
  *
  *  @author: dawnl3ss (Alex') ©2026 — All rights reserved
  *  Source available • Commercial license required for redistribution
@@ -21,43 +21,54 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Http\Response;
+namespace Aether\Http\Request;
 
 use Aether\Http\Methods\HttpMethod;
 use Aether\Http\Methods\HttpMethodEnum;
-use Aether\Http\Response\Format\HttpResponseFormat;
-use Aether\Http\Response\Format\HttpResponseFormatEnum;
+use Aether\Http\Response\HttpResponse;
 
-class HttpResponse implements ResponseInterface {
 
-    /** @var string $_url */
-    private string $_url;
+class HttpRequest implements RequestInterface {
+
+    /** @var string $_destination */
+    private string $_destination;
 
     /** @var HttpMethod $_method */
     private HttpMethod $_method;
 
-    /** @var string|array $_body */
-    private string|array $_body;
-
-    /** @var int $_statusCode */
-    private int $_statusCode;
-
-    /** @var HttpResponseFormat $_format */
-    private HttpResponseFormat $_format;
+    /** @var resource|null $_curl */
+    private mixed $_curl = null;
 
 
-    public function __construct(HttpResponseFormatEnum $_format, string|array $_body, int $_statusCode, string $_url, HttpMethodEnum $_method){
-        $this->_url = $_url;
-        $this->_method = $_method->_make();
-        $this->_body = $_body;
-        $this->_format = $_format->_make();
-        $this->_statusCode = $_statusCode;
+    public function  __construct(string $_destination, HttpMethod $_method){
+        $this->_destination = $_destination;
+        $this->_method = $_method;
+        $this->_init();
+    }
+
+    private function _init() : void {
+        $this->_curl = curl_init();
+
+        curl_setopt_array($this->_curl, [
+            CURLOPT_URL => $this->_destination,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT => 10,
+        ]);
+
+        match ($this->_getMethod()->_getName()){
+            HttpMethodEnum::GET->value => curl_setopt($this->_curl, CURLOPT_HTTPGET, true),
+            HttpMethodEnum::POST->value => curl_setopt($this->_curl, CURLOPT_POST, true),
+            HttpMethodEnum::PUT->value,
+            HttpMethodEnum::DELETE->value => curl_setopt($this->_curl, CURLOPT_CUSTOMREQUEST, $this->_getMethod()->_getName()),
+        };
     }
 
     /**
      * @return string
      */
-    public function _getUrl() : string { return $this->_url; }
+    public function _getDestination() : string { return $this->_destination; }
 
     /**
      * @return HttpMethod
@@ -65,31 +76,27 @@ class HttpResponse implements ResponseInterface {
     public function _getMethod() : HttpMethod { return $this->_method; }
 
     /**
-     * @return string|array
+     * @return HttpResponse|null
      */
-    public function _getBody() : string|array { return $this->_body; }
+    public function _send() : ?HttpResponse {
+        if (!$this->_curl)
+            return null;
 
-    /**
-     * @return HttpResponseFormat
-     */
-    public function _getFormat() : HttpResponseFormat { return $this->_format; }
+        $response = curl_exec($this->_curl);
 
-    /**
-     * @return int
-     */
-    public function _getStatus() : int { return $this->_statusCode; }
+        if (!$response){
+            curl_close($this->_curl);
+            return null;
+        }
 
-    /**
-     * @return void
-     */
-    public function _send() : void {
-        header($this->_getFormat()->_getHeader());
-        $body = $this->_getBody();
+        $code = curl_getinfo($this->_curl, CURLINFO_HTTP_CODE);
+        $hSize = curl_getinfo($this->_curl, CURLINFO_HEADER_SIZE);
 
-        if ($this->_getFormat()->_getName() === HttpResponseFormatEnum::JSON->value)
-            $body = json_encode($body);
+        $headers = substr($response, 0, $hSize);
+        $body = substr($response, $hSize);
 
-        echo $body;
-        exit;
+        curl_close($this->_curl);
+
+        return null;
     }
 }

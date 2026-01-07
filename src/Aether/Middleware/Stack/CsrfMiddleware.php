@@ -23,8 +23,8 @@ declare(strict_types=1);
 
 namespace Aether\Middleware\Stack;
 
-use Aether\Api\Format\HttpParameterUnpacker;
 use Aether\Api\Format\JsonResponse;
+use Aether\Http\HttpParameterUnpacker;
 use Aether\Middleware\MiddlewareInterface;
 use Aether\Security\Token\CsrfToken;
 
