@@ -15,6 +15,10 @@
 ![License](https://img.shields.io/badge/license-Source--Available-3B54C0?style=for-the-badge)
 ![Size](https://img.shields.io/badge/size-%3C1MB-3B54C0?style=for-the-badge)
 ![Dependencies](https://img.shields.io/badge/dependencies-0-777BB4?style=for-the-badge)
+  
+![Stars](https://img.shields.io/github/stars/dawnl3ss/Aether-PHP?style=for-the-badge&logo=github&logoColor=white&color=C8CDFB)
+![Forks](https://img.shields.io/github/forks/dawnl3ss/Aether-PHP?style=for-the-badge&logo=github&logoColor=white&color=C8CDFB)
+
 
 **The divine lightweight PHP framework**  
 **Zero dependencies • < 1 MB • Pure PHP 8.3+**
