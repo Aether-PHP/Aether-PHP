@@ -1,4 +1,4 @@
-# ☄️ Aether PHP
+# ☄️ Aether-PHP
 
 <div align="center">
 
@@ -12,9 +12,9 @@
 ```
 
 ![PHP](https://img.shields.io/badge/PHP-8.3%2B-777BB4?style=for-the-badge&logo=php&logoColor=white)
-![License](https://img.shields.io/badge/license-Source--Available-yellow?style=for-the-badge)
-![Size](https://img.shields.io/badge/size-%3C1MB-4CAF50?style=for-the-badge)
-![Dependencies](https://img.shields.io/badge/dependencies-0-red?style=for-the-badge)
+![License](https://img.shields.io/badge/license-Source--Available-3B54C0?style=for-the-badge)
+![Size](https://img.shields.io/badge/size-%3C1MB-3B54C0?style=for-the-badge)
+![Dependencies](https://img.shields.io/badge/dependencies-0-777BB4?style=for-the-badge)
 
 **The divine lightweight PHP framework**  
 **< 1 MB • Zero dependencies • Pure PHP 8.3+**
