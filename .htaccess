@@ -3,3 +3,8 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule . index.php [L]
 
 DirectorySlash Off
+
+<FilesMatch "^\.env">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
