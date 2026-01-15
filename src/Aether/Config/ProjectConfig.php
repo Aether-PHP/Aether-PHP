@@ -55,6 +55,6 @@ final class ProjectConfig {
 
     
     private static function _ensureLoaded(){
-        if (!self::$_loaded) self::load();
+        if (!self::$_loaded) self::_load();
     }
 }

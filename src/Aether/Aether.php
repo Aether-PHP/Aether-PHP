@@ -26,8 +26,10 @@ namespace Aether;
 use Aether\Config\ProjectConfig;
 use Aether\Middleware\Pipeline;
 use Aether\Middleware\Stack\CsrfMiddleware;
+use Aether\Modules\I18n\I18N;
 use Aether\Modules\ModuleFactory;
 use Aether\Router\Controller\ControllerGateway;
+use Aether\Service\ServiceManager;
 
 /*
  * Pure PHP 8.3+ framework built from scratch.
@@ -45,19 +47,25 @@ class Aether {
     /** @var string $_globalAppState */
     public static string $_globalAppState = "DEV";
 
+    /** @var ServiceManager $_services */
+    private static ServiceManager $_services;
+
 
     /**
-     * Aether Core init function
+     * Aether core init function
      *
      * @return void
      */
-    public static function _init() : void {
+    private function _init() : void {
 
         # - Dev Env-related
         if (self::$_globalAppState == "DEV"){
             error_reporting(E_ALL);
             ini_set('display_errors', 1);
         }
+
+        # - Core helpers
+        include_once __DIR__ . "/Utils/CoreHelperFunctions.php";
 
         # - .Env File load
         ProjectConfig::_load();
@@ -73,6 +81,15 @@ class Aether {
         ini_set('session.cookie_lifetime', 60 * 60 * 24 * 10);
         ini_set('session.gc_maxlifetime', 60 * 60 * 24 * 10);
         session_start();
+    }
+
+    /**
+     * Aether core run function
+     *
+     * @return void
+     */
+    public function _run() : void {
+        $this->_init();
 
         # - Modules load
         ModuleFactory::_load([]);
@@ -83,4 +100,9 @@ class Aether {
             ControllerGateway::_link();
         });
     }
+
+    /**
+     * @return ServiceManager
+     */
+    public static function _getServices() : ServiceManager { return self::$_services ??= new ServiceManager(); }
 }
