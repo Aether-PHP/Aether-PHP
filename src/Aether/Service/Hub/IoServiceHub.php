@@ -16,67 +16,47 @@
  *
  *  @author: dawnl3ss (Alex') ©2026 — All rights reserved
  *  Source available • Commercial license required for redistribution
- *  → https://github.com/dawnl3ss/Aether-PHP
+ *  → github.com/dawnl3ss/Aether-PHP
  *
 */
 declare(strict_types=1);
 
-namespace Aether\Service;
+namespace Aether\Service\Hub;
 
-use Aether\Cache\CacheFactory;
-use Aether\Cache\CacheInterface;
-use Aether\Database\DatabaseWrapper;
-use Aether\Database\Drivers\DatabaseDriverEnum;
-use Aether\Service\Hub\HttpServiceHub;
-use Aether\Service\Hub\IoServiceHub;
+use Aether\IO\IOFile;
+use Aether\IO\IOFolder;
+use Aether\IO\IOStream;
+use Aether\IO\IOTypeEnum;
 
 
-class ServiceManager {
-
-    /** @var DatabaseWrapper[] $_databases */
-    private array $_databases = [];
-
-    /** @var CacheInterface $_cache */
-    private CacheInterface $_cache;
-
-    /** @var HttpServiceHub $_http */
-    private HttpServiceHub $_http;
-
-    /** @var IoServiceHub $_io */
-    private IoServiceHub $_io;
-
-
-    public function __construct(){
-        $this->_cache = CacheFactory::_get();
-        $this->_http = new HttpServiceHub();
-        $this->_io = new IoServiceHub();
-    }
+final class IoServiceHub {
 
     /**
-     * @param string $_database
+     * @param string $_path
+     * @param IOTypeEnum $_type
      *
-     * @return DatabaseWrapper
+     * @return IOFile
      */
-    public function _db(string $_database) : DatabaseWrapper {
-        if (isset($this->_databases[$_database]))
-            return $this->_databases[$_database];
-
-        $this->_databases[$_database] = $conn = new DatabaseWrapper($_database, DatabaseDriverEnum::MYSQL);
-        return $conn;
+    public function _file(string $_path, IoTypeEnum $_type) : IOFile {
+        return IOFile::_open($_type, $_path);
     }
 
     /**
-     * @return CacheInterface
+     * @param string $_path
+     * @param IOTypeEnum $_type
+     *
+     * @return IOStream
      */
-    public function _cache() : CacheInterface { return $this->_cache; }
+    public function _stream(string $_path, IoTypeEnum $_type) : IOStream {
+        return IOStream::_open($_type, $_path);
+    }
 
     /**
-     * @return HttpServiceHub
+     * @param string $_path
+     *
+     * @return IOFolder
      */
-    public function _http() : HttpServiceHub { return $this->_http; }
-
-    /**
-     * @return IoServiceHub
-     */
-    public function _io() : IoServiceHub { return $this->_io; }
+    public function _folder(string $_path) : IOFolder {
+        return IOFolder::_path($_path);
+    }
 }

@@ -16,67 +16,51 @@
  *
  *  @author: dawnl3ss (Alex') ©2026 — All rights reserved
  *  Source available • Commercial license required for redistribution
- *  → https://github.com/dawnl3ss/Aether-PHP
+ *  → github.com/dawnl3ss/Aether-PHP
  *
 */
 declare(strict_types=1);
 
-namespace Aether\Service;
+namespace Aether\Service\Hub;
 
-use Aether\Cache\CacheFactory;
-use Aether\Cache\CacheInterface;
-use Aether\Database\DatabaseWrapper;
-use Aether\Database\Drivers\DatabaseDriverEnum;
-use Aether\Service\Hub\HttpServiceHub;
-use Aether\Service\Hub\IoServiceHub;
-
-
-class ServiceManager {
-
-    /** @var DatabaseWrapper[] $_databases */
-    private array $_databases = [];
-
-    /** @var CacheInterface $_cache */
-    private CacheInterface $_cache;
-
-    /** @var HttpServiceHub $_http */
-    private HttpServiceHub $_http;
-
-    /** @var IoServiceHub $_io */
-    private IoServiceHub $_io;
+use Aether\Http\Methods\HttpMethod;
+use Aether\Http\Methods\HttpMethodEnum;
+use Aether\Http\Request\HttpRequest;
+use Aether\Http\RequestFactory;
+use Aether\Http\Response\Format\HttpResponseFormatEnum;
+use Aether\Http\Response\HttpResponse;
+use Aether\Http\ResponseFactory;
 
 
-    public function __construct(){
-        $this->_cache = CacheFactory::_get();
-        $this->_http = new HttpServiceHub();
-        $this->_io = new IoServiceHub();
-    }
+final class HttpServiceHub {
 
     /**
-     * @param string $_database
+     * @param HttpMethodEnum $_method
+     * @param string $_destination
      *
-     * @return DatabaseWrapper
+     * @return HttpRequest
      */
-    public function _db(string $_database) : DatabaseWrapper {
-        if (isset($this->_databases[$_database]))
-            return $this->_databases[$_database];
-
-        $this->_databases[$_database] = $conn = new DatabaseWrapper($_database, DatabaseDriverEnum::MYSQL);
-        return $conn;
+    public function _request(HttpMethodEnum $_method, string $_destination) : HttpRequest {
+        return RequestFactory::_create($_method, $_destination);
     }
 
     /**
-     * @return CacheInterface
+     * @param HttpResponseFormatEnum $_format
+     * @param string|array $_body
+     * @param int $_code
+     *
+     * @return HttpResponse
      */
-    public function _cache() : CacheInterface { return $this->_cache; }
+    public function _response(HttpResponseFormatEnum $_format, string|array $_body, int $_code) : HttpResponse {
+        return ResponseFactory::_create($_format, $_body, $_code);
+    }
 
     /**
-     * @return HttpServiceHub
+     * @param HttpMethodEnum $_method
+     *
+     * @return HttpMethod
      */
-    public function _http() : HttpServiceHub { return $this->_http; }
-
-    /**
-     * @return IoServiceHub
-     */
-    public function _io() : IoServiceHub { return $this->_io; }
+    public function _method(HttpMethodEnum $_method) : HttpMethod {
+        return $_method->_make();
+    }
 }

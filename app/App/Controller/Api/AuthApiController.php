@@ -29,15 +29,13 @@ use Aether\Auth\Gateway\LogoutAuthGateway;
 use Aether\Auth\Gateway\RegisterAuthGateway;
 use Aether\Auth\User\UserInstance;
 use Aether\Http\HttpParameterUnpacker;
+use Aether\Http\Response\Format\HttpResponseFormatEnum;
+
 use Aether\Security\UserInputValidatorTrait;
 
 
 class AuthApiController {
     use UserInputValidatorTrait;
-
-    public function __construct(){
-        header('Content-Type: application/json');
-    }
 
     /**
      * Login API route
@@ -47,38 +45,37 @@ class AuthApiController {
      */
     public function login(){
         $http_params = new HttpParameterUnpacker();
-        $json = new JsonResponse();
 
         $email = $http_params->_getAttribute("email") == false ? "" : $http_params->_getAttribute("email");
         $password = $http_params->_getAttribute("password") == false ? "" : $http_params->_getAttribute("password");
 
         if ($email == "" || $password == ""){
-            return $json
-                ->_add("status", "failed")
-                ->_add("message", "Credentials should not be empty.")
-            ->_encode();
+            return Aether()->_http()->_response(HttpResponseFormatEnum::JSON, [
+                "status" => "error",
+                "message" => "Credentials should not be empty."
+            ], 404)->_send();
         }
 
         if (UserInstance::_isLoggedIn()){
-            return $json
-                ->_add("status", "failed")
-                ->_add("message", "user aldready logged-in.")
-            ->_encode();
+            return Aether()->_http()->_response(HttpResponseFormatEnum::JSON, [
+                "status" => "error",
+                "message" => "user aldready logged-in."
+            ], 404)->_send();
         }
 
         $gateway = new LoginAuthGateway($email, $password);
 
         if (!$gateway->_tryAuth()){
-            return $json
-                ->_add("status", "failed")
-                ->_add("message", $gateway->_getStatus())
-            ->_encode();
+            return Aether()->_http()->_response(HttpResponseFormatEnum::JSON, [
+                "status" => "error",
+                "message" => $gateway->_getStatus()
+            ], 404)->_send();
         }
 
-        return $json
-            ->_add("status", "success")
-            ->_add("message", $gateway->_getStatus())
-        ->_encode();
+        return Aether()->_http()->_response(HttpResponseFormatEnum::JSON, [
+            "status" => "success",
+            "message" => $gateway->_getStatus()
+        ], 200)->_send();
     }
 
 
@@ -91,39 +88,38 @@ class AuthApiController {
      */
     public function register(){
         $http_params = new HttpParameterUnpacker();
-        $json = new JsonResponse();
 
         $username = $this->_sanitizeInput($http_params->_getAttribute("username") == false ? "" : $http_params->_getAttribute("username"));
         $email = $http_params->_getAttribute("email") == false ? "" : $http_params->_getAttribute("email");
         $password = $http_params->_getAttribute("password") == false ? "" : $http_params->_getAttribute("password");
 
         if ($username == "" || $email == "" || $password == ""){
-            return $json
-                ->_add("status", "failed")
-                ->_add("message", "wrong data provided.")
-            ->_encode();
+            return Aether()->_http()->_response(HttpResponseFormatEnum::JSON, [
+                "status" => "error",
+                "message" => "Credentials should not be empty."
+            ], 404)->_send();
         }
 
         if (UserInstance::_isLoggedIn()){
-            return $json
-                ->_add("status", "failed")
-                ->_add("message", "can not register while being already logged in.")
-            ->_encode();
+            return Aether()->_http()->_response(HttpResponseFormatEnum::JSON, [
+                "status" => "error",
+                "message" => "Can not register while being already logged in."
+            ], 404)->_send();
         }
 
         $gateway = new RegisterAuthGateway($username, $email, $password);
 
         if (!$gateway->_tryAuth()){
-            return $json
-                ->_add("status", "failed")
-                ->_add("message", $gateway->_getStatus())
-            ->_encode();
+            return Aether()->_http()->_response(HttpResponseFormatEnum::JSON, [
+                "status" => "error",
+                "message" => $gateway->_getStatus()
+            ], 404)->_send();
         }
 
-        return $json
-            ->_add("status", "success")
-            ->_add("message", $gateway->_getStatus())
-        ->_encode();
+        return Aether()->_http()->_response(HttpResponseFormatEnum::JSON, [
+            "status" => "success",
+            "message" => $gateway->_getStatus()
+        ], 200)->_send();
     }
 
 
@@ -136,18 +132,17 @@ class AuthApiController {
      */
     public function logout(){
         $gateway = new LogoutAuthGateway();
-        $json = new JsonResponse();
 
         if (!$gateway->_tryAuth()){
-            return $json
-                ->_add("status", "failed")
-                ->_add("message", $gateway->_getStatus())
-            ->_encode();
+            return Aether()->_http()->_response(HttpResponseFormatEnum::JSON, [
+                "status" => "error",
+                "message" => $gateway->_getStatus()
+            ], 404)->_send();
         }
 
-        return $json
-            ->_add("status", "success")
-            ->_add("message", $gateway->_getStatus())
-        ->_encode();
+        return Aether()->_http()->_response(HttpResponseFormatEnum::JSON, [
+            "status" => "success",
+            "message" => $gateway->_getStatus()
+        ], 200)->_send();
     }
 }

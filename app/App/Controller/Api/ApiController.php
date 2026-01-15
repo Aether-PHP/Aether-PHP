@@ -25,11 +25,9 @@ namespace App\Controller\Api;
 
 use Aether\Config\ProjectConfig;
 use Aether\Http\Response\Format\HttpResponseFormatEnum;
-use Aether\Http\ResponseFactory;
 
 
 class ApiController {
-
 
 
     /**
@@ -39,7 +37,7 @@ class ApiController {
      * [@route] => /api/v1
      */
     public function api(){
-        ResponseFactory::_create(HttpResponseFormatEnum::JSON, [
+        Aether()->_http()->_response(HttpResponseFormatEnum::JSON, [
             "name" => ProjectConfig::_get("PROJECT_NAME") . " backend | Powered by Aether-PHP framework.",
             "version" => 1.0,
             "description" => "Backend API v1 for " . ProjectConfig::_get("PROJECT_NAME"),
@@ -70,7 +68,7 @@ class ApiController {
                     "description" => "Auth Logout route"
                 ]
             )
-        ], 200)->_send();
+        ], 404)->_send();
     }
 
 
@@ -81,8 +79,8 @@ class ApiController {
      * [@route] => /api/v1/test
      */
     public function test(){
-        ResponseFactory::_create(HttpResponseFormatEnum::JSON, [
-            "test" => "This is a test v22"
+        Aether()->_http()->_response(HttpResponseFormatEnum::JSON, [
+            "test" => "This is a test v23"
         ], 200)->_send();
     }
 }

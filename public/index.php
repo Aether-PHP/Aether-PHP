@@ -11,4 +11,3 @@ var_dump($loggedin);
 var_dump($sessid);
 
 echo "</pre>";
-
