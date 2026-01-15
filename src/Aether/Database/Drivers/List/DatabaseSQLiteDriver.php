@@ -71,10 +71,10 @@ final class DatabaseSQLiteDriver extends DatabaseDriver {
 
 
         if ($path !== ':memory:'){
-            $dir = dirname($path);
+            $dir = Aether()->_io()->_folder(dirname($path));
 
-            if (!is_dir($dir))
-                mkdir($dir, 0755, true);
+            if (!$dir->_exist())
+                $dir->_create();
         }
 
         return $path;
