@@ -33,7 +33,7 @@ final class LangHandler {
     private static array $_translations = [];
 
     /** @var string $_default */
-    private static string $_default = "en";
+    private static string $_default = "en_US";
 
 
     /**
@@ -46,7 +46,7 @@ final class LangHandler {
 
         self::$_translations = IOFile::_open(
             IOTypeEnum::JSON,
-            __DIR__ . "/../../../../../../lang/" . $language . ".json"
+            "lang/{$language}/{$language}_" . strtoupper($language) . ".json"
         )->_readDecoded();
     }
 
