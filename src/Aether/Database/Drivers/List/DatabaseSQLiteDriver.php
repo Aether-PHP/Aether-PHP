@@ -112,6 +112,12 @@ final class DatabaseSQLiteDriver extends DatabaseDriver {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * @param string $_string
+     *
+     * @return string
+     */
+    public function _escape(string $_string) : string { return '"' . str_replace('"', '""', $_string) . '"'; }
 
     /**
      * @return array

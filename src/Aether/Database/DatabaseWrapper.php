@@ -54,7 +54,7 @@ class DatabaseWrapper {
      * @return mixed
      */
     public function _select(string $table, string $content, array $assoc = []) : mixed {
-        $query = "SELECT {$content} FROM {$table}";
+        $query = "SELECT {$content} FROM " . $this->_driver->_escape($table);
 
         if (!empty($assoc)){
             $conditions = [];
@@ -69,7 +69,7 @@ class DatabaseWrapper {
         return $this->_driver->_query($query, $assoc);
     }
 
-    /**1
+    /**
      * @param string $query
      *
      * @return mixed
@@ -89,7 +89,8 @@ class DatabaseWrapper {
      * @return mixed
      */
     public function _insert(string $table, array $assoc){
-        $query = "INSERT INTO {$table} (" . implode(',', array_keys($assoc)) . ") VALUES (:" . implode(',:', array_keys($assoc)) . ")";
+        $table = $this->_driver->_escape($table);
+        $query = "INSERT INTO `{$table}` (" . implode(',', array_keys($assoc)) . ") VALUES (:" . implode(',:', array_keys($assoc)) . ")";
         return $this->_driver->_query($query, $assoc);
     }
 
@@ -104,13 +105,14 @@ class DatabaseWrapper {
      * @return mixed
      */
     public function _update(string $table, array $assoc, array $conditions = []) : mixed {
+        $table = $this->_driver->_escape($table);
         $setClauses = [];
 
         foreach ($assoc as $key => $value){
             $setClauses[] = "{$key} = :set_{$key}";
         }
 
-        $query = "UPDATE {$table} SET " . implode(", ", $setClauses);
+        $query = "UPDATE `{$table}` SET " . implode(", ", $setClauses);
         $params = [];
 
         foreach ($assoc as $key => $value){
@@ -157,7 +159,7 @@ class DatabaseWrapper {
      * @return mixed
      */
     public function _join(string $table, string $content, array $joins = [], array $assoc = []) : mixed {
-        $query = "SELECT {$content} FROM {$table}";
+        $query = "SELECT {$content} FROM " . $this->_driver->_escape($table);
 
         if (!empty($joins)){
             foreach ($joins as $join){

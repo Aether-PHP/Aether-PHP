@@ -77,6 +77,13 @@ abstract class DatabaseDriver implements DatabaseConnectable {
      */
     abstract public function _query(string $query, array $params) : mixed;
 
+    /**
+     * @param string $_string
+     *
+     * @return string
+     */
+    abstract public function _escape(string $_string) : string;
+
 
     /**
      * @return array

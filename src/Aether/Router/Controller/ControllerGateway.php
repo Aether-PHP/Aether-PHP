@@ -35,7 +35,7 @@ final class ControllerGateway {
      * Router => Controller Gateway | & API integration
      */
     public static function _link() : void {
-        $directory = __DIR__ . '/../../../../app/App/Controller/*.php';
+        $directory = './app/App/Controller/*.php';
         $controllerFiles = glob($directory);
         $router = new Router();
 
@@ -65,7 +65,7 @@ final class ControllerGateway {
             }
         }
 
-        $directory = __DIR__ . '/../../../../app/App/Controller/Api/*.php';
+        $directory = './app/App/Controller/Api/*.php';
         $controllerFiles = glob($directory);
 
         foreach ($controllerFiles as $file){

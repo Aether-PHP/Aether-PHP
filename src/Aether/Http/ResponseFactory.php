@@ -55,38 +55,38 @@ class ResponseFactory {
     }
 
     /**
-     * @param string|array $_body
+     * @param string $_body
      * @param int $_code
      * @param string $_url
      * @param HttpMethodEnum $_method
      *
      * @return HttpResponse
      */
-    public function _xml(string|array $_body, int $_code, string $_url = "", HttpMethodEnum $_method = HttpMethodEnum::GET) : HttpResponse {
+    public function _xml(string $_body, int $_code, string $_url = "", HttpMethodEnum $_method = HttpMethodEnum::GET) : HttpResponse {
         return self::_create(HttpResponseFormatEnum::XML, $_body, $_code, $_url, $_method);
     }
 
     /**
-     * @param string|array $_body
+     * @param string $_body
      * @param int $_code
      * @param string $_url
      * @param HttpMethodEnum $_method
      *
      * @return HttpResponse
      */
-    public function _text(string|array $_body, int $_code, string $_url = "", HttpMethodEnum $_method = HttpMethodEnum::GET) : HttpResponse {
+    public function _text(string $_body, int $_code, string $_url = "", HttpMethodEnum $_method = HttpMethodEnum::GET) : HttpResponse {
         return self::_create(HttpResponseFormatEnum::TEXT, $_body, $_code, $_url, $_method);
     }
 
     /**
-     * @param string|array $_body
+     * @param string $_body
      * @param int $_code
      * @param string $_url
      * @param HttpMethodEnum $_method
      *
      * @return HttpResponse
      */
-    public function _pdf(string|array $_body, int $_code, string $_url = "", HttpMethodEnum $_method = HttpMethodEnum::GET) : HttpResponse {
+    public function _pdf(string $_body, int $_code, string $_url = "", HttpMethodEnum $_method = HttpMethodEnum::GET) : HttpResponse {
         return self::_create(HttpResponseFormatEnum::PDF, $_body, $_code, $_url, $_method);
     }
 

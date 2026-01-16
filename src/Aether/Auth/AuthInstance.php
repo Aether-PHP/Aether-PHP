@@ -59,12 +59,6 @@ abstract class AuthInstance implements AuthInterface {
      */
     protected function _getPassword() : string { return $this->_password; }
 
-
-    /**
-     * @return bool
-     */
-    protected function _isValid() : bool { return $this->_status; }
-
     /**
      * @return string
      */

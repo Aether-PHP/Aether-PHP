@@ -68,7 +68,7 @@ class ApiController extends Controller {
                     "description" => "Auth Logout route"
                 ]
             )
-        ], 404)->_send();
+        ], 200)->_send();
     }
 
 
