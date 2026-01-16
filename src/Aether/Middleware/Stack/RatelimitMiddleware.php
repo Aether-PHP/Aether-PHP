@@ -54,6 +54,8 @@ class RatelimitMiddleware implements MiddlewareInterface {
                     ], 403)->_send();
                 }
 
+                Aether()->_cache()->_set("ratelimit_" . $ip, ["req" => $fromCache["req"], 't' => time()], 60 * 60 * 24);
+
                 echo '<h1>403 - Forbidden</h1><p>RateLimiter flagged YOU !</p>';
                 return;
             } else if (time() >= $fromCache["t"] + self::SECOND_INTERVAL)
