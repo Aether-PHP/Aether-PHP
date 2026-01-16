@@ -30,6 +30,7 @@ use Aether\Database\Drivers\DatabaseDriverEnum;
 use Aether\Service\Hub\ConfigServiceHub;
 use Aether\Service\Hub\HttpServiceHub;
 use Aether\Service\Hub\IoServiceHub;
+use Aether\Service\Hub\SessionServiceHub;
 
 
 class ServiceManager {
@@ -49,12 +50,16 @@ class ServiceManager {
     /** @var ConfigServiceHub $_config */
     private ConfigServiceHub $_config;
 
+    /** @var SessionServiceHub $_session */
+    private SessionServiceHub $_session;
+
 
     public function __construct(){
         $this->_cache = CacheFactory::_get();
         $this->_http = new HttpServiceHub();
         $this->_io = new IoServiceHub();
         $this->_config = new ConfigServiceHub();
+        $this->_session = new SessionServiceHub();
     }
 
     /**
@@ -89,4 +94,9 @@ class ServiceManager {
      * @return ConfigServiceHub
      */
     public function _config() : ConfigServiceHub { return $this->_config; }
+
+    /**
+     * @return SessionServiceHub
+     */
+    public function _session() : SessionServiceHub { return $this->_session; }
 }

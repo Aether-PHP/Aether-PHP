@@ -25,6 +25,7 @@ namespace Aether;
 
 use Aether\Config\ProjectConfig;
 use Aether\Middleware\Pipeline;
+use Aether\Middleware\Stack\AuthMiddleware;
 use Aether\Middleware\Stack\CsrfMiddleware;
 use Aether\Modules\I18n\I18N;
 use Aether\Modules\ModuleFactory;
