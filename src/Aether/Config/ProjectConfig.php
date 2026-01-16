@@ -26,20 +26,8 @@ namespace Aether\Config;
 
 final class ProjectConfig {
 
-    /** @var bool $_loaded */
-    private static bool $_loaded = false;
-
-    /** @var array $_data */
-    private static array $_data = [];
-    
-
     public static function _load(){
-        if (self::$_loaded)
-            return;
-
-        self::$_data = (new EnvDataUnpacker())->_raw();
-        $_ENV = self::$_data;
-        self::$_loaded = true;
+        $_ENV = (new EnvDataUnpacker())->_raw();
     }
 
 
@@ -51,11 +39,11 @@ final class ProjectConfig {
      */
     public static function _get(string $key, mixed $default = null) : mixed {
         self::_ensureLoaded();
-        return self::$_data[strtoupper($key)] ?? $default;
+        return $_ENV[strtoupper($key)] ?? $default;
     }
 
     
     private static function _ensureLoaded(){
-        if (!self::$_loaded) self::_load();
+        if ($_ENV === []) self::_load();
     }
 }
