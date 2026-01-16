@@ -23,31 +23,45 @@ declare(strict_types=1);
 
 namespace Aether\Middleware\Stack;
 
-
-use Aether\Aether;
 use Aether\Http\Response\Format\HttpResponseFormatEnum;
 use Aether\Middleware\MiddlewareInterface;
 
-class AuthMiddleware implements MiddlewareInterface {
+
+class RatelimitMiddleware implements MiddlewareInterface {
+
+    /** @var int SECOND_INTERVAL */
+    private const SECOND_INTERVAL = 60;
+
+    /** @var int MAX_LIMIT */
+    private const MAX_LIMIT = 60;
 
 
     /**
      * @param callable $_next
      */
     public function _handle(callable $_next){
-        if (!Aether()->_session()->_isLoggedIn()){
-            http_response_code(403);
+        $ip = $_SERVER['REMOTE_ADDR'];
+        $fromCache = Aether()->_cache()->_get("ratelimit_" . $ip);
 
-            if (str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json')){
-                return Aether()->_http()->_response(HttpResponseFormatEnum::JSON, [
-                    "status" => "error",
-                    "message" => "You are not logged in.",
-                ], 403)->_send();
-            }
+        if (!is_null($fromCache)){
+            if ($fromCache["req"] >= self::MAX_LIMIT && time() < $fromCache["t"] + self::SECOND_INTERVAL){
+                http_response_code(403);
 
-            echo '<h1>403 - Forbidden</h1><p>You are not logged in.</p>';
-            return;
-        }
+                if (str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json')) {
+                    return Aether()->_http()->_response(HttpResponseFormatEnum::JSON, [
+                        "status" => "error",
+                        "message" => "RateLimiter flagged YOU !"
+                    ], 403)->_send();
+                }
+
+                echo '<h1>403 - Forbidden</h1><p>RateLimiter flagged YOU !</p>';
+                return;
+            } else if (time() >= $fromCache["t"] + self::SECOND_INTERVAL)
+                Aether()->_cache()->_set("ratelimit_" . $ip, ["req" => 1, 't' => time()], 60 * 60 * 24);
+            else
+                Aether()->_cache()->_set("ratelimit_" . $ip, ["req" => $fromCache["req"] + 1, 't' => $fromCache["t"]], 60 * 60 * 24);
+        } else
+            Aether()->_cache()->_set("ratelimit_" . $ip, ["req" => 1, 't' => time()], 60 * 60 * 24);
 
         $_next();
     }
