@@ -23,9 +23,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use Aether\Auth\User\UserInstance;
 use Aether\Router\Controller\Controller;
-use Aether\Session\SessionInstance;
 
 
 class AppController extends Controller {
@@ -36,8 +34,8 @@ class AppController extends Controller {
      */
     public function index(){
         $this->_render("index", [
-            "loggedin" => UserInstance::_isLoggedIn(),
-            "sessid" => SessionInstance::_get()->_getMetadata()->_getSessId(),
+            "loggedin" => Aether()->_session()->_isLoggedIn(),
+            "sessid" => Aether()->_session()->_get()->_getMetadata()->_getSessId(),
         ]);
     }
 

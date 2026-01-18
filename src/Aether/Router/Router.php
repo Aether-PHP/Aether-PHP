@@ -23,8 +23,7 @@ declare(strict_types=1);
 
 namespace Aether\Router;
 
-use Aether\Router\Http\HttpStandardsEnum;
-use Aether\Router\Http\RouterHttpGateway;
+use Aether\Http\Methods\HttpMethodEnum;
 use Aether\Router\Route\Route;
 use Aether\Security\UserInputValidatorTrait;
 
@@ -59,8 +58,8 @@ final class Router implements RouterInterface {
      * @return bool
      */
     public function _run() : bool {
-        $req_uri = RouterHttpGateway::_getHttpRequestUri();
-        $req_method = strtoupper(RouterHttpGateway::_getHttpRequestMethod());
+        $req_uri = $_SERVER['REQUEST_URI'];
+        $req_method = strtoupper($_SERVER['REQUEST_METHOD']);
 
         if (!isset($this->_routes[$req_method]))
             return false;
@@ -77,7 +76,7 @@ final class Router implements RouterInterface {
 
 
                 # - Case 2 : URI contains params - only for HTTP GET
-                if ($req_method !== HttpStandardsEnum::HTTP_GET->value)
+                if ($req_method !== HttpMethodEnum::GET->value)
                     continue;
 
                 $path = preg_replace('#{([\w])+}#', '([^/]+)', trim($route->_getRoute(), '/'));

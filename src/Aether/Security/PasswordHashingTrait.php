@@ -21,7 +21,7 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Auth\Security;
+namespace Aether\Security;
 
 
 trait PasswordHashingTrait {

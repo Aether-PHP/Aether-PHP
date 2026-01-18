@@ -30,7 +30,6 @@ use Aether\Middleware\Stack\CsrfMiddleware;
 use Aether\Middleware\Stack\MaintenanceMiddleware;
 use Aether\Middleware\Stack\RatelimitMiddleware;
 use Aether\Middleware\Stack\SecurityHeadersMiddleware;
-use Aether\Modules\I18n\I18N;
 use Aether\Modules\ModuleFactory;
 use Aether\Router\Controller\ControllerGateway;
 use Aether\Service\ServiceManager;

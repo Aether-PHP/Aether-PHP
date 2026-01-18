@@ -25,8 +25,9 @@ namespace Aether\Auth\Gateway;
 
 use Aether\Auth\AuthInstance;
 use Aether\Auth\User\UserInstance;
-use Aether\Auth\Security\PasswordHashingTrait;
 use Aether\Config\ProjectConfig;
+use Aether\Security\PasswordHashingTrait;
+use Aether\Session\SessionInstance;
 
 
 class LoginAuthGateway extends AuthInstance implements AuthGatewayEventInterface {
@@ -61,12 +62,18 @@ class LoginAuthGateway extends AuthInstance implements AuthGatewayEventInterface
     public function _onSuccess(array $_data) : string {
         $user_db = $_data;
 
-        $_SESSION["user"] = serialize(new UserInstance(
+        $user = new UserInstance(
             $user_db["uid"],
             $user_db["username"],
             $user_db["email"],
             $user_db["perms"]
-        ));
+        );
+
+        $serialized = serialize($user);
+        $signature = hash_hmac('sha256', $serialized, SessionInstance::SESSION_SECRET);
+
+        $_SESSION["user"] = $serialized . '::' . $signature;
+
         return "user successfullly logged in.";
     }
 

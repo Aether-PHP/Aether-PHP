@@ -90,7 +90,7 @@ class DatabaseWrapper {
      */
     public function _insert(string $table, array $assoc){
         $table = $this->_driver->_escape($table);
-        $query = "INSERT INTO `{$table}` (" . implode(',', array_keys($assoc)) . ") VALUES (:" . implode(',:', array_keys($assoc)) . ")";
+        $query = "INSERT INTO {$table} (" . implode(',', array_keys($assoc)) . ") VALUES (:" . implode(',:', array_keys($assoc)) . ")";
         return $this->_driver->_query($query, $assoc);
     }
 
@@ -112,7 +112,7 @@ class DatabaseWrapper {
             $setClauses[] = "{$key} = :set_{$key}";
         }
 
-        $query = "UPDATE `{$table}` SET " . implode(", ", $setClauses);
+        $query = "UPDATE {$table} SET " . implode(", ", $setClauses);
         $params = [];
 
         foreach ($assoc as $key => $value){

@@ -23,10 +23,6 @@ declare(strict_types=1);
 
 namespace Aether\Auth\User\Permission;
 
-use Aether\Config\ProjectConfig;
-use Aether\Database\DatabaseWrapper;
-use Aether\Database\Drivers\DatabaseDriverEnum;
-
 
 class PermissionLayer {
 
@@ -58,11 +54,12 @@ class PermissionLayer {
 
         array_push($this->_perms, $_perm);
 
-        (new DatabaseWrapper(ProjectConfig::_get("AUTH_DATABASE_GATEWAY"), DatabaseDriverEnum::MYSQL))->_update(
+        Aether()->_db()->_mysql($_ENV["AUTH_DATABASE_GATEWAY"])->_update(
             "users",
             ["perms" => $this->_stringify()],
             ["uid" => $uid]
         );
+
         return $this;
     }
 
@@ -78,11 +75,12 @@ class PermissionLayer {
 
         $this->_perms = array_filter($this->_perms, fn($_p) => $_p !== $_perm);
 
-        (new DatabaseWrapper(ProjectConfig::_get("AUTH_DATABASE_GATEWAY"), DatabaseDriverEnum::MYSQL))->_update(
+        Aether()->_db()->_mysql($_ENV["AUTH_DATABASE_GATEWAY"])->_update(
             "users",
             ["perms" => $this->_stringify()],
             ["uid" => $uid]
         );
+
         return $this;
     }
 

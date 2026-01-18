@@ -10,11 +10,11 @@
  *     ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝        ╚═╝     ╚═╝  ╚═╝╚═╝
  *
  *                      The divine lightweight PHP framework
- *                  < 1 Mo • Zero dependencies • Pure PHP 8.3+
+ *                   < 1 Mo • Zero dependencies • Pure PHP 8.3+
  *
- *  Built from scratch. No bloat. POO Embedded.
+ *  Built from scratch. No bloat. OOP Embedded.
  *
- *  @author: dawnl3ss (Alex') ©2025 — All rights reserved
+ *  @author: dawnl3ss (Alex') ©2026 — All rights reserved
  *  Source available • Commercial license required for redistribution
  *  → github.com/dawnl3ss/Aether-PHP
  *
@@ -23,12 +23,15 @@ declare(strict_types=1);
 
 namespace Aether\Session;
 
-
 use Aether\Auth\User\UserInstance;
 use Aether\Session\Data\SessionAppdata;
 use Aether\Session\Data\SessionMetadata;
 
+
 class SessionInstance implements SessionInterface {
+
+    /** @var string SESSION_SECREt */
+    public const string SESSION_SECRET = "01fb5debd4588b04d11b18081fd7d347eb1815ca55a74e63fabe003d312f8980";
 
 
     /** @var UserInstance|null $_user */
@@ -66,9 +69,22 @@ class SessionInstance implements SessionInterface {
      * @return SessionInstance
      */
     private function _setUser() : SessionInstance {
-        if (isset($this->_httpsess["user"]))
-            $this->_user = unserialize($this->_httpsess["user"]);
+        if (!isset($this->_httpsess["user"])){
+            $this->_user = null;
+            return $this;
+        }
 
+        [$serialized, $signature] = explode('::', $this->_httpsess["user"], 2) + [1 => ''];
+
+        if (!$signature || !hash_equals($signature, hash_hmac('sha256', $serialized, self::SESSION_SECRET)))
+            return $this;
+
+        $user = unserialize($serialized, [
+            'allowed_classes' => [ UserInstance::class ],
+            'max_depth' => 5,
+        ]);
+
+        $this->_user = ($user instanceof UserInstance) ? $user : null;
         return $this;
     }
 
@@ -87,7 +103,9 @@ class SessionInstance implements SessionInterface {
             $this->_metadata = new SessionMetadata();
             self::_addHttpSess("_metadata", serialize($this->_metadata));
         } else {
-            $this->_metadata = unserialize($this->_httpsess["_metadata"]);
+            $this->_metadata = unserialize($this->_httpsess["_metadata"], [
+                'allowed_classes' => [SessionMetadata::class]
+            ]);
         }
 
         return $this;
@@ -103,7 +121,9 @@ class SessionInstance implements SessionInterface {
      */
     private function _setAppdata() : SessionInstance {
         if (isset($this->_httpsess["app"]))
-            $this->_appdata = unserialize($this->_httpsess["app"]);
+            $this->_appdata = unserialize($this->_httpsess["app"], [
+                'allowed_classes' => [SessionAppdata::class]
+            ]);
 
         return $this;
     }
@@ -113,15 +133,19 @@ class SessionInstance implements SessionInterface {
      * Add new data in HTTP $_SESSION superglobal.
      *
      * @param string $key
-     * @param $value
+     * @param mixed $value
      */
-    public static function _addHttpSess(string $key, $value){
+    public static function _addHttpSess(string $key, mixed $value){
         # - Check if $value is an object and if yes we serialize it, we never know...
         # - permits free use of the func in the whole core while benefiting of a "centralized" datatype.
-        if (is_object($value))
-            $value = serialize($value);
+        if ($key === 'user' && $value instanceof UserInstance){
+            $serialized = serialize($value);
+            $signature = hash_hmac('sha256', $serialized, self::SESSION_SECRET);
+            $_SESSION[$key] = $serialized . '::' . $signature;
+            return;
+        }
 
-        $_SESSION[$key] = $value;
+        $_SESSION[$key] = is_object($value) ? serialize($value) : $value;
     }
 
 

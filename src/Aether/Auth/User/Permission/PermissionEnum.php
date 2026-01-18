@@ -25,7 +25,7 @@ namespace Aether\Auth\User\Permission;
 
 
 /**
- * Enum used for representing the different permission layers (0 is minimal perm, higher is better)
+ * Enum used for representing the different permission layers
  */
 enum PermissionEnum : string {
 

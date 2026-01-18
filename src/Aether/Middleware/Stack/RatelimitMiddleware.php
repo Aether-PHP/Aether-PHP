@@ -32,7 +32,7 @@ class RatelimitMiddleware implements MiddlewareInterface {
     private const int SECOND_INTERVAL = 60;
 
     /** @var int MAX_LIMIT */
-    private const int MAX_LIMIT = 80;
+    private const int MAX_LIMIT = 100;
 
 
     /**

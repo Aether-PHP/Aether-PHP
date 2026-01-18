@@ -57,7 +57,20 @@ class UserInstance extends PermissionLayer implements UserInterface {
      * @return bool
      */
     public static function _isLoggedIn() : bool {
-        return isset($_SESSION["user"]) && unserialize($_SESSION["user"]) instanceof UserInstance;
+        if (!isset($_SESSION["user"]))
+            return false;
+
+        $parts = explode('::', $_SESSION["user"], 2);
+
+        if (count($parts) !== 2)
+            return false;
+
+        [$serialized, $signature] = $parts;
+
+        return hash_equals(
+            $signature,
+            hash_hmac('sha256', $serialized, SessionInstance::SESSION_SECRET)
+        );
     }
 
     /**
@@ -127,5 +140,5 @@ class UserInstance extends PermissionLayer implements UserInterface {
     /**
      * Update User's instance in session
      */
-    private function _update(){ SessionInstance::_addHttpSess("user", serialize($this)); }
+    private function _update(){ SessionInstance::_addHttpSess("user", $this); }
 }

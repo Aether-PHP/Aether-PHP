@@ -24,9 +24,9 @@ declare(strict_types=1);
 namespace Aether\Auth\Gateway;
 
 use Aether\Auth\AuthInstance;
-use Aether\Config\ProjectConfig;
-use Aether\Auth\Security\PasswordHashingTrait;
 use Aether\Auth\User\UserInstance;
+use Aether\Config\ProjectConfig;
+use Aether\Security\PasswordHashingTrait;
 
 
 class RegisterAuthGateway extends AuthInstance implements AuthGatewayEventInterface {
