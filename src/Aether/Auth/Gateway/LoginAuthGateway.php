@@ -70,7 +70,7 @@ class LoginAuthGateway extends AuthInstance implements AuthGatewayEventInterface
         );
 
         $serialized = serialize($user);
-        $signature = hash_hmac('sha256', $serialized, SessionInstance::SESSION_SECRET);
+        $signature = hash_hmac('sha256', $serialized, $_ENV["SESSION_HMAC"]);
 
         $_SESSION["user"] = $serialized . '::' . $signature;
 

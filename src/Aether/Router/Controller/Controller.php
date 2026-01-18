@@ -31,10 +31,10 @@ class Controller {
     /**
      * Render the provided view (with parameters)
      *
-     * @param string $view
-     * @param array $params
+     * @param string $_view
+     * @param array $_params
      */
-    protected function _render(string $view, array $params = []) {
-        ViewInstance::_make($view, $params);
+    protected function _render(string $_view, array $_params = []) {
+        ViewInstance::_make($_view, $_params);
     }
 }

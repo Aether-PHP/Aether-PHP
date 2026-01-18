@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace Aether;
 
+use Aether\Auth\Gateway\LoginAuthGateway;
 use Aether\Config\ProjectConfig;
 use Aether\Middleware\Pipeline;
 use Aether\Middleware\Stack\AuthMiddleware;
@@ -106,6 +107,7 @@ class Aether {
             # - Router Gateway : deliver correct controller for each route
             ControllerGateway::_link();
         });
+
     }
 
     /**

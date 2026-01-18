@@ -30,10 +30,6 @@ use Aether\Session\Data\SessionMetadata;
 
 class SessionInstance implements SessionInterface {
 
-    /** @var string SESSION_SECREt */
-    public const string SESSION_SECRET = "01fb5debd4588b04d11b18081fd7d347eb1815ca55a74e63fabe003d312f8980";
-
-
     /** @var UserInstance|null $_user */
     private ?UserInstance $_user = null;
 
@@ -76,7 +72,7 @@ class SessionInstance implements SessionInterface {
 
         [$serialized, $signature] = explode('::', $this->_httpsess["user"], 2) + [1 => ''];
 
-        if (!$signature || !hash_equals($signature, hash_hmac('sha256', $serialized, self::SESSION_SECRET)))
+        if (!$signature || !hash_equals($signature, hash_hmac('sha256', $serialized, $_ENV["SESSION_HMAC"])))
             return $this;
 
         $user = unserialize($serialized, [
@@ -140,7 +136,7 @@ class SessionInstance implements SessionInterface {
         # - permits free use of the func in the whole core while benefiting of a "centralized" datatype.
         if ($key === 'user' && $value instanceof UserInstance){
             $serialized = serialize($value);
-            $signature = hash_hmac('sha256', $serialized, self::SESSION_SECRET);
+            $signature = hash_hmac('sha256', $serialized, $_ENV["SESSION_HMAC"]);
             $_SESSION[$key] = $serialized . '::' . $signature;
             return;
         }

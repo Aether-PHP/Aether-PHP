@@ -69,7 +69,7 @@ class UserInstance extends PermissionLayer implements UserInterface {
 
         return hash_equals(
             $signature,
-            hash_hmac('sha256', $serialized, SessionInstance::SESSION_SECRET)
+            hash_hmac('sha256', $serialized, $_ENV["SESSION_HMAC"])
         );
     }
 

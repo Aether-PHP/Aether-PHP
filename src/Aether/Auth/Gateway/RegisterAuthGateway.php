@@ -68,12 +68,17 @@ class RegisterAuthGateway extends AuthInstance implements AuthGatewayEventInterf
         ]);
         $user_db = $this->_dbconn->_select(ProjectConfig::_get("AUTH_TABLE_GATEWAY"), '*', [ "email" => $this->_email ])[0];
 
-        $_SESSION["user"] = serialize(new UserInstance(
+        $user = new UserInstance(
             $user_db["uid"],
             $user_db["username"],
             $user_db["email"],
             $user_db["perms"]
-        ));
+        );
+
+        $serialized = serialize($user);
+        $signature = hash_hmac('sha256', $serialized, $_ENV["SESSION_HMAC"]);
+
+        $_SESSION["user"] = $serialized . '::' . $signature;
         return "user successfullly signed up.";
     }
 
