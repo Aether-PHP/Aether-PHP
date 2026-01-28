@@ -30,7 +30,7 @@ use Aether\Database\Drivers\DatabaseDriverEnum;
 final class DatabaseServiceHub {
 
     /** @var DatabaseWrapper[] $_databases */
-    private array $_databases = [];
+    public array $_databases = [];
 
     /**
      * @param string $_dbname

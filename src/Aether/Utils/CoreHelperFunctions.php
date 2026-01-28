@@ -31,3 +31,19 @@ if (!function_exists('Aether')){
     }
 
 }
+
+if (!function_exists('debug')){
+
+    /**
+     * @param mixed ...$_vars
+     *
+     * @return void
+     */
+    function _debug(mixed ...$_vars) : void {
+        foreach ($_vars as $var){
+            echo "<pre>";
+            var_dump($var);
+            echo "</pre>";
+        }
+    }
+}

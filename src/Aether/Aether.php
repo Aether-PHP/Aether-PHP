@@ -25,6 +25,9 @@ namespace Aether;
 
 use Aether\Auth\Gateway\LoginAuthGateway;
 use Aether\Config\ProjectConfig;
+use Aether\Database\Drivers\DatabaseDriverEnum;
+use Aether\Database\Drivers\List\DatabaseMySQLDriver;
+use Aether\Database\QueryBuilder;
 use Aether\Middleware\Pipeline;
 use Aether\Middleware\Stack\AuthMiddleware;
 use Aether\Middleware\Stack\CsrfMiddleware;
@@ -108,6 +111,13 @@ class Aether {
             ControllerGateway::_link();
         });
 
+        $query = new QueryBuilder("hardware_hub", new DatabaseMySQLDriver());
+        $res = $query->_table("users")
+            ->_select("id", 'username')
+            ->_where("username", "dawnless")
+            ->_send();
+
+        _debug($res);
     }
 
     /**
