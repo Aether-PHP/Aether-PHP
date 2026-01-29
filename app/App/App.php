@@ -23,9 +23,17 @@ declare(strict_types=1);
 
 namespace App;
 
+use Aether\Modules\I18n\I18N;
+use Aether\Modules\ModuleFactory;
+
+
 /**
  * @class App : will handle App-related stuff
  */
 class App {
 
+    public static function _init() : void {
+        # - Modules load
+        ModuleFactory::_load([ I18N::class ]);
+    }
 }

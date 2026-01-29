@@ -25,7 +25,8 @@ namespace Aether\Database;
 
 use Aether\Database\Drivers\DatabaseDriver;
 
-final class QueryBuilder {
+
+abstract class QueryBuilder {
 
     /** @var string|null $_type */
     private ?string $_type = null;
@@ -45,8 +46,11 @@ final class QueryBuilder {
     /** @var array $_wheres */
     private array $_wheres = [];
 
+    /** @var array $_inserts */
+    private array $_inserts = [];
+
     /** @var DatabaseDriver $_driver */
-    private DatabaseDriver $_driver;
+    protected DatabaseDriver $_driver;
 
     public function __construct(string $_database, DatabaseDriver $_driver){
         $this->_database = $_database;
@@ -85,10 +89,25 @@ final class QueryBuilder {
      * @return self
      */
     public function _where(string $_key, mixed $_value) : QueryBuilder {
-        if ($this->_type !== "select")
+        if ($this->_type !== "select" && $this->_type !== "where")
             return $this;
 
         $this->_wheres[$_key] = $_value;
+        return $this;
+    }
+
+    /**
+     * @param string $_key
+     * @param mixed $_value
+     *
+     * @return self
+     */
+    public function _insert(string $_key, mixed $_value) : QueryBuilder {
+        if ($this->_type !== "insert" && !is_null($this->_type))
+            return $this;
+
+        $this->_type = "insert";
+        $this->_inserts[$_key] = $_value;
         return $this;
     }
 
@@ -111,6 +130,17 @@ final class QueryBuilder {
             }
 
             return $this->_driver->_query($query, $this->_wheres);
+        }
+
+        # - Insert SQL query
+        else if ($this->_type === "insert"){
+            $query = "INSERT INTO " . $this->_table . ' (';
+
+            if ($this->_inserts === [])
+                return $this;
+
+            $query .= implode(',', array_keys($this->_inserts)) . ") VALUES (:" . implode(", :", array_keys($this->_inserts)) . ")";
+            return $this->_driver->_query($query, $this->_inserts);
         }
 
         return null;

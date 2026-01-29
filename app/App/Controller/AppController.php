@@ -12,9 +12,9 @@
  *                      The divine lightweight PHP framework
  *                  < 1 Mo • Zero dependencies • Pure PHP 8.3+
  *
- *  Built from scratch. No bloat. POO Embedded.
+ *  Built from scratch. No bloat. OOP Embedded.
  *
- *  @author: dawnl3ss (Alex') ©2025 — All rights reserved
+ *  @author: dawnl3ss (Alex') ©2026 — All rights reserved
  *  Source available • Commercial license required for redistribution
  *  → github.com/dawnl3ss/Aether-PHP
  *
@@ -32,8 +32,8 @@ class AppController extends Controller {
      * [@method] => GET
      * [@route] => /
      */
-    public function index(){
-        $this->_render("index", [
+    public function home(){
+        $this->_render("home", [
             "loggedin" => Aether()->_session()->_isLoggedIn(),
             "sessid" => Aether()->_session()->_get()->_getMetadata()->_getSessId(),
         ]);

@@ -23,11 +23,7 @@ declare(strict_types=1);
 
 namespace Aether;
 
-use Aether\Auth\Gateway\LoginAuthGateway;
 use Aether\Config\ProjectConfig;
-use Aether\Database\Drivers\DatabaseDriverEnum;
-use Aether\Database\Drivers\List\DatabaseMySQLDriver;
-use Aether\Database\QueryBuilder;
 use Aether\Middleware\Pipeline;
 use Aether\Middleware\Stack\AuthMiddleware;
 use Aether\Middleware\Stack\CsrfMiddleware;
@@ -37,6 +33,7 @@ use Aether\Middleware\Stack\SecurityHeadersMiddleware;
 use Aether\Modules\ModuleFactory;
 use Aether\Router\Controller\ControllerGateway;
 use Aether\Service\ServiceManager;
+use App\App;
 
 /*
  * Pure PHP 8.3+ framework built from scratch.
@@ -66,7 +63,7 @@ class Aether {
     private function _init() : void {
 
         # - Dev Env-related
-        if (self::$_globalAppState == "DEV"){
+        if (self::$_globalAppState === "DEV"){
             error_reporting(E_ALL);
             ini_set('display_errors', 1);
         }
@@ -97,9 +94,7 @@ class Aether {
      */
     public function _run() : void {
         $this->_init();
-
-        # - Modules load
-        ModuleFactory::_load([]);
+        App::_init();
 
         # - Middlewares
         Pipeline::_run([
@@ -111,13 +106,13 @@ class Aether {
             ControllerGateway::_link();
         });
 
-        $query = new QueryBuilder("hardware_hub", new DatabaseMySQLDriver());
-        $res = $query->_table("users")
-            ->_select("id", 'username')
-            ->_where("username", "dawnless")
+        $db = Aether()->_db()->_mysql("hardware_hub")
+            ->_table("users")
+            ->_select('*')
+            ->_where("id", 1)
             ->_send();
 
-        _debug($res);
+        _debug($db);
     }
 
     /**

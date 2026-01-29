@@ -70,7 +70,7 @@ final class IOFolder {
      * @return array|false
      */
     public function _listFiles(string $_patern = '') : array|false {
-        return glob($this->_getPath() .  $_patern);
+        return glob($this->_getPath() . $_patern);
     }
 
     /**

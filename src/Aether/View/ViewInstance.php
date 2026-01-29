@@ -50,6 +50,9 @@ final class ViewInstance implements  ViewInterface {
 
         # - Security check : if extension is not php then we do NOT want any php executed
         if (self::$_ext !== "php"){
+            if (!file_exists($fullpath))
+                die("[View] - Error - Template not found : {$fullpath}");
+
             echo file_get_contents($fullpath);
             return;
         }
