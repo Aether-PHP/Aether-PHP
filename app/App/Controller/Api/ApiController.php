@@ -28,13 +28,16 @@ use Aether\Http\Response\Format\HttpResponseFormatEnum;
 use Aether\Router\Controller\Controller;
 
 
+/**
+ * [@base] => /api/v1
+ */
 class ApiController extends Controller {
 
     /**
      * API listing route
      *
      * [@method] => GET
-     * [@route] => /api/v1
+     * [@route] => /
      */
     public function api(){
         Aether()->_http()->_response()->_json([
@@ -76,7 +79,7 @@ class ApiController extends Controller {
      * Test API route
      *
      * [@method] => GET
-     * [@route] => /api/v1/test
+     * [@route] => /test
      */
     public function test(){
         Aether()->_http()->_response()->_json([

@@ -69,6 +69,10 @@ final class ControllerGateway {
                 continue;
             }
 
+            # - We allow developers to add a base path for their controller
+            $base = $reflection->getDocComment() === false ? "" : self::_extractAnnotation($reflection->getDocComment(), 'base');
+            $base = is_null($base) ? "" : $base;
+
             foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method){
                 $doc = $method->getDocComment();
                 if (!$doc) continue;
@@ -82,7 +86,7 @@ final class ControllerGateway {
                     continue;
                 }
 
-                $_router->_addRoute(strtoupper($method_type), $route, "{$class_name}@{$method->getName()}");
+                $_router->_addRoute(strtoupper($method_type), $base . $route, "{$class_name}@{$method->getName()}");
             }
         }
     }

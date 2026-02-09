@@ -33,7 +33,9 @@ use Aether\Router\Controller\Controller;
 
 use Aether\Security\UserInputValidatorTrait;
 
-
+/**
+ * [@base] => /api/v1/auth
+ */
 class AuthApiController extends Controller {
     use UserInputValidatorTrait;
 
@@ -41,7 +43,7 @@ class AuthApiController extends Controller {
      * Login API route
      *
      * [@method] => POST
-     * [@route] => /api/v1/auth/login
+     * [@route] => /login
      */
     public function login(){
         $http_params = new HttpParameterUnpacker();
@@ -84,7 +86,7 @@ class AuthApiController extends Controller {
      * Register API route
      *
      * [@method] => POST
-     * [@route] => /api/v1/auth/register
+     * [@route] => /register
      */
     public function register(){
         $http_params = new HttpParameterUnpacker();
@@ -128,7 +130,7 @@ class AuthApiController extends Controller {
      * Logout API route
      *
      * [@method] => POST
-     * [@route] => /api/v1/auth/logout
+     * [@route] => /logout
      */
     public function logout(){
         $gateway = new LogoutAuthGateway();

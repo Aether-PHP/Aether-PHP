@@ -37,17 +37,16 @@ abstract class QueryBuilder {
     /** @var string $_table */
     private string $_table;
 
+
     /** @var string|array $_rows */
     private string|array $_rows;
-
-    /** @var array $_bindings */
-    private array $_bindings = [];
 
     /** @var array $_wheres */
     private array $_wheres = [];
 
     /** @var array $_inserts */
     private array $_inserts = [];
+
 
     /** @var DatabaseDriver $_driver */
     protected DatabaseDriver $_driver;

@@ -105,14 +105,6 @@ class Aether {
             # - Router Gateway : deliver correct controller for each route
             ControllerGateway::_link();
         });
-
-        $db = Aether()->_db()->_mysql("hardware_hub")
-            ->_table("users")
-            ->_select('*')
-            ->_where("id", 1)
-            ->_send();
-
-        _debug($db);
     }
 
     /**
