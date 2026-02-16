@@ -32,7 +32,7 @@ if (!function_exists('Aether')){
 
 }
 
-if (!function_exists('debug')){
+if (!function_exists('_debug')){
 
     /**
      * @param mixed ...$_vars
