@@ -16,13 +16,15 @@
  *
  *  @author: dawnl3ss (Alex') ©2026 — All rights reserved
  *  Source available • Commercial license required for redistribution
- *  → https://github.com/dawnl3ss/Aether-PHP
+ *  → https://github.com/Aether-PHP/Aether-PHP
  *
 */
 declare(strict_types=1);
 
 namespace Aether;
 
+use Aether\Auth\Gateway\LoginAuthGateway;
+use Aether\Auth\User\UserFactory;
 use Aether\Config\ProjectConfig;
 use Aether\Middleware\Pipeline;
 use Aether\Middleware\Stack\AuthMiddleware;
@@ -32,7 +34,10 @@ use Aether\Middleware\Stack\RatelimitMiddleware;
 use Aether\Middleware\Stack\SecurityHeadersMiddleware;
 use Aether\Modules\ModuleFactory;
 use Aether\Router\Controller\ControllerGateway;
+use Aether\Security\Token\CsrfToken;
 use Aether\Service\ServiceManager;
+use Aether\Session\Session;
+use Aether\Session\SessionHandler;
 use App\App;
 
 /*
@@ -40,6 +45,7 @@ use App\App;
  *
  * Wanted a lightweight and fast alternative to other useless-as-hell and huge frameworks.
  * Easy to incorporate in SaaS, Webapps, REST APIs...
+ * -> https://getaether.space
  *
  * Made by : Dawnless (Alexandre VOISIN)
  * → https://www.linkedin.com/in/alexvsn/
@@ -53,6 +59,9 @@ class Aether {
 
     /** @var ServiceManager $_services */
     private static ServiceManager $_services;
+
+    /** @var array $_middlewares */
+    public static array $_middlewares = [];
 
 
     /**
@@ -82,9 +91,7 @@ class Aether {
         ]);
 
         # - Session
-        ini_set('session.cookie_lifetime', 60 * 60 * 24 * 10);
-        ini_set('session.gc_maxlifetime', 60 * 60 * 24 * 10);
-        session_start();
+        SessionHandler::_load();
     }
 
     /**
@@ -96,12 +103,8 @@ class Aether {
         $this->_init();
         App::_init();
 
-        # - Middlewares
-        Pipeline::_run([
-            RatelimitMiddleware::class,
-            CsrfMiddleware::class,
-            SecurityHeadersMiddleware::class
-        ], function (){
+        # - Middlewares Pipeline
+        Pipeline::_run(self::$_middlewares, function (){
             # - Router Gateway : deliver correct controller for each route
             ControllerGateway::_link();
         });

@@ -12,56 +12,62 @@
  *                      The divine lightweight PHP framework
  *                  < 1 Mo • Zero dependencies • Pure PHP 8.3+
  *
- *  Built from scratch. No bloat. POO Embedded.
+ *  Built from scratch. No bloat. OOP Embedded.
  *
- *  @author: dawnl3ss (Alex') ©2025 — All rights reserved
+ *  @author: dawnl3ss (Alex') ©2026 — All rights reserved
  *  Source available • Commercial license required for redistribution
- *  → github.com/dawnl3ss/Aether-PHP
+ *  → https://github.com/Aether-PHP/Aether-PHP
  *
 */
 declare(strict_types=1);
 
-namespace Aether\Session\Data;
+namespace Aether\Auth\User;
 
 
-abstract class SessionData implements SessionDataInterface {
+class UserFactory {
 
-
-    /** @var array $_raw */
-    protected array $_raw = [];
-
-    public function __construct(array $raw = null){
-        if (is_array($raw))
-            $this->_raw = $raw;
-    }
-
+    public const SESSION_KEY = 'user';
 
     /**
-     * @param string $key
+     * Check if a user is logged in.
      *
-     * @return mixed
+     * @param array $_session
+     *
+     * @return bool
      */
-    public function _get(string $key) : mixed {
-        if ($this->_is($key))
-            return $this->_raw[$key];
+    public static function _isLoggedIn() : bool {
+        if (!Aether()->_session()->_get()->_valueExist(self::SESSION_KEY))
+            return false;
+
+        return !is_null(self::_fromSession());
+    }
+
+    /**
+     * @return ?UserInstance
+     */
+    public static function _fromSession() : ?UserInstance {
+        if (!Aether()->_session()->_get()->_valueExist(self::SESSION_KEY))
+            return null;
+
+        $frmSession = Aether()->_session()->_get()->_getValue(self::SESSION_KEY);
+        return new UserInstance($frmSession["id"], $frmSession["username"], $frmSession["email"], $frmSession["perms"]);
+    }
+
+    /**
+     * @param mixed $_val
+     *
+     * @return array|null
+     */
+    public static function _toSession(mixed $_val) : ?array {
+        if ($_val instanceof UserInstance)
+            return array(
+                "id" => $_val->_getUid(),
+                "username" => $_val->_getUsername(),
+                "email" => $_val->_getEmail(),
+                "perms" => json_encode($_val->_getPerms())
+            );
 
         return null;
     }
 
-    /**
-     * @param string $key
-     * @param $value
-     */
-    public function _set(string $key, $value) : void {
-        $this->_raw[$key] = $value;
-    }
-
-    /**
-     * @param string $key
-     *
-     * @return bool
-     */
-    public function _is(string $key) : bool {
-        return isset($this->_raw[$key]);
-    }
 }

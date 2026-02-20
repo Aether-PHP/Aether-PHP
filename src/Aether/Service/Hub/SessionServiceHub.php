@@ -23,30 +23,24 @@ declare(strict_types=1);
 
 namespace Aether\Service\Hub;
 
-use Aether\Auth\User\UserInstance;
-use Aether\Session\SessionInstance;
+use Aether\Auth\AuthHandler;
+use Aether\Session\Session;
+use Aether\Session\SessionHandler;
 
 
 final class SessionServiceHub {
 
     /**
-     * @return bool
+     * @return Session
      */
-    public function _isLoggedIn() : bool {
-        return UserInstance::_isLoggedIn();
+    public function _get() : Session {
+        return SessionHandler::_getSession();
     }
 
     /**
-     * @return null|UserInstance
+     * @return AuthHandler
      */
-    public function _getUser() : ?UserInstance {
-        return $this->_get()->_getUser();
-    }
-
-    /**
-     * @return SessionInstance
-     */
-    public function _get() : SessionInstance {
-        return SessionInstance::_get();
+    public function _auth() : AuthHandler {
+        return new AuthHandler();
     }
 }

@@ -24,10 +24,10 @@ declare(strict_types=1);
 namespace Aether\Auth\Gateway;
 
 use Aether\Auth\AuthInstance;
+use Aether\Auth\User\UserFactory;
 use Aether\Auth\User\UserInstance;
 use Aether\Config\ProjectConfig;
 use Aether\Security\PasswordHashingTrait;
-use Aether\Session\SessionInstance;
 
 
 class LoginAuthGateway extends AuthInstance implements AuthGatewayEventInterface {
@@ -43,10 +43,14 @@ class LoginAuthGateway extends AuthInstance implements AuthGatewayEventInterface
      * @return bool
      */
     public function _tryAuth() : bool {
-        if (!$this->_dbconn->_exist(ProjectConfig::_get("AUTH_TABLE_GATEWAY"), [ "email" => $this->_email ]))
+        if (!$this->_dbconn->_table($_ENV["AUTH_TABLE_GATEWAY"])->_exist()->_where("email", $this->_email)->_send())
             return $this->_setStatus($this->_onFailure(), false);
 
-        $_data = $this->_dbconn->_select(ProjectConfig::_get("AUTH_TABLE_GATEWAY"), '*', [ "email" => $this->_email ])[0];
+        $_data = Aether()->_db()->_mysql($_ENV["AUTH_DATABASE_GATEWAY"])
+            ->_table($_ENV["AUTH_TABLE_GATEWAY"])
+            ->_select('*')
+            ->_where("email", $this->_email)
+            ->_send()[0];
 
         if (!$this->_checkPassword($this->_password, $_data["password_hash"]))
             return $this->_setStatus($this->_onFailure(), false);
@@ -69,10 +73,9 @@ class LoginAuthGateway extends AuthInstance implements AuthGatewayEventInterface
             $user_db["perms"]
         );
 
-        $serialized = serialize($user);
-        $signature = hash_hmac('sha256', $serialized, $_ENV["SESSION_HMAC"]);
-
-        $_SESSION["user"] = $serialized . '::' . $signature;
+        Aether()->_session()->_get()->_setValue(
+            UserFactory::SESSION_KEY, UserFactory::_toSession($user)
+        );
 
         return "user successfullly logged in.";
     }

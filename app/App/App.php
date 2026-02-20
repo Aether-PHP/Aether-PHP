@@ -23,6 +23,10 @@ declare(strict_types=1);
 
 namespace App;
 
+use Aether\Aether;
+use Aether\Middleware\Stack\CsrfMiddleware;
+use Aether\Middleware\Stack\RatelimitMiddleware;
+use Aether\Middleware\Stack\SecurityHeadersMiddleware;
 use Aether\Modules\I18n\I18N;
 use Aether\Modules\ModuleFactory;
 
@@ -32,8 +36,24 @@ use Aether\Modules\ModuleFactory;
  */
 class App {
 
+    /** @var string[] $_middlewares */
+    private static $_middlewares = [
+        RatelimitMiddleware::class,
+        CsrfMiddleware::class,
+        SecurityHeadersMiddleware::class
+    ];
+
+    /** @var array $_modules */
+    private static array $_modules = [
+        I18N::class
+    ];
+
+
     public static function _init() : void {
         # - Modules load
-        ModuleFactory::_load([ I18N::class ]);
+        ModuleFactory::_load(self::$_modules);
+
+        # - Middlewares load
+        Aether::$_middlewares = self::$_middlewares;
     }
 }

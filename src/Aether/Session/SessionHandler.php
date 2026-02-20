@@ -12,39 +12,41 @@
  *                      The divine lightweight PHP framework
  *                  < 1 Mo • Zero dependencies • Pure PHP 8.3+
  *
- *  Built from scratch. No bloat. POO Embedded.
+ *  Built from scratch. No bloat. OOP Embedded.
  *
- *  @author: dawnl3ss (Alex') ©2025 — All rights reserved
+ *  @author: dawnl3ss (Alex') ©2026 — All rights reserved
  *  Source available • Commercial license required for redistribution
- *  → github.com/dawnl3ss/Aether-PHP
+ *  → https://github.com/Aether-PHP/Aether-PHP
  *
 */
 declare(strict_types=1);
 
-namespace Aether\Session\Data;
+namespace Aether\Session;
+
+use Aether\Session\Security\SessionSecurityLayer;
 
 
-interface SessionDataInterface {
+final class SessionHandler extends SessionSecurityLayer {
+
+    /** @var ?Session $_session */
+    private static ?Session $_session = null;
 
 
     /**
-     * @param string $key
-     *
-     * @return mixed
+     * @return void
      */
-    public function _get(string $key) : mixed;
+    public static function _load() : void {
+        ini_set('session.cookie_lifetime', 60 * 60 * 24 * 10);
+        ini_set('session.gc_maxlifetime', 60 * 60 * 24 * 10);
+        session_start();
+
+        if (is_null(self::$_session))
+            self::$_session = new Session();
+
+    }
 
     /**
-     * @param string $key
-     *
-     * @param $value
+     * @return Session|null
      */
-    public function _set(string $key, $value) : void;
-
-    /**
-     * @param string $key
-     *
-     * @return bool
-     */
-    public function _is(string $key) : bool;
+    public static function _getSession() : ?Session { return self::$_session; }
 }

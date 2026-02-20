@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace Aether\Auth\Gateway;
 
 use Aether\Auth\AuthInstance;
+use Aether\Auth\User\UserFactory;
 
 
 class LogoutAuthGateway extends AuthInstance implements AuthGatewayEventInterface {
@@ -38,7 +39,7 @@ class LogoutAuthGateway extends AuthInstance implements AuthGatewayEventInterfac
      * @return bool
      */
     public function _tryAuth() : bool {
-        if (!isset($_SESSION["user"]))
+        if (!Aether()->_session()->_auth()->_isLoggedIn())
             return $this->_setStatus($this->_onFailure(), false);
 
         return $this->_setStatus($this->_onSuccess([]), true);
@@ -50,7 +51,7 @@ class LogoutAuthGateway extends AuthInstance implements AuthGatewayEventInterfac
      * @return string
      */
     public function _onSuccess(array $_data) : string {
-        unset($_SESSION["user"]);
+        Aether()->_session()->_get()->_removeValue(UserFactory::SESSION_KEY);
         return "user successfullly logged out.";
     }
 

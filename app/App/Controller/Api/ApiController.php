@@ -74,7 +74,6 @@ class ApiController extends Controller {
         ], 200)->_send();
     }
 
-
     /**
      * Test API route
      *

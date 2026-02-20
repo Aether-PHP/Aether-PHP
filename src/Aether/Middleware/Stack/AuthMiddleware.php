@@ -35,7 +35,7 @@ class AuthMiddleware implements MiddlewareInterface {
      * @param callable $_next
      */
     public function _handle(callable $_next){
-        if (!Aether()->_session()->_isLoggedIn()){
+        if (!Aether()->_session()->_auth()->_isLoggedIn()){
             http_response_code(403);
 
             if (str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json')){

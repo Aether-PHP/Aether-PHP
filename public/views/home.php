@@ -1,14 +1,8 @@
 <?php
 
 
-echo __("welcome", [], "fr_FR");
+echo __("welcome");
 
 # - Data extracted from view dispatcher
 /** @var string $loggedin */
-echo "<pre>";
-var_dump($loggedin);
-/** @var string $sessid */
-var_dump($sessid);
-
-
-echo "</pre>";
+_debug($loggedin);

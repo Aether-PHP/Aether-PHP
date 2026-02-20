@@ -12,11 +12,11 @@
  *                      The divine lightweight PHP framework
  *                  < 1 Mo • Zero dependencies • Pure PHP 8.3+
  *
- *  Built from scratch. No bloat. POO Embedded.
+ *  Built from scratch. No bloat. OOP Embedded.
  *
- *  @author: dawnl3ss (Alex') ©2025 — All rights reserved
+ *  @author: dawnl3ss (Alex') ©2026 — All rights reserved
  *  Source available • Commercial license required for redistribution
- *  → github.com/dawnl3ss/Aether-PHP
+ *  → https://github.com/Aether-PHP/Aether-PHP
  *
 */
 declare(strict_types=1);
@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace Aether\Auth\Gateway;
 
 use Aether\Auth\AuthInstance;
+use Aether\Auth\User\UserFactory;
 use Aether\Auth\User\UserInstance;
 use Aether\Config\ProjectConfig;
 use Aether\Security\PasswordHashingTrait;
@@ -47,7 +48,7 @@ class RegisterAuthGateway extends AuthInstance implements AuthGatewayEventInterf
      * @return bool
      */
     public function _tryAuth() : bool {
-        if ($this->_dbconn->_exist(ProjectConfig::_get("AUTH_TABLE_GATEWAY"), [ "email" => $this->_email ]))
+        if ($this->_dbconn->_table($_ENV["AUTH_TABLE_GATEWAY"])->_exist()->_where("email", $this->_email))
             return $this->_setStatus($this->_onFailure(), false);
 
         return $this->_setStatus($this->_onSuccess([]), true);
@@ -60,13 +61,17 @@ class RegisterAuthGateway extends AuthInstance implements AuthGatewayEventInterf
      * @return string
      */
     public function _onSuccess(array $_data) : string {
-        $this->_dbconn->_insert(ProjectConfig::_get("AUTH_TABLE_GATEWAY"), [
-            "username" => $this->_username,
-            "email" => $this->_email,
-            "password_hash" => $this->_hashPassword($this->_password),
-            "perms" => "[]"
-        ]);
-        $user_db = $this->_dbconn->_select(ProjectConfig::_get("AUTH_TABLE_GATEWAY"), '*', [ "email" => $this->_email ])[0];
+        $this->_dbconn->_table($_ENV["AUTH_TABLE_GATEWAY"])
+            ->_insert("username", $this->_username)
+            ->_insert("email", $this->_email)
+            ->_insert("password", $this->_hashPassword($this->_password))
+            ->_insert("perms", "[]")
+            ->_send();
+
+        $user_db = $this->_dbconn->_table($_ENV["AUTH_TABLE_GATEWAY"])
+            ->_select('*')
+            ->_where("email", $this->_email)
+            ->_send()[0];
 
         $user = new UserInstance(
             $user_db["uid"],
@@ -75,10 +80,9 @@ class RegisterAuthGateway extends AuthInstance implements AuthGatewayEventInterf
             $user_db["perms"]
         );
 
-        $serialized = serialize($user);
-        $signature = hash_hmac('sha256', $serialized, $_ENV["SESSION_HMAC"]);
-
-        $_SESSION["user"] = $serialized . '::' . $signature;
+        Aether()->_session()->_get()->_setValue(
+            UserFactory::SESSION_KEY, UserFactory::_toSession($user)
+        );
         return "user successfullly signed up.";
     }
 

@@ -12,11 +12,11 @@
  *                      The divine lightweight PHP framework
  *                  < 1 Mo • Zero dependencies • Pure PHP 8.3+
  *
- *  Built from scratch. No bloat. POO Embedded.
+ *  Built from scratch. No bloat. OOP Embedded.
  *
- *  @author: dawnl3ss (Alex') ©2025 — All rights reserved
+ *  @author: dawnl3ss (Alex') ©2026 — All rights reserved
  *  Source available • Commercial license required for redistribution
- *  → github.com/dawnl3ss/Aether-PHP
+ *  → https://github.com/Aether-PHP/Aether-PHP
  *
 */
 declare(strict_types=1);
@@ -26,7 +26,6 @@ namespace Aether\Auth\User;
 use Aether\Auth\User\Permission\PermissionEnum;
 use Aether\Auth\User\Permission\PermissionLayer;
 use Aether\Security\UserInputValidatorTrait;
-use Aether\Session\SessionInstance;
 
 
 class UserInstance extends PermissionLayer implements UserInterface {
@@ -47,30 +46,6 @@ class UserInstance extends PermissionLayer implements UserInterface {
         $this->_username = $username;
         $this->_email = $email;
         $this->_perms = $this->_serialize($_perms);
-    }
-
-    /**
-     * Check if a user is logged in.
-     *
-     * @param array $_session
-     *
-     * @return bool
-     */
-    public static function _isLoggedIn() : bool {
-        if (!isset($_SESSION["user"]))
-            return false;
-
-        $parts = explode('::', $_SESSION["user"], 2);
-
-        if (count($parts) !== 2)
-            return false;
-
-        [$serialized, $signature] = $parts;
-
-        return hash_equals(
-            $signature,
-            hash_hmac('sha256', $serialized, $_ENV["SESSION_HMAC"])
-        );
     }
 
     /**
@@ -140,5 +115,5 @@ class UserInstance extends PermissionLayer implements UserInterface {
     /**
      * Update User's instance in session
      */
-    private function _update(){ SessionInstance::_addHttpSess("user", $this); }
+    private function _update(){ Aether()->_session()->_get()->_setValue("user", UserFactory::_toSession($this)); }
 }

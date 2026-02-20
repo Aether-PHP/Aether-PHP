@@ -89,7 +89,7 @@ abstract class QueryBuilder {
      * @return self
      */
     public function _where(string $_key, mixed $_value) : QueryBuilder {
-        if (!in_array($this->_type, ["select", "update", "delete", "where", null]))
+        if (!in_array($this->_type, ["select", "update", "delete", "where", null, "exist"]))
             return $this;
 
         $this->_wheres[$_key] = $_value;
@@ -158,6 +158,17 @@ abstract class QueryBuilder {
     /**
      * @return self
      */
+    public function _exist() : QueryBuilder {
+        if ($this->_type !== null && $this->_type !== "exist")
+            return $this;
+
+        $this->_type = "exist";
+        return $this;
+    }
+
+    /**
+     * @return self
+     */
     public function _delete() : QueryBuilder {
         if ($this->_type !== null && $this->_type !== "delete")
             return $this;
@@ -181,6 +192,7 @@ abstract class QueryBuilder {
      * @return mixed
      */
     public function _send() : mixed {
+
         # - SELECT
         if ($this->_type === "select"){
             $query = "SELECT " . implode(", ", $this->_rows) . " FROM " . $this->_table;
@@ -199,7 +211,7 @@ abstract class QueryBuilder {
                 }
                 $query .= " WHERE " . implode(" AND ", $wheres);
             }
-
+            $this->_type = null;
             return $this->_driver->_query($query, $this->_wheres);
         }
 
@@ -212,6 +224,7 @@ abstract class QueryBuilder {
             $query .= implode(',', array_keys($this->_inserts)) . ") VALUES (:";
             $query .= implode(", :", array_keys($this->_inserts)) . ")";
 
+            $this->_type = null;
             return $this->_driver->_query($query, $this->_inserts);
         }
 
@@ -247,6 +260,7 @@ abstract class QueryBuilder {
                 $params[$k] = $v;
             }
 
+            $this->_type = null;
             return $this->_driver->_query($query, $params);
         }
 
@@ -263,13 +277,34 @@ abstract class QueryBuilder {
                 $query .= " WHERE " . implode(" AND ", $wheres);
             }
 
+            $this->_type = null;
             return $this->_driver->_query($query, $this->_wheres);
         }
 
         # - DROP TABLE
         else if ($this->_type === "drop"){
             $query = "DROP TABLE " . $this->_table;
+            $this->_type = null;
             return $this->_driver->_query($query, []);
+        }
+
+        # - EXIST in TABLE
+        else if ($this->_type === "exist"){
+            $query = "SELECT 1 FROM " . $this->_table;
+
+            if ($this->_wheres !== []){
+                $wheres = [];
+
+                foreach ($this->_wheres as $key => $val){
+                    $wheres[] = "{$key} = :{$key}";
+                }
+                $query .= " WHERE " . implode(" AND ", $wheres);
+            }
+
+            $query .= " LIMIT 1";
+            $result = $this->_driver->_query($query, $this->_wheres);
+            $this->_type = null;
+            return !empty($result);
         }
 
         return null;

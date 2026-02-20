@@ -26,6 +26,7 @@ namespace App\Controller\Api;
 use Aether\Auth\Gateway\LoginAuthGateway;
 use Aether\Auth\Gateway\LogoutAuthGateway;
 use Aether\Auth\Gateway\RegisterAuthGateway;
+use Aether\Auth\User\UserFactory;
 use Aether\Auth\User\UserInstance;
 use Aether\Http\HttpParameterUnpacker;
 use Aether\Http\Response\Format\HttpResponseFormatEnum;
@@ -58,7 +59,7 @@ class AuthApiController extends Controller {
             ], 404)->_send();
         }
 
-        if (UserInstance::_isLoggedIn()){
+        if (UserFactory::_isLoggedIn()){
             return Aether()->_http()->_response()->_json([
                 "status" => "error",
                 "message" => "user aldready logged-in."
@@ -102,7 +103,7 @@ class AuthApiController extends Controller {
             ], 404)->_send();
         }
 
-        if (UserInstance::_isLoggedIn()){
+        if (UserFactory::_isLoggedIn()){
             return Aether()->_http()->_response()->_json([
                 "status" => "error",
                 "message" => "Can not register while being already logged in."

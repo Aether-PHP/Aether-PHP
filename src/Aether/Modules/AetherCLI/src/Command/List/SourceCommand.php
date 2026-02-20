@@ -68,7 +68,7 @@ class SourceCommand extends Command {
 
             echo CliColorEnum::FG_BRIGHT_GREEN->_paint("[SourceCommand] - Successfully imported source file '{$fullClass}'.") . PHP_EOL;
         } else if ($_prototype === "db"){
-
+            echo CliColorEnum::FG_BLUE->_paint("[SourceCommand] - Not implemented yet.") . PHP_EOL;
         }
 
         return true;

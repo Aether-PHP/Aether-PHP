@@ -34,8 +34,7 @@ class AppController extends Controller {
      */
     public function home(){
         $this->_render("home", [
-            "loggedin" => Aether()->_session()->_isLoggedIn(),
-            "sessid" => Aether()->_session()->_get()->_getMetadata()->_getSessId(),
+            "loggedin" => Aether()->_session()->_auth()->_isLoggedIn(),
         ]);
     }
 

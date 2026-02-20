@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace Aether\Auth;
 
-use Aether\Config\ProjectConfig;
 use Aether\Database\DatabaseWrapper;
 use Aether\Database\Drivers\DatabaseDriverEnum;
 
@@ -46,7 +45,7 @@ abstract class AuthInstance implements AuthInterface {
         $this->_email = $email;
         $this->_password = $password;
         $this->_status = "";
-        $this->_dbconn = new DatabaseWrapper(ProjectConfig::_get("AUTH_DATABASE_GATEWAY"), DatabaseDriverEnum::MYSQL);
+        $this->_dbconn = Aether()->_db()->_mysql($_ENV["AUTH_DATABASE_GATEWAY"]);
     }
 
     /**
