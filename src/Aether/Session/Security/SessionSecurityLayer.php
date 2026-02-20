@@ -38,7 +38,7 @@ abstract class SessionSecurityLayer {
             return null;
 
         $b64decoded = base64_decode($_SESSION[$_key]);
-        [$rawData, $hmacSignStr] = explode(':::', $b64decoded) + [1 => ''];
+        [$rawData, $hmacSignStr] = explode(':::', $b64decoded, 2) + [1 => ''];
 
         if (!HmacSignature::_hmacEquals($hmacSignStr, $rawData))
             return null;
