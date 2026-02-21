@@ -34,7 +34,19 @@ class Controller {
      * @param string $_view
      * @param array $_params
      */
-    protected function _render(string $_view, array $_params = []) {
+    protected function _render(string $_view, array $_params = []) : void {
         ViewInstance::_make($_view, $_params);
+    }
+
+    /**
+     * Redirect safely
+     *
+     * @param string $_url
+     *
+     * @return void
+     */
+    protected function _redirect(string $_url) : void {
+        header("Location: " . $_url, true, 302);
+        exit;
     }
 }
