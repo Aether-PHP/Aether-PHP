@@ -51,6 +51,9 @@ abstract class QueryBuilder {
     /** @var array $_joins */
     private array $_joins = [];
 
+    /** @var string $_countCol */
+    private string $_countCol = "*";
+
     /** @var DatabaseDriver $_driver */
     protected DatabaseDriver $_driver;
 
@@ -89,7 +92,7 @@ abstract class QueryBuilder {
      * @return self
      */
     public function _where(string $_key, mixed $_value) : QueryBuilder {
-        if (!in_array($this->_type, ["select", "update", "delete", "where", null, "exist"]))
+        if (!in_array($this->_type, ["select", "update", "delete", "where", null, "exist", "count"]))
             return $this;
 
         $this->_wheres[$_key] = $_value;
@@ -189,6 +192,59 @@ abstract class QueryBuilder {
     }
 
     /**
+     * @param string $_col
+     *
+     * @return self
+     */
+    public function _count(string $_col = "*") : QueryBuilder {
+        if ($this->_type !== null && $this->_type !== "count")
+            return $this;
+
+        $this->_type = "count";
+        $this->_countCol = $_col;
+        return $this;
+    }
+
+    /**
+     * Sanitize a WHERE key to a valid PDO named placeholder
+     *
+     * @param string $_key
+     *
+     * @return string
+     */
+    private function _placeholder(string $_key) : string {
+        return str_replace(['.', ' '], ['_', '_'], $_key);
+    }
+
+    /**
+     * Build the WHERE clause string and the corresponding params array
+     *
+     * @return array
+     */
+    private function _buildWheres() : array {
+        $wheres = [];
+        $params = [];
+
+        foreach ($this->_wheres as $key => $val){
+            $placeholder = $this->_placeholder($key);
+            $wheres[] = "{$key} = :{$placeholder}";
+            $params[$placeholder] = $val;
+        }
+
+        $clause = !empty($wheres) ? " WHERE " . implode(" AND ", $wheres) : "";
+        return ['clause' => $clause, 'params' => $params];
+    }
+
+    private function _reset() : void {
+        $this->_type = null;
+        $this->_wheres = [];
+        $this->_inserts = [];
+        $this->_sets = [];
+        $this->_joins = [];
+        $this->_countCol = "*";
+    }
+
+    /**
      * @return mixed
      */
     public function _send() : mixed {
@@ -203,35 +259,36 @@ abstract class QueryBuilder {
             }
 
             # - WHERE
-            if ($this->_wheres !== []){
-                $wheres = [];
+            ['clause' => $clause, 'params' => $params] = $this->_buildWheres();
+            $query .= $clause;
 
-                foreach ($this->_wheres as $key => $val){
-                    $wheres[] = "{$key} = :{$key}";
-                }
-                $query .= " WHERE " . implode(" AND ", $wheres);
-            }
-            $this->_type = null;
-            return $this->_driver->_query($query, $this->_wheres);
+            $result = $this->_driver->_query($query, $params);
+            $this->_reset();
+            return $result;
         }
 
         # - INSERT
         else if ($this->_type === "insert"){
-            if ($this->_inserts === [])
+            if ($this->_inserts === []){
+                $this->_reset();
                 return null;
+            }
 
             $query = "INSERT INTO " . $this->_table . " (";
             $query .= implode(',', array_keys($this->_inserts)) . ") VALUES (:";
             $query .= implode(", :", array_keys($this->_inserts)) . ")";
 
-            $this->_type = null;
-            return $this->_driver->_query($query, $this->_inserts);
+            $result = $this->_driver->_query($query, $this->_inserts);
+            $this->_reset();
+            return $result;
         }
 
         # - UPDATE
         else if ($this->_type === "update"){
-            if ($this->_sets === [])
+            if ($this->_sets === []){
+                $this->_reset();
                 return null;
+            }
 
             $query = "UPDATE " . $this->_table . " SET ";
             $sets = [];
@@ -242,71 +299,69 @@ abstract class QueryBuilder {
             $query .= implode(", ", $sets);
 
             # - WHERE
-            if ($this->_wheres !== []){
-                $wheres = [];
-
-                foreach ($this->_wheres as $key => $val){
-                    $wheres[] = "{$key} = :{$key}";
-                }
-                $query .= " WHERE " . implode(" AND ", $wheres);
-            }
+            ['clause' => $clause, 'params' => $whereParams] = $this->_buildWheres();
+            $query .= $clause;
 
             $params = [];
-
             foreach ($this->_sets as $k => $v){
                 $params["set_{$k}"] = $v;
             }
-            foreach ($this->_wheres as $k => $v){
+            foreach ($whereParams as $k => $v){
                 $params[$k] = $v;
             }
 
-            $this->_type = null;
-            return $this->_driver->_query($query, $params);
+            $result = $this->_driver->_query($query, $params);
+            $this->_reset();
+            return $result;
         }
 
         # - DELETE
         else if ($this->_type === "delete"){
             $query = "DELETE FROM " . $this->_table;
 
-            if ($this->_wheres !== []) {
-                $wheres = [];
+            ['clause' => $clause, 'params' => $params] = $this->_buildWheres();
+            $query .= $clause;
 
-                foreach ($this->_wheres as $key => $val){
-                    $wheres[] = "{$key} = :{$key}";
-                }
-                $query .= " WHERE " . implode(" AND ", $wheres);
-            }
-
-            $this->_type = null;
-            return $this->_driver->_query($query, $this->_wheres);
+            $result = $this->_driver->_query($query, $params);
+            $this->_reset();
+            return $result;
         }
 
         # - DROP TABLE
         else if ($this->_type === "drop"){
             $query = "DROP TABLE " . $this->_table;
-            $this->_type = null;
-            return $this->_driver->_query($query, []);
+
+            $result = $this->_driver->_query($query, []);
+            $this->_reset();
+            return $result;
         }
 
         # - EXIST in TABLE
         else if ($this->_type === "exist"){
             $query = "SELECT 1 FROM " . $this->_table;
 
-            if ($this->_wheres !== []){
-                $wheres = [];
-
-                foreach ($this->_wheres as $key => $val){
-                    $wheres[] = "{$key} = :{$key}";
-                }
-                $query .= " WHERE " . implode(" AND ", $wheres);
-            }
-
+            ['clause' => $clause, 'params' => $params] = $this->_buildWheres();
+            $query .= $clause;
             $query .= " LIMIT 1";
-            $result = $this->_driver->_query($query, $this->_wheres);
-            $this->_type = null;
+
+            $result = $this->_driver->_query($query, $params);
+            $this->_reset();
             return !empty($result);
         }
 
+        # - COUNT
+        else if ($this->_type === "count"){
+            $query = "SELECT COUNT({$this->_countCol}) as _count FROM " . $this->_table;
+
+            ['clause' => $clause, 'params' => $params] = $this->_buildWheres();
+            $query .= $clause;
+
+            $result = $this->_driver->_query($query, $params);
+            $this->_reset();
+            return !empty($result) ? (int) $result[0]['_count'] : 0;
+        }
+
+        $this->_reset();
         return null;
     }
 }
