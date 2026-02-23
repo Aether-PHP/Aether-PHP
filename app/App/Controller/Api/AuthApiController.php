@@ -26,8 +26,6 @@ namespace App\Controller\Api;
 use Aether\Auth\Gateway\LoginAuthGateway;
 use Aether\Auth\Gateway\LogoutAuthGateway;
 use Aether\Auth\Gateway\RegisterAuthGateway;
-use Aether\Auth\User\UserFactory;
-use Aether\Auth\User\UserInstance;
 use Aether\Http\HttpParameterTypeEnum;
 use Aether\Router\Controller\Controller;
 

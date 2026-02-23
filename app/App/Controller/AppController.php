@@ -33,9 +33,7 @@ class AppController extends Controller {
      * [@route] => /
      */
     public function home(){
-        $this->_render("home", [
-            "loggedin" => Aether()->_session()->_auth()->_isLoggedIn(),
-        ]);
+        $this->_render("home");
     }
 
 }
