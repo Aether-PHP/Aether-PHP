@@ -54,6 +54,12 @@ abstract class QueryBuilder {
     /** @var string $_countCol */
     private string $_countCol = "*";
 
+    /** @var ?string $_orderBy */
+    private ?string $_orderBy = null;
+
+    /** @var string $_orderByOrd */
+    private ?string $_orderByOrd;
+
     /** @var DatabaseDriver $_driver */
     protected DatabaseDriver $_driver;
 
@@ -206,6 +212,24 @@ abstract class QueryBuilder {
     }
 
     /**
+     * @param string $_field
+     * @param string $_order
+     *
+     * @return self
+     */
+    public function _orderBy(string $_field, string $_order = "ASC") : QueryBuilder {
+        if ($this->_type !== "select")
+            return $this;
+
+        if (!in_array(strtoupper($_order), [ "ASC", "DESC" ]))
+            return $this;
+
+        $this->_orderBy = $_field;
+        $this->_orderByOrd = $_order;
+        return $this;
+    }
+
+    /**
      * Sanitize a WHERE key to a valid PDO named placeholder
      *
      * @param string $_key
@@ -242,6 +266,8 @@ abstract class QueryBuilder {
         $this->_sets = [];
         $this->_joins = [];
         $this->_countCol = "*";
+        $this->_orderBy = null;
+        $this->_orderByOrd = null;
     }
 
     /**
@@ -261,6 +287,10 @@ abstract class QueryBuilder {
             # - WHERE
             ['clause' => $clause, 'params' => $params] = $this->_buildWheres();
             $query .= $clause;
+
+            # - ORDERBY
+            if (!is_null($this->_orderBy))
+                $query .= " ORDER BY {$this->_orderBy} {$this->_orderByOrd}";
 
             $result = $this->_driver->_query($query, $params);
             $this->_reset();
