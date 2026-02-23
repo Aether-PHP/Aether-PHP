@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace Aether\Service\Hub;
 
+use Aether\Http\HttpParameterTypeEnum;
+use Aether\Http\HttpParameterUnpacker;
 use Aether\Http\Methods\HttpMethod;
 use Aether\Http\Methods\HttpMethodEnum;
 use Aether\Http\Request\HttpRequest;
@@ -56,5 +58,14 @@ final class HttpServiceHub {
      */
     public function _method(HttpMethodEnum $_method) : HttpMethod {
         return $_method->_make();
+    }
+
+    /**
+     * @param HttpParameterTypeEnum $_parameterType
+     *
+     * @return HttpParameterUnpacker
+     */
+    public function _parameters(HttpParameterTypeEnum $_parameterType) : HttpParameterUnpacker {
+        return $_parameterType->_make();
     }
 }

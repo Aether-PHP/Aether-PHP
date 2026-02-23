@@ -28,8 +28,7 @@ use Aether\Auth\Gateway\LogoutAuthGateway;
 use Aether\Auth\Gateway\RegisterAuthGateway;
 use Aether\Auth\User\UserFactory;
 use Aether\Auth\User\UserInstance;
-use Aether\Http\HttpParameterUnpacker;
-use Aether\Http\Response\Format\HttpResponseFormatEnum;
+use Aether\Http\HttpParameterTypeEnum;
 use Aether\Router\Controller\Controller;
 
 use Aether\Security\UserInputValidatorTrait;
@@ -47,7 +46,7 @@ class AuthApiController extends Controller {
      * [@route] => /login
      */
     public function login(){
-        $http_params = new HttpParameterUnpacker();
+        $http_params = Aether()->_http()->_parameters(HttpParameterTypeEnum::PHP_INPUT);
 
         $email = $http_params->_getAttribute("email") == false ? "" : $http_params->_getAttribute("email");
         $password = $http_params->_getAttribute("password") == false ? "" : $http_params->_getAttribute("password");
@@ -59,7 +58,7 @@ class AuthApiController extends Controller {
             ], 404)->_send();
         }
 
-        if (UserFactory::_isLoggedIn()){
+        if (Aether()->_session()->_auth()->_isLoggedIn()){
             return Aether()->_http()->_response()->_json([
                 "status" => "error",
                 "message" => "user aldready logged-in."
@@ -90,7 +89,7 @@ class AuthApiController extends Controller {
      * [@route] => /register
      */
     public function register(){
-        $http_params = new HttpParameterUnpacker();
+        $http_params = Aether()->_http()->_parameters(HttpParameterTypeEnum::PHP_INPUT);
 
         $username = $this->_sanitizeInput($http_params->_getAttribute("username") == false ? "" : $http_params->_getAttribute("username"));
         $email = $http_params->_getAttribute("email") == false ? "" : $http_params->_getAttribute("email");
@@ -103,7 +102,7 @@ class AuthApiController extends Controller {
             ], 404)->_send();
         }
 
-        if (UserFactory::_isLoggedIn()){
+        if (Aether()->_session()->_auth()->_isLoggedIn()){
             return Aether()->_http()->_response()->_json([
                 "status" => "error",
                 "message" => "Can not register while being already logged in."

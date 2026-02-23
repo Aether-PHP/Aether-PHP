@@ -12,11 +12,11 @@
  *                      The divine lightweight PHP framework
  *                  < 1 Mo • Zero dependencies • Pure PHP 8.3+
  *
- *  Built from scratch. No bloat. POO Embedded.
+ *  Built from scratch. No bloat. OOP Embedded.
  *
- *  @author: dawnl3ss (Alex') ©2025 — All rights reserved
+ *  @author: dawnl3ss (Alex') ©2026 — All rights reserved
  *  Source available • Commercial license required for redistribution
- *  → github.com/dawnl3ss/Aether-PHP
+ *  → https://github.com/Aether-PHP/Aether-PHP
  *
 */
 declare(strict_types=1);
@@ -31,10 +31,13 @@ class HttpParameterUnpacker {
 
 
     /**
-     * The goal here is to extract data from php://input stream to translate it to class object.
+     * The goal here is to extract data from streams to translate it to accessible array.
      */
-    public function __construct(){
-        $this->_decoded = json_decode(file_get_contents('php://input'), true);
+    public function __construct(HttpParameterTypeEnum $_type){
+        if ($_type === HttpParameterTypeEnum::PHP_INPUT)
+            $this->_decoded = json_decode(file_get_contents('php://input'), true);
+        elseif ($_type === HttpParameterTypeEnum::FORM_INPUT)
+            $this->_decoded = $_POST;
     }
 
     /**
