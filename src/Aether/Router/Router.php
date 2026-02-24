@@ -69,21 +69,17 @@ final class Router implements RouterInterface {
 
                 # - Case 1 : URI == route - ex: uri:(/test) route:(/test)
                 if (trim($req_uri, '/') == trim($route->_getRoute(), '/')){
-                    header('HTTP/1.1 200 OK', true, 200);
+                    header('HTTP/2 200 OK', true, 200);
                     $this->_execute($route->_getCallable());
                     return true;
                 }
 
-
-                # - Case 2 : URI contains params - only for HTTP GET
-                if ($req_method !== HttpMethodEnum::GET->value)
-                    continue;
-
+                # - Case 2 : URI contains params
                 $path = preg_replace('#{([\w])+}#', '([^/]+)', trim($route->_getRoute(), '/'));
                 $path_to_match = "#^$path$#";
 
                 if (preg_match_all($path_to_match, trim($req_uri, '/'), $params)){
-                    header('HTTP/1.1 200 OK', true, 200);
+                    header('HTTP/2 200 OK', true, 200);
                     $this->_execute($route->_getCallable(), $params);
                     return true;
                 }

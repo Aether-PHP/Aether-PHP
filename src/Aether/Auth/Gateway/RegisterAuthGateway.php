@@ -64,7 +64,7 @@ class RegisterAuthGateway extends AuthInstance implements AuthGatewayEventInterf
         $this->_dbconn->_table($_ENV["AUTH_TABLE_GATEWAY"])
             ->_insert("username", $this->_username)
             ->_insert("email", $this->_email)
-            ->_insert("password", $this->_hashPassword($this->_password))
+            ->_insert("password_hash", $this->_hashPassword($this->_password))
             ->_insert("perms", "[]")
             ->_send();
 

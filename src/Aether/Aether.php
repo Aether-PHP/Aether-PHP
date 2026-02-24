@@ -23,8 +23,6 @@ declare(strict_types=1);
 
 namespace Aether;
 
-use Aether\Auth\Gateway\LoginAuthGateway;
-use Aether\Auth\User\UserFactory;
 use Aether\Config\ProjectConfig;
 use Aether\Middleware\Pipeline;
 use Aether\Middleware\Stack\AuthMiddleware;

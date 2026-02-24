@@ -34,7 +34,7 @@ final class EnvDataUnpacker {
 
 
     public function __construct(){
-        $this->_envData = IOFile::_open(IOTypeEnum::ENV, ".env")->_readDecoded();
+        $this->_envData = IOFile::_open(IOTypeEnum::ENV, _root(".env"))->_readDecoded();
     }
 
 

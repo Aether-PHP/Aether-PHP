@@ -83,6 +83,7 @@ class HttpResponse implements ResponseInterface {
      * @return void
      */
     public function _send() : void {
+        http_response_code($this->_statusCode);
         header($this->_getFormat()->_getHeader());
         $body = $this->_getBody();
 

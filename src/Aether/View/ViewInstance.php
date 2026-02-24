@@ -46,9 +46,9 @@ final class ViewInstance implements  ViewInterface {
      * @return void
      */
     public function _render(){
-        $fullpath = "public/views/" . $this->_path . "." . self::$_ext;
+        $fullpath = "views/" . $this->_path . "." . self::$_ext;
 
-        # - Security check : if extension is not php then we do NOT want any php executed
+        # - Security check : if extension is not PHP then we do NOT want any PHP executed
         if (self::$_ext !== "php"){
             if (!file_exists($fullpath))
                 die("[View] - Error - Template not found : {$fullpath}");
@@ -63,7 +63,7 @@ final class ViewInstance implements  ViewInterface {
         if (!file_exists($fullpath))
             die("[View] - Error - Template not found : {$fullpath}");
 
-        # - We turn output bufferin on and we include the given view page
+        # - We turn output bufferin on, and we include the given view page
         \ob_start();
         require_once $fullpath;
         echo \ob_get_clean();

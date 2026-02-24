@@ -12,11 +12,11 @@
  *                      The divine lightweight PHP framework
  *                  < 1 Mo • Zero dependencies • Pure PHP 8.3+
  *
- *  Built from scratch. No bloat. POO Embedded.
+ *  Built from scratch. No bloat. OOP Embedded.
  *
- *  @author: dawnl3ss (Alex') ©2025 — All rights reserved
+ *  @author: dawnl3ss (Alex') ©2026 — All rights reserved
  *  Source available • Commercial license required for redistribution
- *  → github.com/dawnl3ss/Aether-PHP
+ *  → https://github.com/Aether-PHP/Aether-PHP
  *
 */
 declare(strict_types=1);
@@ -54,11 +54,11 @@ class PermissionLayer {
 
         array_push($this->_perms, $_perm);
 
-        Aether()->_db()->_mysql($_ENV["AUTH_DATABASE_GATEWAY"])->_update(
-            "users",
-            ["perms" => $this->_stringify()],
-            ["uid" => $uid]
-        );
+        Aether()->_db()->_mysql($_ENV["AUTH_DATABASE_GATEWAY"])->_table("users")
+            ->_update()
+            ->_set("perms", $this->_stringify())
+            ->_where("uid", $uid)
+            ->_send();
 
         return $this;
     }
@@ -75,11 +75,11 @@ class PermissionLayer {
 
         $this->_perms = array_filter($this->_perms, fn($_p) => $_p !== $_perm);
 
-        Aether()->_db()->_mysql($_ENV["AUTH_DATABASE_GATEWAY"])->_update(
-            "users",
-            ["perms" => $this->_stringify()],
-            ["uid" => $uid]
-        );
+        Aether()->_db()->_mysql($_ENV["AUTH_DATABASE_GATEWAY"])->_table("users")
+            ->_update()
+            ->_set("perms", $this->_stringify())
+            ->_where("uid", $uid)
+            ->_send();
 
         return $this;
     }

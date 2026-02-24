@@ -1,3 +1,3 @@
 <?php
 
-echo __("welcome");
+echo "Aether-PHP default homeview.";

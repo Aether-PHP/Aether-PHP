@@ -28,15 +28,14 @@ use Aether\Middleware\MiddlewareInterface;
 
 class MaintenanceMiddleware implements MiddlewareInterface {
 
-    /** @var bool IN_MAINTENANCE */
-    private const bool IN_MAINTENANCE = true;
-
     /**
      * @param callable $_next
      * @return void
      */
     public function _handle(callable $_next){
-        if (self::IN_MAINTENANCE){
+        $inMaintenance = $_ENV['MAINTENANCE'] === "true";
+
+        if ($inMaintenance){
             http_response_code(503);
 
             if (str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json')){

@@ -16,7 +16,7 @@
  *
  *  @author: dawnl3ss (Alex') ©2026 — All rights reserved
  *  Source available • Commercial license required for redistribution
- *  → github.com/dawnl3ss/Aether-PHP
+ *  → https://github.com/Aether-PHP/Aether-PHP
  *
 */
 declare(strict_types=1);
@@ -79,7 +79,7 @@ final class IOFolder {
      * @return null|IOFile
      */
     public function _createFile(string $_name) : ?IOFile {
-        if ($this->_exist())
+        if (!$this->_exist())
             return null;
 
         return IOFile::_open(IOTypeEnum::OTHER, $this->_getPath() . '/' . $_name)->_write('', true);

@@ -21,7 +21,7 @@
 */
 declare(strict_types=1);
 
-if (!function_exists('Aether')){
+if (!function_exists("Aether")){
 
     /**
      * @return \Aether\Service\ServiceManager
@@ -32,7 +32,8 @@ if (!function_exists('Aether')){
 
 }
 
-if (!function_exists('_debug')){
+
+if (!function_exists("_debug")){
 
     /**
      * @param mixed ...$_vars
@@ -46,4 +47,15 @@ if (!function_exists('_debug')){
             echo "</pre>";
         }
     }
+}
+
+
+if (!function_exists("_root")){
+
+    /**
+     * @param string $_path
+     *
+     * @return string
+     */
+    function _root(string $_path = "") : string { return "../" . $_path; }
 }

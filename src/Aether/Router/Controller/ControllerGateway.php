@@ -38,10 +38,10 @@ final class ControllerGateway {
         $router = new Router();
 
         # - Scan for view controllers
-        self::_scanForController("./app/App/Controller/*.php",  "App\Controller\\", $router);
+        self::_scanForController(_root("app/App/Controller/*.php"),  "App\Controller\\", $router);
 
         # - Scan for api controllers
-        self::_scanForController("./app/App/Controller/Api/*.php",  "App\Controller\Api\\", $router);
+        self::_scanForController(_root("app/App/Controller/Api/*.php"),  "App\Controller\Api\\", $router);
 
         $router->_run();
     }

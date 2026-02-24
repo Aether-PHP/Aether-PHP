@@ -3,3 +3,6 @@
 .idea\
 .idea/*
 .idea\*
+.env
+storage\sessions\sess_*
+storage/sessions/sess_*

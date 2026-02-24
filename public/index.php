@@ -22,12 +22,8 @@
 declare(strict_types=1);
 
 # - Autoload
-require_once __DIR__ . '/autoload.php';
+require_once '../autoload.php';
 
 # - Core init
-$boot_time = \testing\BootTimeTest::_wrap(function (){
-    $app = new \Aether\Aether();
-    $app->_run();
-});
-
-print_r("<br><br>" . $boot_time . " ms.");
+$app = new \Aether\Aether();
+$app->_run();

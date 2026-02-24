@@ -58,7 +58,10 @@ abstract class QueryBuilder {
     private ?string $_orderBy = null;
 
     /** @var string $_orderByOrd */
-    private ?string $_orderByOrd;
+    private string $_orderByOrd;
+
+    /** @var ?int $_limit */
+    private ?int $_limit = null;
 
     /** @var DatabaseDriver $_driver */
     protected DatabaseDriver $_driver;
@@ -230,6 +233,19 @@ abstract class QueryBuilder {
     }
 
     /**
+     * @param int $_limit
+     *
+     * @return self
+     */
+    public function _limit(int $_limit) : QueryBuilder {
+        if ($this->_type !== "select")
+            return $this;
+
+        $this->_limit = $_limit;
+        return $this;
+    }
+
+    /**
      * Sanitize a WHERE key to a valid PDO named placeholder
      *
      * @param string $_key
@@ -291,6 +307,10 @@ abstract class QueryBuilder {
             # - ORDERBY
             if (!is_null($this->_orderBy))
                 $query .= " ORDER BY {$this->_orderBy} {$this->_orderByOrd}";
+
+            # - LIMIT
+            if (!is_null($this->_limit))
+                $query .= " LIMIT {$this->_limit}";
 
             $result = $this->_driver->_query($query, $params);
             $this->_reset();
