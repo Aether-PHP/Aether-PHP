@@ -36,6 +36,12 @@ final class SessionHandler extends SessionSecurityLayer {
      * @return void
      */
     public static function _load() : void {
+        session_set_cookie_params([
+            'httponly' => true,
+            'secure' => true,
+            'samesite' => 'Strict'
+        ]);
+
         ini_set('session.save_path', $_ENV['SESSION_FOLDER_PATH']);
         ini_set('session.cookie_lifetime', 60 * 60 * 24 * (int)$_ENV['COOKIE_SESSION_TTL']);
         ini_set('session.gc_maxlifetime', 60 * 60 * 24 * (int)$_ENV['COOKIE_SESSION_TTL']);

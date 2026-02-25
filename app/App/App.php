@@ -45,8 +45,7 @@ class App {
     ];
 
     /** @var array $_modules */
-    private static array $_modules = [
-    ];
+    private static array $_modules = [];
 
 
     public static function _init() : void {

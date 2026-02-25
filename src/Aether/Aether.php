@@ -32,7 +32,6 @@ use Aether\Middleware\Stack\RatelimitMiddleware;
 use Aether\Middleware\Stack\SecurityHeadersMiddleware;
 use Aether\Modules\ModuleFactory;
 use Aether\Router\Controller\ControllerGateway;
-use Aether\Security\Token\CsrfToken;
 use Aether\Service\ServiceManager;
 use Aether\Session\Session;
 use Aether\Session\SessionHandler;
@@ -80,13 +79,6 @@ class Aether {
 
         # - .Env File load
         ProjectConfig::_load();
-
-        # - Cookies Security Fix
-        session_set_cookie_params([
-            'httponly' => true,
-            'secure' => true,
-            'samesite' => 'Strict'
-        ]);
 
         # - Session
         SessionHandler::_load();
