@@ -14,9 +14,9 @@
  *
  *  Built from scratch. No bloat. OOP Embedded.
  *
- *  @author: dawnl3ss (Alex') ©2025 — All rights reserved
+ *  @author: dawnl3ss (Alex') ©2026 — All rights reserved
  *  Source available • Commercial license required for redistribution
- *  → github.com/dawnl3ss/Aether-PHP
+ *  → https://github.com/Aether-PHP/Aether-PHP
  *
 */
 declare(strict_types=1);
@@ -82,7 +82,7 @@ class ApiController extends Controller {
      */
     public function test(){
         Aether()->_http()->_response()->_json([
-            "test" => "This is a test v23"
+            "test" => "api test endpoint"
         ], 200)->_send();
     }
 }

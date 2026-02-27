@@ -80,7 +80,7 @@ final class ControllerGateway {
                 # - We gather the 'Method' and 'Route' phpdoc annotations
                 $method_type = self::_extractAnnotation($doc, 'method');
                 $route = self::_extractAnnotation($doc, 'route');
-
+                
                 if (!$method_type || !$route){
                     echo "[ControllerGateway] - ERROR - Wrong PHP Doc for {$class_name} Controller, method {$method->getName()}";
                     continue;
