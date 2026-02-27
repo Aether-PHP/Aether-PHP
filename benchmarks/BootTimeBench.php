@@ -1,8 +1,8 @@
 <?php
 
-namespace testing;
+namespace benchmarks;
 
-class BootTimeTest {
+class BootTimeBench {
 
     /**
      * Wrapped function to compute callable's boot time (ms)

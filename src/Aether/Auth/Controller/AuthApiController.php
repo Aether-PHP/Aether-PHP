@@ -21,14 +21,13 @@
 */
 declare(strict_types=1);
 
-namespace App\Controller\Api;
+namespace Aether\Auth\Controller;
 
 use Aether\Auth\Gateway\LoginAuthGateway;
 use Aether\Auth\Gateway\LogoutAuthGateway;
 use Aether\Auth\Gateway\RegisterAuthGateway;
 use Aether\Http\HttpParameterTypeEnum;
 use Aether\Router\Controller\Controller;
-
 use Aether\Security\UserInputValidatorTrait;
 
 /**

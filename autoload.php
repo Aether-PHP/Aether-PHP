@@ -47,8 +47,8 @@ spl_autoload_register(function ($class){
         if (file_exists($file)) return require_once $file;
     }
 
-    # - Testing folder
-    if (str_starts_with($class, 'testing\\')) {
+    # - Benchmarks folder
+    if (str_starts_with($class, 'benchmarks\\')) {
         $file = '../' . str_replace('\\', '/', $class) . '.php';
         if (file_exists($file)) return require_once $file;
     }

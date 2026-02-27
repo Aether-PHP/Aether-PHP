@@ -28,13 +28,6 @@ use Aether\Middleware\MiddlewareInterface;
 
 class RatelimitMiddleware implements MiddlewareInterface {
 
-    /** @var int SECOND_INTERVAL */
-    private const int SECOND_INTERVAL = 60;
-
-    /** @var int MAX_LIMIT */
-    private const int MAX_LIMIT = 100;
-
-
     /**
      * @param callable $_next
      */
@@ -44,8 +37,11 @@ class RatelimitMiddleware implements MiddlewareInterface {
 
         $fromCache = $cache->_get("ratelimit_" . $ip);
 
+        $maxlimit = (int)$_ENV["RATELIMIT_MAX_LIMIT"];
+        $secondInterval = (int)$_ENV["RATELIMIT_SECOND_INTERVAL"];
+
         if (!is_null($fromCache)){
-            if ($fromCache["req"] >= self::MAX_LIMIT && time() < $fromCache['t'] + self::SECOND_INTERVAL){
+            if ($fromCache["req"] >= $maxlimit && time() < $fromCache['t'] + $secondInterval){
                 http_response_code(403);
 
                 if (str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json')) {
@@ -61,7 +57,7 @@ class RatelimitMiddleware implements MiddlewareInterface {
                     '<h1>403 - Forbidden</h1><p>RateLimiter flagged YOU !</p>', 403
                 )->_send();
 
-            } else if (time() >= $fromCache['t'] + self::SECOND_INTERVAL)
+            } else if (time() >= $fromCache['t'] + $secondInterval)
                 $cache->_set("ratelimit_" . $ip, ["req" => 1, 't' => time()], 60 * 60 * 24);
             else
                 $cache->_set("ratelimit_" . $ip, ["req" => $fromCache["req"] + 1, 't' => $fromCache['t']], 60 * 60 * 24);

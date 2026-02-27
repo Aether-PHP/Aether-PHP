@@ -58,7 +58,7 @@ abstract class QueryBuilder {
     private ?string $_orderBy = null;
 
     /** @var string $_orderByOrd */
-    private string $_orderByOrd;
+    private string $_orderByOrd = "";
 
     /** @var ?int $_limit */
     private ?int $_limit = null;
@@ -283,7 +283,7 @@ abstract class QueryBuilder {
         $this->_joins = [];
         $this->_countCol = "*";
         $this->_orderBy = null;
-        $this->_orderByOrd = null;
+        $this->_orderByOrd = "";
     }
 
     /**
