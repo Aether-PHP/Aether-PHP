@@ -25,6 +25,7 @@ namespace Aether\Database\Drivers\List;
 
 use Aether\Database\Drivers\DatabaseDriver;
 use Aether\Database\Drivers\DatabaseDriverEnum;
+use Aether\Exception\DatabaseConnectionException;
 use PDO;
 
 
@@ -39,15 +40,20 @@ final class DatabaseSQLiteDriver extends DatabaseDriver {
 
     /**
      * @return DatabaseDriver
+     * @throws DatabaseConnectionException
      */
     public function _connect(): self {
         $path = $this->_getDatabasePath();
 
-        $this->_conn = new PDO("sqlite:{$path}", null, null, [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false
-        ]);
+        try {
+            $this->_conn = new PDO("sqlite:{$path}", null, null, [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false
+            ]);
+        } catch (\PDOException $_e) {
+            throw new DatabaseConnectionException("SQLite connection failed : " . $_e->getMessage(), (int) $_e->getCode(), $_e);
+        }
 
         return $this;
     }

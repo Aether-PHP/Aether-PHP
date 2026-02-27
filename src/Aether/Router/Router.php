@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace Aether\Router;
 
+use Aether\Exception\RouterControllerException;
 use Aether\Http\Methods\HttpMethodEnum;
 use Aether\Router\Route\Route;
 use Aether\Security\UserInputValidatorTrait;
@@ -56,6 +57,7 @@ final class Router implements RouterInterface {
 
     /**
      * @return bool
+     * @throws RouterControllerException
      */
     public function _run() : bool {
         $req_uri = $_SERVER['REQUEST_URI'];
@@ -112,12 +114,12 @@ final class Router implements RouterInterface {
             $_callback = explode('@', $_callback);
 
         if (!class_exists($_callback[0]))
-            throw new \Exception("Class {$_callback[0]} not found");
+            throw new RouterControllerException("Class {$_callback[0]} not found");
 
         $class = new $_callback[0];
 
         if (!method_exists($class, $_callback[1]))
-            throw new \Exception("Method $_callback[1] not found in class $_callback[0]");
+            throw new RouterControllerException("Method {$_callback[1]} not found in class {$_callback[0]}");
 
 
         return call_user_func_array([$class, $_callback[1]], $matches);

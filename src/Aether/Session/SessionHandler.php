@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace Aether\Session;
 
+use Aether\Exception\SessionConfigurationException;
 use Aether\Session\Security\SessionSecurityLayer;
 
 
@@ -34,8 +35,12 @@ final class SessionHandler extends SessionSecurityLayer {
 
     /**
      * @return void
+     * @throws SessionConfigurationException
      */
     public static function _load() : void {
+        if (empty($_ENV['SESSION_FOLDER_PATH']))
+            throw new SessionConfigurationException("Session config missing. Set SESSION_FOLDER_PATH in .env.");
+
         session_set_cookie_params([
             'httponly' => true,
             'secure' => true,

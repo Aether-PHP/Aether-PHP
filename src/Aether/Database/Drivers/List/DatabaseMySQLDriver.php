@@ -25,6 +25,7 @@ namespace Aether\Database\Drivers\List;
 
 use Aether\Database\Drivers\DatabaseDriver;
 use Aether\Database\Drivers\DatabaseDriverEnum;
+use Aether\Exception\DatabaseConnectionException;
 use PDO;
 
 
@@ -40,12 +41,17 @@ final class DatabaseMySQLDriver extends DatabaseDriver {
 
     /**
      * @return DatabaseDriver
+     * @throws DatabaseConnectionException
      */
     public function _connect() : self {
-        $this->_conn = new PDO("mysql:dbname={$this->_database};host={$this->_getHost()}", $this->_getIds()->_getLogin(), $this->_getIds()->_getPasskey(), [
-            PDO::ATTR_PERSISTENT => true,
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-        ]);
+        try {
+            $this->_conn = new PDO("mysql:dbname={$this->_database};host={$this->_getHost()}", $this->_getIds()->_getLogin(), $this->_getIds()->_getPasskey(), [
+                PDO::ATTR_PERSISTENT => true,
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+            ]);
+        } catch (\PDOException $_e) {
+            throw new DatabaseConnectionException("MySQL connection failed : " . $_e->getMessage(), (int) $_e->getCode(), $_e);
+        }
         return $this;
     }
 

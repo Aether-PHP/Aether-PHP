@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace Aether\View;
 
+use Aether\Exception\ViewTemplateException;
+
 
 final class ViewInstance implements  ViewInterface {
 
@@ -44,6 +46,7 @@ final class ViewInstance implements  ViewInterface {
      * Render the provided view
      *
      * @return void
+     * @throws ViewTemplateException
      */
     public function _render(){
         $fullpath = "views/" . $this->_path . "." . self::$_ext;
@@ -51,7 +54,7 @@ final class ViewInstance implements  ViewInterface {
         # - Security check : if extension is not PHP then we do NOT want any PHP executed
         if (self::$_ext !== "php"){
             if (!file_exists($fullpath))
-                die("[View] - Error - Template not found : {$fullpath}");
+                throw new ViewTemplateException("Template not found : {$fullpath}");
 
             echo file_get_contents($fullpath);
             return;
@@ -61,7 +64,7 @@ final class ViewInstance implements  ViewInterface {
         \extract($this->_vars, EXTR_SKIP);
 
         if (!file_exists($fullpath))
-            die("[View] - Error - Template not found : {$fullpath}");
+            throw new ViewTemplateException("Template not found : {$fullpath}");
 
         # - We turn output bufferin on, and we include the given view page
         \ob_start();
@@ -73,6 +76,7 @@ final class ViewInstance implements  ViewInterface {
     /**
      * @param string $path
      * @param array $vars
+     * @throws ViewTemplateException
      */
     public static function _make(string $path, array $vars){
         (new self($path, $vars))->_render();
