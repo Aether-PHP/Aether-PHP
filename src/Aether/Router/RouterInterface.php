@@ -27,15 +27,16 @@ namespace Aether\Router;
 interface RouterInterface {
 
     /**
-     * Add a route in the list
+     *  Add a route in the list
      *
      * @param string $method
      * @param string $route
      * @param $callable
+     * @param array $middlewrares
      *
      * @return Router
      */
-    public function _addRoute(string $method, string $route, $callable) : Router;
+    public function _addRoute(string $method, string $route, $callable, array $middlewrares) : Router;
 
     /**
      * Run the core Router job

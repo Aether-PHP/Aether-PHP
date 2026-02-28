@@ -12,17 +12,18 @@
  *                      The divine lightweight PHP framework
  *                  < 1 Mo • Zero dependencies • Pure PHP 8.3+
  *
- *  Built from scratch. No bloat. POO Embedded.
+ *  Built from scratch. No bloat. OOP Embedded.
  *
- *  @author: dawnl3ss (Alex') ©2025 — All rights reserved
+ *  @author: dawnl3ss (Alex') ©2026 — All rights reserved
  *  Source available • Commercial license required for redistribution
- *  → github.com/dawnl3ss/Aether-PHP
+ *  → https://github.com/Aether-PHP/Aether-PHP
  *
 */
 declare(strict_types=1);
 
 namespace Aether\Router\Controller;
 
+use Aether\Exception\RouterControllerException;
 use Aether\Router\Router;
 use \ReflectionClass;
 use \ReflectionException;
@@ -54,6 +55,7 @@ final class ControllerGateway {
      * @param Router $_router
      *
      * @return void
+     * @throws RouterControllerException
      */
     private static function _scanForController(string $_dir, string $_namespace, Router $_router) : void {
         $controllerFiles = glob($_dir);
@@ -65,8 +67,7 @@ final class ControllerGateway {
             try {
                 $reflection = new ReflectionClass($class_name);
             } catch (ReflectionException $e){
-                echo "[ControllerGateway] - ERROR - Cannot reflect class $class_name: " . $e->getMessage();
-                continue;
+                throw new RouterControllerException("[ControllerGateway] - ERROR - Cannot reflect class $class_name: " . $e->getMessage());
             }
 
             # - We allow developers to add a base path for their controller
@@ -77,16 +78,18 @@ final class ControllerGateway {
                 $doc = $method->getDocComment();
                 if (!$doc) continue;
 
-                # - We gather the 'Method' and 'Route' phpdoc annotations
+                # - We gather the 'Method' and 'Route' and 'Middlewares' phpdoc annotations
                 $method_type = self::_extractAnnotation($doc, 'method');
                 $route = self::_extractAnnotation($doc, 'route');
-                
-                if (!$method_type || !$route){
-                    echo "[ControllerGateway] - ERROR - Wrong PHP Doc for {$class_name} Controller, method {$method->getName()}";
-                    continue;
-                }
+                $middlewares = self::_extractAnnotation($doc, 'middlewares');
 
-                $_router->_addRoute(strtoupper($method_type), $base . $route, "{$class_name}@{$method->getName()}");
+                if (!$method_type || !$route)
+                    throw new RouterControllerException("[ControllerGateway] - ERROR - Wrong PHP Doc for {$class_name} Controller, method {$method->getName()}");
+
+                if (!is_null($middlewares))
+                    $_router->_addRoute(strtoupper($method_type), $base . $route, "{$class_name}@{$method->getName()}", explode(",", $middlewares));
+                else
+                    $_router->_addRoute(strtoupper($method_type), $base . $route, "{$class_name}@{$method->getName()}", []);
             }
         }
     }

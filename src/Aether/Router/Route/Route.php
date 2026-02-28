@@ -35,11 +35,15 @@ class Route implements RouteInterface {
     /** @var $_callable */
     private $_callable;
 
+    /** @var array $_middlewares */
+    private array $_middlewares;
 
-    public function __construct(string $_method, string $_route, $_callable){
+
+    public function __construct(string $_method, string $_route, $_callable, array $_middlewares){
         $this->_method = $_method;
         $this->_route = $_route;
         $this->_callable = $_callable;
+        $this->_middlewares = $_middlewares;
     }
 
     /**
@@ -56,5 +60,10 @@ class Route implements RouteInterface {
      * @return
      */
     public function _getCallable() { return $this->_callable; }
+
+    /**
+     * @return array
+     */
+    public function _getMiddlewares() : array { return $this->_middlewares; }
 
 }

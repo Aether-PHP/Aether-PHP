@@ -12,11 +12,11 @@
  *                      The divine lightweight PHP framework
  *                  < 1 Mo • Zero dependencies • Pure PHP 8.3+
  *
- *  Built from scratch. No bloat. POO Embedded.
+ *  Built from scratch. No bloat. OOP Embedded.
  *
- *  @author: dawnl3ss (Alex') ©2025 — All rights reserved
+ *  @author: dawnl3ss (Alex') ©2026 — All rights reserved
  *  Source available • Commercial license required for redistribution
- *  → github.com/dawnl3ss/Aether-PHP
+ *  → https://github.com/Aether-PHP/Aether-PHP
  *
 */
 declare(strict_types=1);
@@ -24,7 +24,7 @@ declare(strict_types=1);
 namespace Aether\Router;
 
 use Aether\Exception\RouterControllerException;
-use Aether\Http\Methods\HttpMethodEnum;
+use Aether\Middleware\Pipeline;
 use Aether\Router\Route\Route;
 use Aether\Security\UserInputValidatorTrait;
 
@@ -49,8 +49,8 @@ final class Router implements RouterInterface {
      *
      * @return Router
      */
-    public function _addRoute(string $method, string $route, $callable) : Router {
-        array_push($this->_routes[$method], new Route($method, $route, $callable));
+    public function _addRoute(string $method, string $route, $callable, array $middlewares) : Router {
+        array_push($this->_routes[$method], new Route($method, $route, $callable, $middlewares));
         return $this;
     }
 
@@ -72,7 +72,7 @@ final class Router implements RouterInterface {
                 # - Case 1 : URI == route - ex: uri:(/test) route:(/test)
                 if (trim($req_uri, '/') == trim($route->_getRoute(), '/')){
                     header('HTTP/2 200 OK', true, 200);
-                    $this->_execute($route->_getCallable());
+                    $this->_execute($route);
                     return true;
                 }
 
@@ -82,7 +82,7 @@ final class Router implements RouterInterface {
 
                 if (preg_match_all($path_to_match, trim($req_uri, '/'), $params)){
                     header('HTTP/2 200 OK', true, 200);
-                    $this->_execute($route->_getCallable(), $params);
+                    $this->_execute($route, $params);
                     return true;
                 }
             }
@@ -94,34 +94,40 @@ final class Router implements RouterInterface {
 
 
     /**
-     * @param $_callback
+     * @param Route $route
      * @param array|null $_params
      *
      * @return mixed
+     * @throws RouterControllerException
      */
-    private function _execute($_callback, ?array $_params = []){
+    private function _execute(Route $route, ?array $_params = []){
         $matches = [];
+        $callable = $route->_getCallable();
 
-        foreach($_params as $key => $value){
-            if ($key != 0)
-                array_push($matches, $this->_sanitizeInput($value[0]));
-        }
+        # - Middlewares wrapper
+        Pipeline::_runForRoute($route->_getMiddlewares(), function () use ($_params, $matches, $callable){
 
-        if (is_callable($_callback))
-            return call_user_func_array($_callback, $matches);
+            foreach($_params as $key => $value){
+                if ($key != 0)
+                    array_push($matches, $this->_sanitizeInput($value[0]));
+            }
 
-        if (is_string($_callback))
-            $_callback = explode('@', $_callback);
+            if (is_callable($callable))
+                return call_user_func_array($callable, $matches);
 
-        if (!class_exists($_callback[0]))
-            throw new RouterControllerException("Class {$_callback[0]} not found");
+            if (is_string($callable))
+                $callable = explode('@', $callable);
 
-        $class = new $_callback[0];
+            if (!class_exists($callable[0]))
+                throw new RouterControllerException("Class {$callable[0]} not found");
 
-        if (!method_exists($class, $_callback[1]))
-            throw new RouterControllerException("Method {$_callback[1]} not found in class {$_callback[0]}");
+            $class = new $callable[0];
+
+            if (!method_exists($class, $callable[1]))
+                throw new RouterControllerException("Method {$callable[1]} not found in class {$callable[0]}");
 
 
-        return call_user_func_array([$class, $_callback[1]], $matches);
+            return call_user_func_array([$class, $callable[1]], $matches);
+        });
     }
 }

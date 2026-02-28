@@ -16,7 +16,7 @@
  *
  *  @author: dawnl3ss (Alex') ©2026 — All rights reserved
  *  Source available • Commercial license required for redistribution
- *  → github.com/dawnl3ss/Aether-PHP
+ *  → https://github.com/Aether-PHP/Aether-PHP
  *
 */
 declare(strict_types=1);
@@ -35,5 +35,4 @@ class AppController extends Controller {
     public function home(){
         $this->_render("home");
     }
-
 }
