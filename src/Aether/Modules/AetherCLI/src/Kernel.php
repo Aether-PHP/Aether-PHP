@@ -45,7 +45,7 @@ final class Kernel extends AetherModule {
 
 
 
-    public function _onLoad(){
+    public function _onLoad() : void {
         echo PHP_EOL . PHP_EOL . CliColorEnum::FG_BRIGHT_CYAN->_paint($this->_logger->_getAscii()) . PHP_EOL . PHP_EOL;
 
         echo CliColorEnum::FG_WHITE->_paint("✦ AetherCLI ready – divine command-line interface ☄️") . PHP_EOL;

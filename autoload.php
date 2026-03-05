@@ -31,7 +31,7 @@ spl_autoload_register(function ($class){
         if (str_starts_with($class, 'Aether\\Modules\\')){
 
             if (preg_match('/^Aether\\\\Modules\\\\([^\\\\]+)\\\\(.+)$/', $class, $matches)){
-                $file = '/src/Aether/Modules/' . $matches[1] . '/src/' . str_replace('\\', '/', $matches[2]) . '.php';
+                $file = '../src/Aether/Modules/' . $matches[1] . '/src/' . str_replace('\\', '/', $matches[2]) . '.php';
                 if (file_exists($file)) return require_once $file;
             }
         }
