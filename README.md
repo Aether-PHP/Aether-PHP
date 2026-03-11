@@ -569,7 +569,7 @@ While Aether-PHP is source-available, contributions and feedback are welcome. Fo
 
 - **GitHub Issues**: Report bugs or request features
 - **Email**: alexandre.voisin@epita.fr
-- **Website**: [getaether.space](https://aetherphp.net)
+- **Website**: [aetherphp.net](https://aetherphp.net)
 
 ---
 
