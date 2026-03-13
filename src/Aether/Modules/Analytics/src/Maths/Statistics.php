@@ -10,7 +10,7 @@
  *     ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝        ╚═╝     ╚═╝  ╚═╝╚═╝
  *
  *                      The divine lightweight PHP framework
- *                  < 1 Mo • Zero dependencies • Pure PHP 8.3+
+ *                   < 1 Mo • Zero dependencies • Pure PHP 8.3+
  *
  *  Built from scratch. No bloat. OOP Embedded.
  *
@@ -21,9 +21,11 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Database\Models;
+namespace Aether\Modules\Analytics\Maths;
 
 
-final class ModelFactory {
+class Statistics {
 
+    public function __construct(){
+    }
 }

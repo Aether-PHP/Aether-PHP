@@ -23,61 +23,45 @@ declare(strict_types=1);
 
 namespace Aether\Database\Models;
 
+
 use Aether\Database\QueryBuilder;
 
+final class ModelTemplate {
 
-abstract class Model extends \StdClass {
+    /** @var string $_dbName */
+    private string $_dbName;
 
-    /** @var QueryBuilder $_queryBuilder */
-    private QueryBuilder $_queryBuilder;
+    /** @var string $_table */
+    private string $_table;
 
-    /** @var array $_data */
-    private array $_data = [];
+    /** @var string $_rows */
+    private string $_rows;
+
+    /** @var int $_count */
+    private int $_count;
+
+    /** @var array $_conditions */
+    private array $_conditions;
 
 
-    public function __construct(QueryBuilder $_builder){
-        $this->_queryBuilder = $_builder;
-        $this->_build();
+    public function __construct(string $_dbName, string $_table){
+        $this->_dbName = $_dbName;
+        $this->_table = $_table;
+        $this->_rows = '*';
+        $this->_count = 1;
     }
 
     /**
-     * @param callable $_func
-     * - must be like : func_name($key, $value) : bool {}
-     *
-     * @return bool
+     * @return QueryBuilder
      */
-    public function _map(callable $_func) : bool {
-        if (!$this->_hasBeenSent())
-            return false;
+    public function _template() : QueryBuilder {
+        $builder = Aether()->_db()->_mysql($this->_dbName)->_table($this->_table)->_select($this->_rows);
 
-        foreach ($this->_data as $k => $v){
-            if (!$_func($k, $v))
-                return false;
+        foreach($this->_conditions as $cond){
+            $builder->_where($cond[0], $cond[1]);
         }
-        return true;
-    }
 
-    /**
-     * @return bool
-     */
-    private function _hasBeenSent() : bool { return !empty($this->_data); }
-
-
-    /**
-     * @return void
-     */
-    private function _build() : void {
-        # - The goal here is to extract $this->_data into stdClass properties
-        # -- mimic the table columns
-        $data = $this->_queryBuilder->_send();
-
-        if (!is_array($data) || count($data) < 1)
-            return;
-
-        foreach ($data[0] as $key => $value){
-            $this->$key = $value;
-        }
-        $this->_data = $data;
+        return $builder;
     }
 
 }
