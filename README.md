@@ -11,7 +11,7 @@
 ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝        ╚═╝     ╚═╝  ╚═╝╚═╝
 ```
 
-**The divine lightweight PHP framework**
+**The divine secure and lightweight PHP framework**
 
 ![PHP](https://img.shields.io/badge/PHP-8.3%2B-777BB4?style=for-the-badge&logo=php&logoColor=white)
 ![License](https://img.shields.io/badge/license-Source--Available-3B54C0?style=for-the-badge)
