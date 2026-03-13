@@ -11,7 +11,7 @@
 ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝        ╚═╝     ╚═╝  ╚═╝╚═╝
 ```
 
-**The divine lightweight PHP framework**
+**The divine secure and lightweight PHP framework**
 
 ![PHP](https://img.shields.io/badge/PHP-8.3%2B-777BB4?style=for-the-badge&logo=php&logoColor=white)
 ![License](https://img.shields.io/badge/license-Source--Available-3B54C0?style=for-the-badge)
@@ -569,7 +569,7 @@ While Aether-PHP is source-available, contributions and feedback are welcome. Fo
 
 - **GitHub Issues**: Report bugs or request features
 - **Email**: alexandre.voisin@epita.fr
-- **Website**: [getaether.space](https://getaether.space)
+- **Website**: [aetherphp.net](https://aetherphp.net)
 
 ---
 
@@ -585,6 +585,6 @@ While Aether-PHP is source-available, contributions and feedback are welcome. Fo
 
 <div align="center">
 
-[⭐ Star on GitHub](https://github.com/Aether-PHP/Aether-PHP) • [📖 Documentation](https://getaether.space/en/docs) • [🐛 Report Bug](https://github.com/Aether-PHP/Aether-PHP/issues)
+[⭐ Star on GitHub](https://github.com/Aether-PHP/Aether-PHP) • [📖 Documentation](https://aetherphp.net/en/docs) • [🐛 Report Bug](https://github.com/Aether-PHP/Aether-PHP/issues)
 
 </div>
