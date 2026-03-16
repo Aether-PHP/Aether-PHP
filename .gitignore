@@ -3,3 +3,4 @@
 .idea/*
 .env
 storage/sessions/sess_*
+*.sqlite

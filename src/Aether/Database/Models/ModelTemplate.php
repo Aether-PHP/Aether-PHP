@@ -23,8 +23,8 @@ declare(strict_types=1);
 
 namespace Aether\Database\Models;
 
-
 use Aether\Database\QueryBuilder;
+
 
 final class ModelTemplate {
 
@@ -44,11 +44,12 @@ final class ModelTemplate {
     private array $_conditions;
 
 
-    public function __construct(string $_dbName, string $_table){
+    public function __construct(string $_dbName, string $_table, array $_conditions){
         $this->_dbName = $_dbName;
         $this->_table = $_table;
         $this->_rows = '*';
         $this->_count = 1;
+        $this->_conditions = $_conditions;
     }
 
     /**
@@ -57,8 +58,8 @@ final class ModelTemplate {
     public function _template() : QueryBuilder {
         $builder = Aether()->_db()->_mysql($this->_dbName)->_table($this->_table)->_select($this->_rows);
 
-        foreach($this->_conditions as $cond){
-            $builder->_where($cond[0], $cond[1]);
+        foreach($this->_conditions as $cond => $val){
+            $builder->_where($cond, $val);
         }
 
         return $builder;

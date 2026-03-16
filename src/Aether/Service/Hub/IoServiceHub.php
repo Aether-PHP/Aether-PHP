@@ -16,7 +16,7 @@
  *
  *  @author: dawnl3ss (Alex') ©2026 — All rights reserved
  *  Source available • Commercial license required for redistribution
- *  → github.com/dawnl3ss/Aether-PHP
+ *  → https://github.com/Aether-PHP/Aether-PHP
  *
 */
 declare(strict_types=1);
@@ -32,22 +32,22 @@ use Aether\IO\IOTypeEnum;
 final class IoServiceHub {
 
     /**
-     * @param string $_path
      * @param IOTypeEnum $_type
+     * @param string $_path
      *
      * @return IOFile
      */
-    public function _file(string $_path, IoTypeEnum $_type) : IOFile {
+    public function _file(string $_path, IOTypeEnum $_type) : IOFile {
         return IOFile::_open($_type, $_path);
     }
 
     /**
-     * @param string $_path
      * @param IOTypeEnum $_type
+     * @param string $_path
      *
      * @return IOStream
      */
-    public function _stream(string $_path, IoTypeEnum $_type) : IOStream {
+    public function _stream(string $_path, IOTypeEnum $_type) : IOStream {
         return IOStream::_open($_type, $_path);
     }
 

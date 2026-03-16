@@ -25,6 +25,7 @@ namespace Aether\Service\Hub;
 
 use Aether\Cache\Adapter\Apcu;
 use Aether\Cache\Adapter\CacheAdapterEnum;
+use Aether\Cache\Adapter\Files;
 use Aether\Cache\CacheFactory;
 
 
@@ -35,5 +36,12 @@ final class CacheServiceHub {
      */
     public function _apcu() : Apcu {
         return CacheFactory::_get(CacheAdapterEnum::APCU);
+    }
+
+    /**
+     * @return Files
+     */
+    public function _files() : Files {
+        return CacheFactory::_get(CacheAdapterEnum::FILES);
     }
 }

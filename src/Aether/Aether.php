@@ -36,13 +36,14 @@ use Aether\Service\ServiceManager;
 use Aether\Session\Session;
 use Aether\Session\SessionHandler;
 use App\App;
+use App\Models\User;
 
 /*
  * Pure PHP 8.3+ framework built from scratch.
  *
  * Wanted a lightweight and fast alternative to other useless-as-hell and huge frameworks.
  * Easy to incorporate in SaaS, Webapps, REST APIs...
- * -> https://getaether.space
+ * -> https://aetherphp.net
  *
  * Made by : Dawnless (Alexandre VOISIN)
  * → https://www.linkedin.com/in/alexvsn/

@@ -1,0 +1,7 @@
+{
+    "v": {
+        "controller": "AppController@home",
+        "middlewares": []
+    },
+    "e": 0
+}

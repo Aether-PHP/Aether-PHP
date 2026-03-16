@@ -80,10 +80,10 @@ final class LogProvider {
      *
      * @return null|array
      */
-    public function _retrieve(string $_address) : ?array {
+    public function _retrieve(string $_key, string $_val) : ?array {
         $data = $this->_getDatabase()
             ->_select('*')
-            ->_where("ip_addr", $_address)
+            ->_where($_key, $_val)
             ->_send();
 
         return $data;

@@ -26,7 +26,7 @@ namespace Aether\Database\Models;
 use Aether\Database\QueryBuilder;
 
 
-abstract class Model extends \StdClass {
+abstract class DatabaseModel extends \StdClass {
 
     /** @var QueryBuilder $_queryBuilder */
     private QueryBuilder $_queryBuilder;
@@ -79,5 +79,4 @@ abstract class Model extends \StdClass {
         }
         $this->_data = $data;
     }
-
 }

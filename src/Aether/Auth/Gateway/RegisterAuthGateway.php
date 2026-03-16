@@ -48,7 +48,7 @@ class RegisterAuthGateway extends AuthInstance implements AuthGatewayEventInterf
      * @return bool
      */
     public function _tryAuth() : bool {
-        if ($this->_dbconn->_table($_ENV["AUTH_TABLE_GATEWAY"])->_exist()->_where("email", $this->_email))
+        if ($this->_dbconn->_table($_ENV["AUTH_TABLE_GATEWAY"])->_exist()->_where("email", $this->_email)->_send())
             return $this->_setStatus($this->_onFailure(), false);
 
         return $this->_setStatus($this->_onSuccess([]), true);

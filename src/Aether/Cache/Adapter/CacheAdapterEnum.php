@@ -28,7 +28,7 @@ use Aether\Cache\CacheInterface;
 
 enum CacheAdapterEnum : string {
 
-    case FILES = "files";           # - Not implemented yet
+    case FILES = "files";
     case APCU = "apcu";
     case REDIS = "redis";           # - Not implemented yet
     case MEMCACHED = "memcached";   # - Not implemented yet
@@ -38,6 +38,13 @@ enum CacheAdapterEnum : string {
      * @return CacheInterface
      */
     public function _make() : CacheInterface {
-        return new Apcu();
+        return match ($this){
+            self::FILES => new Files(),
+            self::APCU => new Apcu(),
+
+            # - Placeholders : fallback to APCU for now
+            self::REDIS,
+            self::MEMCACHED => new Apcu(),
+        };
     }
 }
