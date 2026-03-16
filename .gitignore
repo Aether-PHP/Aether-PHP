@@ -4,3 +4,4 @@
 .env
 storage/sessions/sess_*
 *.sqlite
+*.cache.json
