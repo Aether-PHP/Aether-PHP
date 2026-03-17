@@ -16,35 +16,13 @@
  *
  *  @author: dawnl3ss (Alex') ©2026 — All rights reserved
  *  Source available • Commercial license required for redistribution
- *  → https://github.com/dawnl3ss/Aether-PHP
+ *  → https://github.com/Aether-PHP/Aether-PHP
  *
 */
 declare(strict_types=1);
 
-namespace Aether\Cache\Adapter;
-
-use Aether\Cache\CacheInterface;
+namespace Aether\Exception;
 
 
-enum CacheAdapterEnum : string {
-
-    case FILES = "files";
-    case APCU = "apcu";
-    case REDIS = "redis";
-    case MEMCACHED = "memcached";   # - Not implemented yet
-
-
-    /**
-     * @return CacheInterface
-     */
-    public function _make() : CacheInterface {
-        return match ($this){
-            self::FILES => new Files(),
-            self::APCU => new Apcu(),
-            self::REDIS => new Redis(),
-
-            # - Placeholders : fallback to APCU for now
-            self::MEMCACHED => new Apcu(),
-        };
-    }
+final class CacheRedisException extends AetherException {
 }
