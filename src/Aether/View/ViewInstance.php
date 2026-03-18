@@ -49,12 +49,27 @@ final class ViewInstance implements  ViewInterface {
      * @throws ViewTemplateException
      */
     public function _render(){
-        $fullpath = "views/" . $this->_path . "." . self::$_ext;
+        $viewsRoot = realpath("views");
+        if ($viewsRoot === false)
+            throw new ViewTemplateException("Views folder not found.");
+
+        # - View path hardening : no traversal, no absolute paths, no weird chars
+        $path = str_replace("\\", "/", trim($this->_path));
+        $path = ltrim($path, "/");
+
+        if ($path === "" || str_contains($path, "..") || !preg_match('/^[a-zA-Z0-9_\\-\\/]+$/', $path))
+            throw new ViewTemplateException("Invalid view path provided.");
+
+        $fullpath = $viewsRoot . "/" . $path . "." . self::$_ext;
 
         # - Security check : if extension is not PHP then we do NOT want any PHP executed
         if (self::$_ext !== "php"){
             if (!file_exists($fullpath))
                 throw new ViewTemplateException("Template not found : {$fullpath}");
+
+            $real = realpath($fullpath);
+            if ($real === false || !str_starts_with($real, $viewsRoot))
+                throw new ViewTemplateException("Invalid view path provided.");
 
             echo file_get_contents($fullpath);
             return;
@@ -65,6 +80,10 @@ final class ViewInstance implements  ViewInterface {
 
         if (!file_exists($fullpath))
             throw new ViewTemplateException("Template not found : {$fullpath}");
+
+        $real = realpath($fullpath);
+        if ($real === false || !str_starts_with($real, $viewsRoot))
+            throw new ViewTemplateException("Invalid view path provided.");
 
         # - We turn output bufferin on, and we include the given view page
         \ob_start();

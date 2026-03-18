@@ -30,6 +30,24 @@ use Aether\Modules\AetherCLI\Script\BaseScript;
 
 class SourceCommand extends Command {
 
+    /**
+     * @param string $_path
+     *
+     * @return bool
+     */
+    private static function _isScriptPathAllowed(string $_path) : bool {
+        $scriptsRoot = realpath("./bin/scripts");
+        $scriptPath = realpath($_path);
+
+        if ($scriptsRoot === false || $scriptPath === false)
+            return false;
+
+        $scriptsRoot = rtrim(str_replace("\\", "/", $scriptsRoot), "/") . "/";
+        $scriptPath = str_replace("\\", "/", $scriptPath);
+
+        return str_starts_with($scriptPath, $scriptsRoot);
+    }
+
     public function __construct(array $_extra){
         parent::__construct(
             "source",
@@ -55,7 +73,19 @@ class SourceCommand extends Command {
             if (strtolower(pathinfo($script, PATHINFO_EXTENSION)) !== 'php')
                 die(CliColorEnum::FG_RED->_paint("[SourceCommand] - Error - Source file '{$script}' needs to be a php file.") . PHP_EOL);
 
-            $fullClass = str_replace('/', "\\", preg_replace('/\.[^.]+$/', '', $script));
+            if (!self::_isScriptPathAllowed($script))
+                die(CliColorEnum::FG_RED->_paint("[SourceCommand] - Error - Provided script must be located in ./bin/scripts/.") . PHP_EOL);
+
+            require_once realpath($script);
+
+            $fullClass = str_replace('/', "\\", preg_replace('/\.[^.]+$/', '', str_replace("\\", "/", $script)));
+
+            if (!class_exists($fullClass))
+                die(CliColorEnum::FG_RED->_paint("[SourceCommand] - Error - Script class '{$fullClass}' not found. Check namespace/class name.") . PHP_EOL);
+
+            if (!is_subclass_of($fullClass, BaseScript::class))
+                die(CliColorEnum::FG_RED->_paint("[SourceCommand] - Error - Provided script must be an instance of AetherCLI/Script/BaseScript.") . PHP_EOL);
+
             $script = new $fullClass();
 
             if (!$script instanceof BaseScript)

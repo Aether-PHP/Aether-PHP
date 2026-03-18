@@ -41,9 +41,16 @@ final class SessionHandler extends SessionSecurityLayer {
         if (empty($_ENV['SESSION_FOLDER_PATH']))
             throw new SessionConfigurationException("Session config missing. Set SESSION_FOLDER_PATH in .env.");
 
+        # - Secure cookies should be enabled only on HTTPS (or if forced by env)
+        $secure = false;
+        if (($_ENV['SESSION_COOKIE_SECURE'] ?? "") !== "")
+            $secure = (($_ENV['SESSION_COOKIE_SECURE'] ?? "0") === "1");
+        else if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            $secure = true;
+
         session_set_cookie_params([
             'httponly' => true,
-            'secure' => true,
+            'secure' => $secure,
             'samesite' => 'Strict'
         ]);
 

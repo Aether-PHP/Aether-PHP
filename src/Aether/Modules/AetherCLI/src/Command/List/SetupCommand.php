@@ -34,6 +34,23 @@ class SetupCommand extends Command {
     /** @var string $_binPath */
     private static $_binPath = "./bin/aether";
 
+    /**
+     * @param string $_line
+     *
+     * @return bool
+     */
+    private static function _isSafeLine(string $_line) : bool {
+        $line = trim($_line);
+        if ($line === "")
+            return false;
+
+        # - Block classic shell injection chars
+        if (preg_match('/[;&|`$<>\\r\\n]/', $line))
+            return false;
+
+        return true;
+    }
+
     public function __construct(array $_extra){
         parent::__construct(
             "setup",
@@ -55,10 +72,21 @@ class SetupCommand extends Command {
         $lines = IOFile::_open(IOTypeEnum::OTHER, "./Aetherfile" . $ext)->_readLines();
 
         foreach ($lines as $line){
-            if (str_contains($line, '#') || str_starts_with($line, "//"))
+            $line = trim($line);
+
+            if ($line === "")
                 continue;
 
-            if (!shell_exec(self::$_binPath . ' ' . $line))
+            if (str_starts_with($line, "#") || str_starts_with($line, "//"))
+                continue;
+
+            if (!self::_isSafeLine($line))
+                die(CliColorEnum::FG_RED->_paint("[SetupCommand] - Error - Unsafe command detected in Aetherfile{$ext}.") . PHP_EOL);
+
+            # - We keep it simple: setup file executes only AetherCLI commands (no shell features)
+            $cmd = self::$_binPath . " " . $line;
+
+            if (!shell_exec($cmd))
                 return false;
         }
 

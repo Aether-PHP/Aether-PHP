@@ -60,7 +60,7 @@ final class Router implements RouterInterface {
      * @throws RouterControllerException
      */
     public function _run() : bool {
-        $req_uri = $_SERVER['REQUEST_URI'];
+        $req_uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? $_SERVER['REQUEST_URI'];
         $req_method = strtoupper($_SERVER['REQUEST_METHOD']);
 
         if (!isset($this->_routes[$req_method]))
@@ -71,7 +71,6 @@ final class Router implements RouterInterface {
 
                 # - Case 1 : URI == route - ex: uri:(/test) route:(/test)
                 if (trim($req_uri, '/') == trim($route->_getRoute(), '/')){
-                    header('HTTP/2 200 OK', true, 200);
                     $this->_execute($route);
                     return true;
                 }
@@ -81,7 +80,6 @@ final class Router implements RouterInterface {
                 $path_to_match = "#^$path$#";
 
                 if (preg_match_all($path_to_match, trim($req_uri, '/'), $params)){
-                    header('HTTP/2 200 OK', true, 200);
                     $this->_execute($route, $params);
                     return true;
                 }

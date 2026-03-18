@@ -257,6 +257,36 @@ abstract class QueryBuilder {
     }
 
     /**
+     * @param string $_identifier
+     *
+     * @return bool
+     */
+    private static function _isSafeIdentifier(string $_identifier) : bool {
+        $id = trim($_identifier);
+        if ($id === "")
+            return false;
+
+        # - Allow: table, table alias, db.table, table.col, col, col alias
+        # - Block: quotes, parenthesis, semicolons, operators etc.
+        return preg_match('/^[a-zA-Z0-9_\\.]+(\\s+[a-zA-Z0-9_]+)?$/', $id) === 1;
+    }
+
+    /**
+     * @param string $_clause
+     *
+     * @return bool
+     */
+    private static function _isSafeJoinClause(string $_clause) : bool {
+        $clause = trim($_clause);
+        if ($clause === "")
+            return false;
+
+        # - Very strict: only identifiers, dots, spaces and equality
+        # - ex: users.id = profiles.user_id
+        return preg_match('/^[a-zA-Z0-9_\\.\\s=]+$/', $clause) === 1;
+    }
+
+    /**
      * Build the WHERE clause string and the corresponding params array
      *
      * @return array
@@ -266,6 +296,9 @@ abstract class QueryBuilder {
         $params = [];
 
         foreach ($this->_wheres as $key => $val){
+            if (!self::_isSafeIdentifier($key))
+                continue;
+
             $placeholder = $this->_placeholder($key);
             $wheres[] = "{$key} = :{$placeholder}";
             $params[$placeholder] = $val;
@@ -293,10 +326,18 @@ abstract class QueryBuilder {
 
         # - SELECT
         if ($this->_type === "select"){
+            if (!self::_isSafeIdentifier($this->_table)){
+                $this->_reset();
+                return null;
+            }
+
             $query = "SELECT " . implode(", ", $this->_rows) . " FROM " . $this->_table;
 
             # - JOINs
             foreach ($this->_joins as $join){
+                if (!self::_isSafeIdentifier($join['table']) || !self::_isSafeJoinClause($join['on']))
+                    continue;
+
                 $query .= " INNER JOIN {$join['table']} ON {$join['on']}";
             }
 
@@ -305,7 +346,7 @@ abstract class QueryBuilder {
             $query .= $clause;
 
             # - ORDERBY
-            if (!is_null($this->_orderBy))
+            if (!is_null($this->_orderBy) && self::_isSafeIdentifier($this->_orderBy))
                 $query .= " ORDER BY {$this->_orderBy} {$this->_orderByOrd}";
 
             # - LIMIT
@@ -320,6 +361,11 @@ abstract class QueryBuilder {
         # - INSERT
         else if ($this->_type === "insert"){
             if ($this->_inserts === []){
+                $this->_reset();
+                return null;
+            }
+
+            if (!self::_isSafeIdentifier($this->_table)){
                 $this->_reset();
                 return null;
             }
@@ -340,11 +386,20 @@ abstract class QueryBuilder {
                 return null;
             }
 
+            if (!self::_isSafeIdentifier($this->_table)){
+                $this->_reset();
+                return null;
+            }
+
             $query = "UPDATE " . $this->_table . " SET ";
             $sets = [];
 
             foreach ($this->_sets as $key => $val){
-                $sets[] = "{$key} = :set_{$key}";
+                if (!self::_isSafeIdentifier($key))
+                    continue;
+
+                $ph = $this->_placeholder($key);
+                $sets[] = "{$key} = :set_{$ph}";
             }
             $query .= implode(", ", $sets);
 
@@ -354,7 +409,11 @@ abstract class QueryBuilder {
 
             $params = [];
             foreach ($this->_sets as $k => $v){
-                $params["set_{$k}"] = $v;
+                if (!self::_isSafeIdentifier($k))
+                    continue;
+
+                $ph = $this->_placeholder($k);
+                $params["set_{$ph}"] = $v;
             }
             foreach ($whereParams as $k => $v){
                 $params[$k] = $v;
@@ -367,6 +426,11 @@ abstract class QueryBuilder {
 
         # - DELETE
         else if ($this->_type === "delete"){
+            if (!self::_isSafeIdentifier($this->_table)){
+                $this->_reset();
+                return null;
+            }
+
             $query = "DELETE FROM " . $this->_table;
 
             ['clause' => $clause, 'params' => $params] = $this->_buildWheres();
@@ -379,6 +443,11 @@ abstract class QueryBuilder {
 
         # - DROP TABLE
         else if ($this->_type === "drop"){
+            if (!self::_isSafeIdentifier($this->_table)){
+                $this->_reset();
+                return null;
+            }
+
             $query = "DROP TABLE " . $this->_table;
 
             $result = $this->_driver->_query($query, []);
@@ -388,6 +457,11 @@ abstract class QueryBuilder {
 
         # - EXIST in TABLE
         else if ($this->_type === "exist"){
+            if (!self::_isSafeIdentifier($this->_table)){
+                $this->_reset();
+                return null;
+            }
+
             $query = "SELECT 1 FROM " . $this->_table;
 
             ['clause' => $clause, 'params' => $params] = $this->_buildWheres();
@@ -401,6 +475,11 @@ abstract class QueryBuilder {
 
         # - COUNT
         else if ($this->_type === "count"){
+            if (!self::_isSafeIdentifier($this->_table) || !self::_isSafeIdentifier($this->_countCol)){
+                $this->_reset();
+                return null;
+            }
+
             $query = "SELECT COUNT({$this->_countCol}) as _count FROM " . $this->_table;
 
             ['clause' => $clause, 'params' => $params] = $this->_buildWheres();
