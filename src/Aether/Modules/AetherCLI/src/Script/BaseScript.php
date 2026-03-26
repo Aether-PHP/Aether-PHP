@@ -25,7 +25,6 @@ declare(strict_types=1);
 namespace Aether\Modules\AetherCLI\Script;
 
 use Aether\Modules\AetherCLI\Cli\CliLogger;
-use Aether\Modules\AetherCLI\src\Script\ScriptInterface;
 
 
 /**

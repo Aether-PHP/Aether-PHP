@@ -55,7 +55,7 @@ class PermissionLayer {
 
         array_push($this->_perms, $_perm);
 
-        Aether()->_db()->_mysql($_ENV["AUTH_DATABASE_GATEWAY"])->_table("users")
+        Aether()->_db()->_mysql($_ENV["AUTH_DATABASE_GATEWAY"])->_table($_ENV["AUTH_TABLE_GATEWAY"])
             ->_update()
             ->_set("perms", $this->_stringify())
             ->_where("uid", $uid)
@@ -76,7 +76,7 @@ class PermissionLayer {
 
         $this->_perms = array_filter($this->_perms, fn($_p) => $_p !== $_perm);
 
-        Aether()->_db()->_mysql($_ENV["AUTH_DATABASE_GATEWAY"])->_table("users")
+        Aether()->_db()->_mysql($_ENV["AUTH_DATABASE_GATEWAY"])->_table(_ENV["AUTH_TABLE_GATEWAY"])
             ->_update()
             ->_set("perms", $this->_stringify())
             ->_where("uid", $uid)

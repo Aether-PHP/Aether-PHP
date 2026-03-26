@@ -22,7 +22,7 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Modules\AetherCLI\src\Script;
+namespace Aether\Modules\AetherCLI\Script;
 
 
 interface ScriptInterface {

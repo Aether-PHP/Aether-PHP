@@ -30,7 +30,7 @@ use Aether\Router\Route\Route;
 use Aether\Security\UserInputValidatorTrait;
 
 
-final class Router implements RouterInterface {
+final class Router {
     use UserInputValidatorTrait;
 
 

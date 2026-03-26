@@ -22,7 +22,7 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Modules\AetherCLI\src\Command\List;
+namespace Aether\Modules\AetherCLI\Command\List;
 
 use Aether\IO\IOFile;
 use Aether\IO\IOTypeEnum;

@@ -60,7 +60,7 @@ class AuthApiController extends Controller {
         if (Aether()->_session()->_auth()->_isLoggedIn()){
             return Aether()->_http()->_response()->_json([
                 "status" => "error",
-                "message" => "user aldready logged-in."
+                "message" => "user already logged-in."
             ], 404)->_send();
         }
 

@@ -67,6 +67,16 @@ interface UserInterface {
      */
     public function _addPerm(mixed $_perm) : UserInstance;
 
+
+    /**
+     * Remove permission to a User
+     *
+     * @param mixed $_perm
+     *
+     * @return UserInstance
+     */
+    public function _removePerm(mixed $_perm) : UserInstance;
+
     /**
      * Get User's permissions : used for admin check-ups and user backend-related operations
      *

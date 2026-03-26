@@ -26,15 +26,8 @@ namespace Aether;
 
 use Aether\Config\ProjectConfig;
 use Aether\Middleware\Pipeline;
-use Aether\Middleware\Stack\AuthMiddleware;
-use Aether\Middleware\Stack\CsrfMiddleware;
-use Aether\Middleware\Stack\MaintenanceMiddleware;
-use Aether\Middleware\Stack\RatelimitMiddleware;
-use Aether\Middleware\Stack\SecurityHeadersMiddleware;
-use Aether\Modules\ModuleFactory;
 use Aether\Router\Controller\ControllerGateway;
 use Aether\Service\ServiceManager;
-use Aether\Session\Session;
 use Aether\Session\SessionHandler;
 use App\App;
 use App\Models\User;
@@ -49,7 +42,6 @@ use App\Models\User;
  * Made by : Dawnless (Alexandre VOISIN)
  * → https://www.linkedin.com/in/alexvsn/
  * → https://dawnless.me
- * → https://hardware-hub.fr
  */
 class Aether {
 
