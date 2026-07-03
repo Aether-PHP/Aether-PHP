@@ -36,4 +36,12 @@ class AppController extends Controller {
     public function home(){
         $this->_render("home");
     }
+
+    /**
+     * [@method] => GET
+     * [@route] => /test
+     */
+    public function tests(){
+        $this->_render("home");
+    }
 }

@@ -33,17 +33,43 @@ use \ReflectionMethod;
 
 final class ControllerGateway {
 
+    private const CACHE_KEY = "aether::routes::compiled";
+    private const CACHE_TTL = 3600;
+
     /**
      * Router => Controller Gateway | & API integration
      */
     public static function _link() : void {
         $router = new Router();
 
-        # - Scan for view controllers
-        self::_scanForController(_root("app/App/Controller/*.php"),  "App\Controller\\", $router);
+        if (Aether()->_cache()->_apcu()->_has(self::CACHE_KEY)){
+            # - Fetch from cache
+            $routes = json_decode(Aether()->_cache()->_apcu()->_get(self::CACHE_KEY), true);
 
-        # - Scan for api controllers
-        self::_scanForController(_root("app/App/Controller/Api/*.php"),  "App\Controller\Api\\", $router);
+            foreach ($routes as $r){
+                $router->_addRoute($r['method'], $r['route'], $r['callable'], $r['middlewares']);
+            }
+        } else {
+
+            # - Scan for view controllers
+            self::_scanForController(_root("app/App/Controller/*.php"), "App\Controller\\", $router);
+
+            # - Scan for api controllers
+            self::_scanForController(_root("app/App/Controller/Api/*.php"), "App\Controller\Api\\", $router);
+
+            # - Cache the compiled route table
+            $compiled = [];
+            foreach ($router->_routes as $method => $routes)
+                foreach ($routes as $route)
+                    $compiled[] = [
+                        'method' => $method,
+                        'route' => $route->_getRoute(),
+                        'callable' => $route->_getCallable(),
+                        'middlewares' => $route->_getMiddlewares(),
+                    ];
+
+            Aether()->_cache()->_apcu()->_set(self::CACHE_KEY, json_encode($compiled), _ttl: self::CACHE_TTL);
+        }
 
         $router->_run();
     }
@@ -87,10 +113,11 @@ final class ControllerGateway {
                 if (!$method_type || !$route)
                     throw new RouterControllerException("[ControllerGateway] - ERROR - Wrong PHP Doc for {$class_name} Controller, method {$method->getName()}");
 
-                if (!is_null($middlewares))
+                if (!is_null($middlewares)){
                     $_router->_addRoute(strtoupper($method_type), $base . $route, "{$class_name}@{$method->getName()}", explode(",", $middlewares));
-                else
+                } else {
                     $_router->_addRoute(strtoupper($method_type), $base . $route, "{$class_name}@{$method->getName()}", []);
+                }
             }
         }
     }

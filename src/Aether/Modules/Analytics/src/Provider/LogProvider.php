@@ -24,10 +24,7 @@ declare(strict_types=1);
 
 namespace Aether\Modules\Analytics\Provider;
 
-use Aether\Aether;
 use Aether\Database\DatabaseWrapper;
-use Aether\Database\Drivers\DatabaseDriver;
-use Aether\Database\Drivers\DatabaseDriverEnum;
 use Aether\Modules\Analytics\Http\HttpPacketModel;
 
 
@@ -77,14 +74,56 @@ final class LogProvider {
     /**
      * Retrieve data from the provided sqlite database.
      *
-     * @param string $_address
+     * @param string $_key
+     * @param string $_val
      *
-     * @return null|array
+     * @return array|null
      */
     public function _retrieve(string $_key, string $_val) : ?array {
         $data = $this->_getDatabase()
             ->_select('*')
             ->_where($_key, $_val)
+            ->_send();
+
+        return $data;
+    }
+
+    /**
+     * Retrieve data from the provided sqlite database (distinct).
+     *
+     * @param string $_key
+     * @param string $_val
+     *
+     * @return array|null
+     */
+    public function _distinct(string $_key) : ?array {
+        $data = $this->_getDatabase()->_raw("SELECT DISTINCT {$_key} FROM analytics;");
+        return $data;
+    }
+
+    /**
+     * Retrieve data from the provided sqlite database (distinct).
+     *
+     * @param string $_key
+     * @param string $_val
+     *
+     * @return array|null
+     */
+    public function _distinctRetrieve(string $_key, string $_v1, string $_v2) : ?array {
+        $data = $this->_getDatabase()->_raw("SELECT DISTINCT {$_key} FROM analytics WHERE $_v1 = $_v2");
+        return $data;
+    }
+
+    /**
+     * Retrieve data from the provided sqlite database (count).
+     *
+     * @param string $_key
+     *
+     * @return null|array
+     */
+    public function _count(string $_key) : ?array {
+        $data = $this->_getDatabase()
+            ->_count($_key)
             ->_send();
 
         return $data;

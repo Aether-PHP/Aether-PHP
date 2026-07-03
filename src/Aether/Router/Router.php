@@ -50,7 +50,7 @@ final class Router {
      *
      * @return Router
      */
-    public function _addRoute(string $method, string $route, $callable, array $middlewares) : Router {
+    public function _addRoute(string $method, string $route, $callable, $middlewares) : Router {
         array_push($this->_routes[$method], new Route($method, $route, $callable, $middlewares));
         return $this;
     }

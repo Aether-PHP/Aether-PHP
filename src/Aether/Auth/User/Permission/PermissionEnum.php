@@ -31,5 +31,6 @@ namespace Aether\Auth\User\Permission;
 enum PermissionEnum : string {
 
     case PERM_ADMIN = "PERM.AETHER.ADMIN";
+    case PERM_MOD = "PERM.AETHER.MOD";
 
 }

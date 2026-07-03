@@ -26,13 +26,14 @@ namespace Aether\Modules\Analytics;
 
 use Aether\Modules\AetherModule;
 use Aether\Modules\Analytics\Http\HttpPacketModel;
+use Aether\Modules\Analytics\Maths\Statistics;
 use Aether\Modules\Analytics\Provider\LogProvider;
 
 
 class Analytics extends AetherModule {
 
     /** @var string $_path */
-    private static string $_path = __DIR__ . "/../ressources/db.sqlite";
+    public static string $_path = __DIR__ . "/../ressources/db.sqlite";
 
     public function __construct(){
         parent::__construct("Analytics Module", 1.0, "Permits you to have insightful http analytics.");
@@ -40,8 +41,9 @@ class Analytics extends AetherModule {
 
     public function _onLoad() : void {
         $httpPacket = HttpPacketModel::_build();
-        $provider = new LogProvider(self::$_path);
         $this->_initDatabase(self::$_path);
+
+        $provider = new LogProvider(self::$_path);
         $provider->_log($httpPacket);
     }
 
