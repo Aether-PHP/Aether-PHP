@@ -8,3 +8,7 @@ DirectorySlash Off
     Order allow,deny
     Deny from all
 </FilesMatch>
+<FilesMatch "^\.sql">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

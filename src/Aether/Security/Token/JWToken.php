@@ -22,9 +22,11 @@
 */
 declare(strict_types=1);
 
-# - Autoload
-require_once '../autoload.php';
+namespace Aether\Security\Token;
 
-# - Core init
-$app = new \Aether\Aether();
-$app->_run();
+
+final class JWToken {
+
+
+
+}

@@ -3,5 +3,6 @@
 .idea/*
 .env
 storage/sessions/sess_*
+storage/cache/*
 *.sqlite
 *.cache.json
