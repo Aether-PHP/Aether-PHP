@@ -22,14 +22,33 @@
 */
 declare(strict_types=1);
 
-# - Autoload
-require_once '../autoload.php';
+namespace Aether\Middleware\Stack;
 
-# - Core init
-$boot_time = \benchmarks\BootTimeBench::_wrap(function (){
-    # - Core init
-    $app = new \Aether\Aether();
-    $app->_run();
-});
+use Aether\Middleware\MiddlewareInterface;
 
-print_r("<br><br>" . $boot_time . " ms");
+
+class CorsMiddleware implements MiddlewareInterface {
+
+    /**
+     * @param callable $_next
+     */
+    public function _handle(callable $_next){
+
+        header(
+            "Content-Security-Policy: " .
+            "default-src 'self'; " .
+            "script-src 'self'; " .
+            "style-src 'self'; " .
+            "img-src 'self'; " .
+            "font-src 'self'; " .
+            "connect-src 'self'; " .
+            "frame-src 'none'; " .
+            "object-src 'none'; " .
+            "base-uri 'self'; " .
+            "form-action 'self'; " .
+            "frame-ancestors 'none';"
+        );
+
+        $_next();
+    }
+}

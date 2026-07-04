@@ -25,12 +25,11 @@ declare(strict_types=1);
 namespace App;
 
 use Aether\Aether;
+use Aether\Middleware\Stack\CorsMiddleware;
 use Aether\Middleware\Stack\CsrfMiddleware;
 use Aether\Middleware\Stack\MaintenanceMiddleware;
 use Aether\Middleware\Stack\RatelimitMiddleware;
 use Aether\Middleware\Stack\SecurityHeadersMiddleware;
-use Aether\Modules\Analytics\Analytics;
-use Aether\Modules\I18n\I18N;
 use Aether\Modules\ModuleFactory;
 
 
@@ -44,11 +43,12 @@ class App {
         MaintenanceMiddleware::class,
         RatelimitMiddleware::class,
         CsrfMiddleware::class,
-        SecurityHeadersMiddleware::class
+        SecurityHeadersMiddleware::class,
+        CorsMiddleware::class
     ];
 
     /** @var array $_modules */
-    private static array $_modules = [ Analytics::class ];
+    private static array $_modules = [];
 
 
     public static function _init() : void {

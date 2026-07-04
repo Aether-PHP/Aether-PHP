@@ -44,7 +44,7 @@ class RatelimitMiddleware implements MiddlewareInterface {
         if (!is_null($fromCache)){
             if ($fromCache["req"] >= $maxlimit && time() < $fromCache['t'] + $secondInterval){
                 http_response_code(403);
-                $cache->_set("ratelimit://" . $ip, ["req" => $fromCache["req"], 't' => time()], 60 * 60 * 24);
+                $cache->_set("ratelimit://" . $ip, ["req" => $fromCache["req"], 't' => time()], 60 * 60);
 
                 if (str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json')) {
                     return Aether()->_http()->_response()->_json([
@@ -53,16 +53,14 @@ class RatelimitMiddleware implements MiddlewareInterface {
                     ], 403)->_send();
                 }
 
-                return Aether()->_http()->_response()->_html(
-                    '<h1>403 - Forbidden</h1><p>RateLimiter flagged YOU !</p>', 403
-                )->_send();
+                return Aether()->_http()->_response()->_html('<h1>403 - Forbidden</h1><p>RateLimiter flagged YOU !</p>', 403)->_send();
 
             } else if (time() >= $fromCache['t'] + $secondInterval)
-                $cache->_set("ratelimit://" . $ip, ["req" => 1, 't' => time()], 60 * 60 * 24);
+                $cache->_set("ratelimit://" . $ip, ["req" => 1, 't' => time()], 60 * 60);
             else
-                $cache->_set("ratelimit://" . $ip, ["req" => $fromCache["req"] + 1, 't' => $fromCache['t']], 60 * 60 * 24);
+                $cache->_set("ratelimit://" . $ip, ["req" => $fromCache["req"] + 1, 't' => $fromCache['t']], 60 * 60);
         } else
-            $cache->_set("ratelimit://" . $ip, ["req" => 1, 't' => time()], 60 * 60 * 24);
+            $cache->_set("ratelimit://" . $ip, ["req" => 1, 't' => time()], 60 * 60);
 
         $_next();
     }

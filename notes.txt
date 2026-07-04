@@ -1,0 +1,31 @@
+Améliorations structurelles (haute priorité)
+
+1. Système de migrations — Tu as un QueryBuilder solide mais aucun outil pour versionner le schéma de ta base. Un système de migrations (up/down) avec tracking en table serait un ajout
+naturel via ta CLI.
+2. Dependency Injection Container — Ton ServiceManager centralise les services, mais un vrai conteneur DI avec résolution automatique des dépendances (autowiring via Reflection) rendrait
+le framework plus flexible et testable.
+3. Validation des données — Pas de couche de validation dédiée (rules, messages d'erreur). Un validateur fluent (Validator::make($data)->rule('email', 'required|email')) est quasi
+indispensable pour un framework web.
+
+Améliorations fonctionnelles (moyenne priorité)
+
+4. ORM léger / Model layer — Ton QueryBuilder est bas niveau. Un layer Model avec relations (hasMany, belongsTo), accessors/mutators, et scopes simplifierait le code applicatif.
+5. Event system — Un dispatcher d'événements permettrait de découpler les composants (ex: UserRegistered event qui trigger un mail, un log, etc.).
+6. Moteur de templates — Ton view system est du PHP brut. Un mini-moteur avec héritage de layouts (@extends, @section, @yield) et échappement automatique réduirait les risques XSS.
+7. Système de logging — Pas de logger structuré. Un logger PSR-3 compatible avec rotation de fichiers, niveaux (debug/info/error), et contexte serait utile en production.
+
+Améliorations DX (Developer Experience)
+
+8. Étoffer la CLI — Ajouter des générateurs : aether make:controller, make:model, make:middleware, make:migration. Ça accélère le développement.
+9. Error handling en dev — Une page d'erreur détaillée en mode APP_ENV=dev (stack trace, request dump, query log) plutôt qu'une exception brute.
+10. composer.json — Même sans dépendances externes, un composer.json avec autoload PSR-4 rendrait le framework installable via Composer et compatible avec l'écosystème PHP.
+
+Améliorations avancées (plus tard)
+
+11. Tests d'intégration — Tes tests unitaires sont bons, mais un TestCase HTTP qui simule des requêtes ($this->get('/api/users')->assertStatus(200)) serait un gros plus.
+12. Gestion des WebSockets ou SSE — Si tu veux aller vers le temps réel.
+13. Queue system — Pour les tâches asynchrones (emails, traitements lourds).
+
+---
+Mon conseil : commence par les migrations et la validation — ce sont les deux manques les plus ressentis au quotidien quand on développe avec un framework. Le conteneur DI viendrait
+ensuite pour solidifier l'architecture.

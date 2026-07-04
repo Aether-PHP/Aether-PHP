@@ -42,21 +42,6 @@ class SecurityHeadersMiddleware implements MiddlewareInterface {
         header('Cross-Origin-Opener-Policy: same-origin');
         header('Cross-Origin-Resource-Policy: same-origin');
 
-        header(
-            "Content-Security-Policy: " .
-            "default-src 'self'; " .
-            "script-src 'self'; " .
-            "style-src 'self'; " .
-            "img-src 'self'; " .
-            "font-src 'self'; " .
-            "connect-src 'self'; " .
-            "frame-src 'none'; " .
-            "object-src 'none'; " .
-            "base-uri 'self'; " .
-            "form-action 'self'; " .
-            "frame-ancestors 'none';"
-        );
-
         $_next();
     }
 }
