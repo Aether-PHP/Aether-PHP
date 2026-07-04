@@ -29,12 +29,18 @@ enum IOTypeEnum : string {
 
     case TEXT = 'text';
     case JSON = 'json';
+    case XML  = 'xml';
+    case PHP  = 'php';
+    case JS  = 'js';
+    case CSS  = 'css';
     case YAML = 'yaml';
     case ENV  = 'env';
     case CSV  = 'csv';
     case PNG  = 'png';
-    case PHP  = 'php';
     case JPG  = 'jpg';
+    case WEBP = 'webp';
+    case GIF  = 'gif';
+    case PDF  = 'pdf';
     case OTHER  = 'other';
 
 }
