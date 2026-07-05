@@ -28,7 +28,8 @@ namespace Aether\Http;
 enum HttpParameterTypeEnum : string {
 
     case PHP_INPUT = 'php_input';
-    case FORM_INPUT = 'form_input';
+    case POST_INPUT = 'post_input';
+    case GET_INPUT = 'get_input';
 
 
     /**
@@ -37,7 +38,8 @@ enum HttpParameterTypeEnum : string {
     public function _make() : HttpParameterUnpacker {
         return match ($this) {
             self::PHP_INPUT => new HttpParameterUnpacker(HttpParameterTypeEnum::PHP_INPUT),
-            self::FORM_INPUT => new HttpParameterUnpacker(HttpParameterTypeEnum::FORM_INPUT)
+            self::POST_INPUT => new HttpParameterUnpacker(HttpParameterTypeEnum::POST_INPUT),
+            self::GET_INPUT => new HttpParameterUnpacker(HttpParameterTypeEnum::GET_INPUT),
         };
     }
 }

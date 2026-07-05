@@ -37,8 +37,10 @@ class HttpParameterUnpacker {
     public function __construct(HttpParameterTypeEnum $_type){
         if ($_type === HttpParameterTypeEnum::PHP_INPUT)
             $this->_decoded = json_decode(file_get_contents('php://input'), true);
-        elseif ($_type === HttpParameterTypeEnum::FORM_INPUT)
+        elseif ($_type === HttpParameterTypeEnum::POST_INPUT)
             $this->_decoded = $_POST;
+        elseif ($_type === HttpParameterTypeEnum::GET_INPUT)
+            $this->_decoded = $_GET;
     }
 
     /**
