@@ -19,8 +19,6 @@ The divine secure and lightweight PHP framework
   <img src="https://img.shields.io/github/stars/Aether-PHP/Aether-PHP?style=flat-square&color=4F5B93" alt="Stars"/>
 </p>
 
-<h1 align="center">Aether-PHP</h1>
-
 
 <p align="center">
 A ground-up PHP 8.3+ framework built for speed, security, and surgical precision.<br/>
