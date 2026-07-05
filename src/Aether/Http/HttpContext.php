@@ -22,59 +22,51 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Service\Hub;
+namespace Aether\Http;
 
-use Aether\Http\HttpContext;
-use Aether\Http\HttpParameterTypeEnum;
-use Aether\Http\HttpParameterUnpacker;
 use Aether\Http\Methods\HttpMethod;
 use Aether\Http\Methods\HttpMethodEnum;
-use Aether\Http\Request\HttpRequest;
-use Aether\Http\RequestFactory;
-use Aether\Http\ResponseFactory;
 
 
-final class HttpServiceHub {
+final class HttpContext {
 
-    /**
-     * @return HttpContext
-     */
-    public function _context() : HttpContext {
-        return new HttpContext();
+    /** @var string $_ipaddr */
+    private string $_ipaddr;
+
+    /** @var string $_useragent */
+    private string $_useragent;
+
+    /** @var HttpMethod $_method */
+    private HttpMethod $_method;
+
+    /** @var string $_route */
+    private string $_route;
+
+
+    public function __construct(){
+        $this->_ipaddr = $_SERVER['REMOTE_ADDR'];
+        $this->_useragent = $_SERVER['HTTP_USER_AGENT'];
+        $this->_method = HttpMethodEnum::{$_SERVER['REQUEST_METHOD']}->_make();
+        $this->_route = $_SERVER['REQUEST_URI'];
     }
 
     /**
-     * @param HttpMethodEnum $_method
-     * @param string $_destination
-     *
-     * @return HttpRequest
+     * @return string
      */
-    public function _request(HttpMethodEnum $_method, string $_destination) : HttpRequest {
-        return RequestFactory::_create($_method, $_destination);
-    }
+    public function _getIpaddr() : string { return $this->_ipaddr; }
 
     /**
-     * @return ResponseFactory
+     * @return string
      */
-    public function _response() : ResponseFactory {
-        return new ResponseFactory();
-    }
+    public function _getUseragent() : string { return $this->_useragent; }
 
     /**
-     * @param HttpMethodEnum $_method
-     *
      * @return HttpMethod
      */
-    public function _method(HttpMethodEnum $_method) : HttpMethod {
-        return $_method->_make();
-    }
+    public function _getMethod() : HttpMethod { return $this->_method; }
 
     /**
-     * @param HttpParameterTypeEnum $_parameterType
-     *
-     * @return HttpParameterUnpacker
+     * @return string
      */
-    public function _parameters(HttpParameterTypeEnum $_parameterType) : HttpParameterUnpacker {
-        return $_parameterType->_make();
-    }
+    public function _getRoute() : string { return $this->_route; }
 }
