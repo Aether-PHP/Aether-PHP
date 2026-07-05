@@ -1,3 +1,16 @@
+
+```php
+     █████╗ ███████╗████████╗██╗  ██╗███████╗██████╗         ██████╗ ██╗  ██╗██████╗
+     ██╔══██╗██╔════╝╚══██╔══╝██║  ██║██╔════╝██╔══██╗        ██╔══██╗██║  ██║██╔══██╗
+     ███████║█████╗     ██║   ███████║█████╗  ██████╔╝ █████╗ ██████╔╝███████║██████╔╝
+    ██╔══██║██╔══╝     ██║   ██╔══██║██╔══╝  ██╔══██╗ ╚════╝ ██╔═══╝ ██╔══██║██╔═══╝
+██║  ██║███████╗   ██║   ██║  ██║███████╗██║  ██║        ██║     ██║  ██║██║
+╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝        ╚═╝     ╚═╝  ╚═╝╚═╝
+```
+<p align="center">
+The divine secure and lightweight PHP framework
+</p>
+
 <p align="center">
   <img src="https://img.shields.io/badge/PHP-8.3+-4F5B93?style=flat-square&logo=php&logoColor=white" alt="PHP 8.3+"/>
   <img src="https://img.shields.io/badge/footprint-%3C_1MB-1a1a2e?style=flat-square" alt="< 1MB"/>
@@ -7,6 +20,7 @@
 </p>
 
 <h1 align="center">Aether-PHP</h1>
+
 
 <p align="center">
 A ground-up PHP 8.3+ framework built for speed, security, and surgical precision.<br/>
