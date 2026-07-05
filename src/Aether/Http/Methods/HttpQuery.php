@@ -25,34 +25,29 @@ declare(strict_types=1);
 namespace Aether\Http\Methods;
 
 
-enum HttpMethodEnum : string {
+final class HttpQuery extends HttpMethod {
 
-    case GET = 'GET';
-    case POST = 'POST';
-    case QUERY = 'QUERY';
-    case PUT = 'PUT';
-    case DELETE = 'DELETE';
-
-    #TODO
-    case PATCH = 'PATCH';
-    case OPTIONS = 'OPTIONS';
-    case HEAD = 'HEAD';
-
-    /**
-     * @return string
-     */
-    public function _get() : string { return $this->value; }
-
-    /**
-     * @return HttpMethod
-     */
-    public function _make() : HttpMethod {
-        return match($this){
-            self::POST => new HttpPost(),
-            self::GET => new HttpGet(),
-            self::QUERY => new HttpQuery(),
-            self::PUT => new HttpPut(),
-            self::DELETE => new HttpDelete()
-        };
+    public function __construct(){
+        parent::__construct(HttpMethodEnum::QUERY->value);
     }
+
+    /**
+     * @return bool
+     */
+    public function _isSafe() : bool { return true; }
+
+    /**
+     * @return bool
+     */
+    public function _isCacheable() : bool { return true; }
+
+    /**
+     * @return bool
+     */
+    public function _allowsBody() : bool { return false; }
+
+    /**
+     * @return bool
+     */
+    public function _requiresBody() : bool { return false; }
 }
