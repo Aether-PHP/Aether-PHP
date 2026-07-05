@@ -38,24 +38,19 @@ use Aether\Modules\ModuleFactory;
  */
 class App {
 
-    /** @var string[] $_middlewares */
-    private static $_middlewares = [
-        MaintenanceMiddleware::class,
-        RatelimitMiddleware::class,
-        CsrfMiddleware::class,
-        SecurityHeadersMiddleware::class,
-        CorsMiddleware::class
-    ];
-
-    /** @var array $_modules */
-    private static array $_modules = [];
-
 
     public static function _init() : void {
-        # - Modules load
-        ModuleFactory::_load(self::$_modules);
 
         # - Middlewares load
-        Aether::$_middlewares = self::$_middlewares;
+        Aether::$_middlewares = [
+            MaintenanceMiddleware::class,
+            RatelimitMiddleware::class,
+            CsrfMiddleware::class,
+            SecurityHeadersMiddleware::class,
+            CorsMiddleware::class
+        ];
+
+        # - Modules load
+        ModuleFactory::_load([ ]);
     }
 }
