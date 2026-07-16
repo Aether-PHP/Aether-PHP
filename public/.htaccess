@@ -1,12 +1,24 @@
-RewriteEngine on
+RewriteEngine On
+
+# Bloque tous les .php sauf index.php
+<FilesMatch "\.php$">
+    Require all denied
+</FilesMatch>
+
+<Files "index.php">
+    Require all granted
+</Files>
+
+# Front Controller
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule . index.php [L]
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L]
 
 DirectorySlash Off
 
-<FilesMatch "^\.env">
-    Order allow,deny
-    Deny from all
+# Fichiers sensibles
+<FilesMatch "^\.env|^.ht">
+    Require all denied
 </FilesMatch>
 <FilesMatch "^\.sql">
     Order allow,deny
