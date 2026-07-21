@@ -34,7 +34,7 @@ class RatelimitMiddleware implements MiddlewareInterface {
      */
     public function _handle(callable $_next){
         $ip = $_SERVER['REMOTE_ADDR'];
-        $cache = Aether()->_cache()->_files();
+        $cache = Aether()->_cache()->_apcu();
 
         $fromCache = $cache->_get("ratelimit://" . $ip);
 

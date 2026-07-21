@@ -39,7 +39,11 @@ final class EnvDataUnpacker {
      * @throws EnvConfigException
      */
     public function __construct(){
-        $_raw = IOFile::_open(IOTypeEnum::ENV, _root(".env"))->_readDecoded();
+        $_raw = Aether()->_cache()->_apcu()->_get("env://", function (){
+            $t = IOFile::_open(IOTypeEnum::ENV, _root(".env"))->_readDecoded();
+            Aether()->_cache()->_apcu()->_set("env://", $t, 60 * 10);
+            return $t;
+        });
 
         if (!is_array($_raw) || $_raw === [])
             throw new EnvConfigException("Env config missing or invalid. Ensure .env exists at project root and is readable.");

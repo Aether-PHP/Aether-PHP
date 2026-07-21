@@ -36,13 +36,13 @@ class Apcu implements CacheInterface {
 
     /**
      * @param string $_key
-     * @param mixed|null $_default
+     * @param mixed|null $_fallback
      *
      * @return mixed
      */
-    public function _get(string $_key, mixed $_default = null) : mixed {
+    public function _get(string $_key, mixed $_fallback = null) : mixed {
         $val = apcu_fetch($_key, $ok);
-        return $ok ? $val : $_default;
+        return $ok ? $val : $_fallback();
     }
 
     /**

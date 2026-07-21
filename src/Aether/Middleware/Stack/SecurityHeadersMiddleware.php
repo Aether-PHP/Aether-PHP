@@ -42,6 +42,12 @@ class SecurityHeadersMiddleware implements MiddlewareInterface {
         header('Cross-Origin-Opener-Policy: same-origin');
         header('Cross-Origin-Resource-Policy: same-origin');
 
+        header('Referrer-Policy: strict-origin-when-cross-origin');
+
+        if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'){
+            header('Strict-Transport-Security: max-age=31536000; preload');
+        }
+
         $_next();
     }
 }

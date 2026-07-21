@@ -24,6 +24,8 @@ declare(strict_types=1);
 
 namespace Aether\Modules\AetherCLI\Command\List;
 
+use Aether\IO\IOFile;
+use Aether\IO\IOTypeEnum;
 use Aether\Modules\AetherCLI\Cli\CliColorEnum;
 use Aether\Modules\AetherCLI\Command\Command;
 use Aether\Modules\AetherCLI\Script\BaseScript;
@@ -99,7 +101,18 @@ class SourceCommand extends Command {
 
             echo CliColorEnum::FG_BRIGHT_GREEN->_paint("[SourceCommand] - Successfully imported source file '{$fullClass}'.") . PHP_EOL;
         } else if ($_prototype === "db"){
-            echo CliColorEnum::FG_BLUE->_paint("[SourceCommand] - Not implemented yet.") . PHP_EOL;
+            $jsondb_schema = $this->_getExtra()[0];
+
+            $data = IOFile::_open(IOTypeEnum::JSON, $jsondb_schema)->_readDecoded();
+
+            foreach ($data as $dbname => $data){
+                //Aether()->_db()->_mysql("mysql")->_raw("CREATE DATABASE IF NOT EXISTS {$dbname}");
+                foreach ($data as $tablename => $tdata){
+                    foreach ($tdata as $column => $columndata){
+                        var_dump($column . " " . $columndata . ",");
+                    }
+                }
+            }
         }
 
         return true;

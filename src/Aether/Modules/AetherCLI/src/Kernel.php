@@ -30,7 +30,7 @@ use Aether\Modules\AetherCLI\Cli\CliLogger;
 use Aether\Modules\AetherCLI\Command\CommandDispatcher;
 use Aether\Modules\AetherCLI\Command\List\MakeCommand;
 use Aether\Modules\AetherCLI\Command\List\SourceCommand;
-use Aether\Modules\AetherCLI\src\Command\List\SetupCommand;
+use Aether\Modules\AetherCLI\Command\List\SetupCommand;
 use Aether\Modules\AetherModule;
 
 

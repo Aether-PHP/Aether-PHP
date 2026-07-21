@@ -30,7 +30,6 @@ use Aether\Router\Controller\ControllerGateway;
 use Aether\Service\ServiceManager;
 use Aether\Session\SessionHandler;
 use App\App;
-use App\Models\User;
 
 /*
  * Pure PHP 8.3+ framework built from scratch.

@@ -26,5 +26,10 @@ declare(strict_types=1);
 require_once '../autoload.php';
 
 # - Core init
-$app = new \Aether\Aether();
-$app->_run();
+$boot_time = \benchmarks\BootTimeBench::_wrap(function (){
+    # - Core init
+    $app = new \Aether\Aether();
+    $app->_run();
+});
+
+print_r("<br><br>" . $boot_time . " ms");
