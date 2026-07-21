@@ -44,10 +44,10 @@ final class HttpQuery extends HttpMethod {
     /**
      * @return bool
      */
-    public function _allowsBody() : bool { return false; }
+    public function _allowsBody() : bool { return true; }
 
     /**
      * @return bool
      */
-    public function _requiresBody() : bool { return false; }
+    public function _requiresBody() : bool { return true; }
 }

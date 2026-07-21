@@ -40,6 +40,7 @@ final class Router {
         "POST" => [],
         "DELETE" => [],
         "PUT" => [],
+        "QUERY" => []
     );
 
 
