@@ -37,6 +37,14 @@ interface CacheInterface {
 
     /**
      * @param string $_key
+     * @param callable $_fallback
+     *
+     * @return mixed
+     */
+    public function _getFallback(string $_key, callable $_fallback) : mixed;
+
+    /**
+     * @param string $_key
      * @param mixed $_value
      * @param int $_ttl
      *

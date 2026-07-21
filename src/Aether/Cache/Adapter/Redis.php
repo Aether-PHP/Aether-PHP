@@ -42,7 +42,7 @@ class Redis implements CacheInterface {
         $port = Aether()->_config()->_get("REDIS_PORT");
 
         if (is_null($addr) || is_null($port))
-            throw new CacheRedisException("[Caching] - Redis - Configuration parameters are missing in the .env file.");
+            throw new CacheRedisException("[Caching] - Redis - Configuration parameters are missing in the environment.");
 
         $this->_redis->connect($addr, $port);
     }
@@ -95,5 +95,18 @@ class Redis implements CacheInterface {
      */
     public function _has(string $_key) : bool {
         return $this->_redis->exists($_key) > 0;
+    }
+
+    /**
+     * @param string $_key
+     * @param callable $_fallback
+     *
+     * @return mixed
+     */
+    public function _getFallback(string $_key, callable $_fallback) : mixed {
+        if ($this->_has($_key))
+            return $this->_get($_key);
+
+        return $_fallback();
     }
 }
