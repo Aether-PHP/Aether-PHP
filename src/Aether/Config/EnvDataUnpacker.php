@@ -39,7 +39,7 @@ final class EnvDataUnpacker {
      * @throws EnvConfigException
      */
     public function __construct(){
-        $_raw = Aether()->_cache()->_apcu()->_get("env://", function (){
+        $_raw = Aether()->_cache()->_apcu()->_getFallback("env://", function (){
             $t = IOFile::_open(IOTypeEnum::ENV, _root(".env"))->_readDecoded();
             Aether()->_cache()->_apcu()->_set("env://", $t, 60 * 10);
             return $t;

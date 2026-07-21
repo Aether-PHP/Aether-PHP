@@ -106,12 +106,20 @@ class SourceCommand extends Command {
             $data = IOFile::_open(IOTypeEnum::JSON, $jsondb_schema)->_readDecoded();
 
             foreach ($data as $dbname => $data){
-                //Aether()->_db()->_mysql("mysql")->_raw("CREATE DATABASE IF NOT EXISTS {$dbname}");
+                $raw = "CREATE DATABASE IF NOT EXISTS `{$dbname}`; USE `{$dbname}`;";
+
                 foreach ($data as $tablename => $tdata){
+                    $raw .= "CREATE TABLE IF NOT EXISTS `{$tablename}` (";
+
                     foreach ($tdata as $column => $columndata){
-                        var_dump($column . " " . $columndata . ",");
+                        $raw .= "`{$column}` {$columndata},";
                     }
+                    $raw = substr($raw, 0, -1);
+                    $raw .= ");";
                 }
+                Aether()->_db()->_mysql("mysql")->_raw($raw);
+
+                echo CliColorEnum::FG_BRIGHT_GREEN->_paint("[SourceCommand] - Successfully imported database file '{$jsondb_schema}'.") . PHP_EOL;
             }
         }
 
