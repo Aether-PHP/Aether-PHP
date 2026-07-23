@@ -24,8 +24,6 @@ declare(strict_types=1);
 
 namespace App\Controller\Api;
 
-use Aether\Config\ProjectConfig;
-use Aether\Http\Response\Format\HttpResponseFormatEnum;
 use Aether\Router\Controller\Controller;
 
 
