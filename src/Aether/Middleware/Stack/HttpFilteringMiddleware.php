@@ -22,37 +22,50 @@
 */
 declare(strict_types=1);
 
-namespace App;
+namespace Aether\Middleware\Stack;
 
-use Aether\Aether;
-use Aether\Middleware\Stack\CorsMiddleware;
-use Aether\Middleware\Stack\CsrfMiddleware;
-use Aether\Middleware\Stack\HttpFilteringMiddleware;
-use Aether\Middleware\Stack\MaintenanceMiddleware;
-use Aether\Middleware\Stack\RatelimitMiddleware;
-use Aether\Middleware\Stack\SecurityHeadersMiddleware;
-use Aether\Modules\ModuleFactory;
+use Aether\Middleware\MiddlewareInterface;
 
 
-/**
- * @class App : will handle App-related stuff
- */
-class App {
+class HttpFilteringMiddleware implements MiddlewareInterface {
+
+    /** @var bool EXCLUDE_GET */
+    private const bool EXCLUDE_GET = true;
 
 
-    public static function _init() : void {
+    /**
+     * @param callable $_next
+     */
+    public function _handle(callable $_next){
+        $cache = Aether()->_cache()->_apcu();
 
-        # - Middlewares load
-        Aether::$_middlewares = [
-            MaintenanceMiddleware::class,
-            RatelimitMiddleware::class,
-            HttpFilteringMiddleware::class,
-            CsrfMiddleware::class,
-            SecurityHeadersMiddleware::class,
-            CorsMiddleware::class
-        ];
+        $ip = Aether()->_http()->_context()->_getIpaddr();
+        $method = Aether()->_http()->_context()->_getMethod();
+        $route = Aether()->_http()->_context()->_getRoute();
 
-        # - Modules load
-        ModuleFactory::_load([ ]);
+        if (self::EXCLUDE_GET && $method->_getName() == "GET")
+            return $_next();
+
+        # - The goal here is to filter strange http requests
+        $key = "filtering://" . $method->_getName() . ":" . $ip . ':' . $route;
+
+        if ($cache->_has($key)){
+
+            if (str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json')){
+                return Aether()->_http()->_response()->_json([
+                    "status" => "error",
+                    "message" => "Flagged for two requests at the same time.",
+                ], 403)->_send();
+            }
+
+            return Aether()->_http()->_response()->_html(
+                '<h1>403 - Forbidden</h1><p>Flagged for two requests at the same time.</p>', 403
+            )->_send();
+
+        } else {
+            $cache->_set($key, true, 1);
+        }
+
+        $_next();
     }
 }

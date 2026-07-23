@@ -44,7 +44,7 @@ final class ControllerGateway {
 
         if (Aether()->_cache()->_apcu()->_has(self::CACHE_KEY)){
             # - Fetch from cache
-            $routes = json_decode(Aether()->_cache()->_apcu()->_get(self::CACHE_KEY, function (){ return []; } ), true);
+            $routes = json_decode(Aether()->_cache()->_apcu()->_get(self::CACHE_KEY), true);
 
             foreach ($routes as $r){
                 $router->_addRoute($r['method'], $r['route'], $r['callable'], $r['middlewares']);

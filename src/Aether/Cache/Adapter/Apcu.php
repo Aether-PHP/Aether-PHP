@@ -41,11 +41,8 @@ class Apcu implements CacheInterface {
      * @return mixed
      */
     public function _get(string $_key, mixed $_fallback = null) : mixed {
-        if (!$this->_has($_key))
-            return null;
-
         $val = apcu_fetch($_key, $ok);
-        return $ok ? $val : $_fallback();
+        return $ok ? $val : $_fallback;
     }
 
     /**
