@@ -22,15 +22,46 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Auth\User\Permission;
+namespace Aether\Http\Session\Security;
+
+use Aether\Security\Token\HmacSignature;
 
 
-/**
- * Enum used for representing the different permission layers
- */
-enum PermissionEnum : string {
+abstract class SessionSecurityLayer {
 
-    case PERM_ADMIN = "PERM.AETHER.ADMIN";
-    case PERM_MOD = "PERM.AETHER.MOD";
+    /**
+     * @param string $_key
+     *
+     * @return mixed
+     */
+    protected static function _decodeNode(string $_key) : mixed {
+        if (!isset($_SESSION[$_key]))
+            return null;
 
+        $b64decoded = base64_decode($_SESSION[$_key]);
+        [$rawData, $hmacSignStr] = explode(':::', $b64decoded, 2) + [1 => ''];
+
+        if (!HmacSignature::_hmacEquals($hmacSignStr, $rawData))
+            return null;
+
+        $data = json_decode($rawData, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE)
+            return $rawData;
+
+        return $data;
+    }
+
+    /**
+     * @param string $_key
+     * @param mixed $_dat
+     *
+     * @return string
+     */
+    protected static function _encodeNode(string $_key, mixed $_dat) : string {
+        if (is_array($_dat))
+            $_dat = json_encode($_dat);
+
+        return base64_encode($_dat . ":::" . hash_hmac('sha256', $_dat, $_ENV["SESSION_HMAC"]));
+    }
 }

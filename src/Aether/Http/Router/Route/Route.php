@@ -22,42 +22,49 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Auth\Gateway;
-
-use Aether\Auth\AuthInstance;
-use Aether\Auth\User\UserFactory;
+namespace Aether\Http\Router\Route;
 
 
-class LogoutAuthGateway extends AuthInstance implements AuthGatewayEventInterface {
+class Route implements RouteInterface {
 
-    public function __construct(){
-        parent::__construct("", "");
-    }
+    /** @var string $_method */
+    private string $_method;
 
-    /**
-     * Auth job's purpose : check if user is already logged out.
-     *
-     * @return bool
-     */
-    public function _tryAuth() : bool {
-        if (!Aether()->_session()->_auth()->_isLoggedIn())
-            return $this->_setStatus($this->_onFailure(), false);
+    /** @var string $_route */
+    private string $_route;
 
-        return $this->_setStatus($this->_onSuccess([]), true);
-    }
+    /** @var $_callable */
+    private $_callable;
 
-    /***
-     * @param array $_data
-     *
-     * @return string
-     */
-    public function _onSuccess(array $_data) : string {
-        Aether()->_session()->_get()->_removeValue(UserFactory::SESSION_KEY);
-        return "user successfullly logged out.";
+    /** @var $_middlewares */
+    private $_middlewares;
+
+
+    public function __construct(string $_method, string $_route, $_callable, $_middlewares){
+        $this->_method = $_method;
+        $this->_route = $_route;
+        $this->_callable = $_callable;
+        $this->_middlewares = $_middlewares;
     }
 
     /**
      * @return string
      */
-    public function _onFailure() : string { return "failed"; }
+    public function _getMethod() : string { return $this->_method; }
+
+    /**
+     * @return string
+     */
+    public function _getRoute() : string {  return $this->_route; }
+
+    /**
+     * @return
+     */
+    public function _getCallable() { return $this->_callable; }
+
+    /**
+     * @return
+     */
+    public function _getMiddlewares() { return $this->_middlewares; }
+
 }

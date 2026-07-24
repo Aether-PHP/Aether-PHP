@@ -22,60 +22,24 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Session;
-
-use Aether\Session\Security\SessionSecurityLayer;
+namespace Aether\Http\Auth\Gateway;
 
 
-class Session extends SessionSecurityLayer {
-
+interface AuthGatewayEventInterface {
 
     /**
-     * @param string $_key
+     * Bind event when auth succeed - Return success message
      *
-     * @return mixed
-     */
-    public function _getValue(string $_key) : mixed {
-        if (!$this->_valueExist($_key))
-            return null;
-
-        return self::_decodeNode($_key);
-    }
-
-    /**
-     * @param string $_key
-     * @param mixed $_dat
+     * @param array $_data
      *
-     * @return void
+     * @return string
      */
-    public function _setValue(string $_key, mixed $_dat) : void {
-        $_SESSION[$_key] = self::_encodeNode($_key, $_dat);
-    }
+    public function _onSuccess(array $_data) : string;
 
     /**
-     * @param string $_key
+     * Bind event when auth failed - Return failure message
      *
-     * @return bool
+     * @return string
      */
-    public function _valueExist(string $_key) : bool {
-        return isset($_SESSION[$_key]);
-    }
-
-    /**
-     * @param string $_key
-     *
-     * @return void
-     */
-    public function _removeValue(string $_key) : void { unset($_SESSION[$_key]); }
-
-    /**
-     * @return false|string
-     */
-    public function _getSessId() : false|string { return session_id(); }
-
-    /**
-     * @return bool
-     */
-    public function _regenerateId() : bool { return session_regenerate_id(true); }
-
+    public function _onFailure() : string;
 }

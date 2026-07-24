@@ -22,25 +22,15 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Auth;
+namespace Aether\Http\Auth\User\Permission;
 
 
-use Aether\Auth\User\UserFactory;
-use Aether\Auth\User\UserInstance;
+/**
+ * Enum used for representing the different permission layers
+ */
+enum PermissionEnum : string {
 
-final class AuthHandler {
+    case PERM_ADMIN = "PERM.AETHER.ADMIN";
+    case PERM_MOD = "PERM.AETHER.MOD";
 
-    /**
-     * @return bool
-     */
-    public function _isLoggedIn() : bool {
-        return UserFactory::_isLoggedIn();
-    }
-
-    /**
-     * @return ?UserInstance
-     */
-    public function _getUser() : ?UserInstance {
-        return UserFactory::_fromSession();
-    }
 }

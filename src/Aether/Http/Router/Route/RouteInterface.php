@@ -22,53 +22,29 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Auth\User;
+namespace Aether\Http\Router\Route;
 
 
-class UserFactory {
-
-    public const SESSION_KEY = 'user';
+interface RouteInterface {
 
     /**
-     * Check if a user is logged in.
+     * Get Route's HTTP method
      *
-     * @param array $_session
-     *
-     * @return bool
+     * @return string
      */
-    public static function _isLoggedIn() : bool {
-        if (!Aether()->_session()->_get()->_valueExist(self::SESSION_KEY))
-            return false;
-
-        return !is_null(self::_fromSession());
-    }
+    public function _getMethod() : string;
 
     /**
-     * @return ?UserInstance
+     * Get Route's name
+     *
+     * @return string
      */
-    public static function _fromSession() : ?UserInstance {
-        if (!Aether()->_session()->_get()->_valueExist(self::SESSION_KEY))
-            return null;
-
-        $frmSession = Aether()->_session()->_get()->_getValue(self::SESSION_KEY);
-        return new UserInstance($frmSession["id"], $frmSession["username"], $frmSession["email"], $frmSession["perms"]);
-    }
+    public function _getRoute() : string;
 
     /**
-     * @param mixed $_val
+     * Get Route's callable function
      *
-     * @return array|null
+     * @return
      */
-    public static function _toSession(mixed $_val) : ?array {
-        if ($_val instanceof UserInstance)
-            return array(
-                "id" => $_val->_getUid(),
-                "username" => $_val->_getUsername(),
-                "email" => $_val->_getEmail(),
-                "perms" => json_encode($_val->_getPerms())
-            );
-
-        return null;
-    }
-
+    public function _getCallable();
 }

@@ -22,46 +22,25 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Session\Security;
-
-use Aether\Security\Token\HmacSignature;
+namespace Aether\Http\Auth;
 
 
-abstract class SessionSecurityLayer {
+use Aether\Http\Auth\User\UserFactory;
+use Aether\Http\Auth\User\UserInstance;
+
+final class AuthHandler {
 
     /**
-     * @param string $_key
-     *
-     * @return mixed
+     * @return bool
      */
-    protected static function _decodeNode(string $_key) : mixed {
-        if (!isset($_SESSION[$_key]))
-            return null;
-
-        $b64decoded = base64_decode($_SESSION[$_key]);
-        [$rawData, $hmacSignStr] = explode(':::', $b64decoded, 2) + [1 => ''];
-
-        if (!HmacSignature::_hmacEquals($hmacSignStr, $rawData))
-            return null;
-
-        $data = json_decode($rawData, true);
-
-        if (json_last_error() !== JSON_ERROR_NONE)
-            return $rawData;
-
-        return $data;
+    public function _isLoggedIn() : bool {
+        return UserFactory::_isLoggedIn();
     }
 
     /**
-     * @param string $_key
-     * @param mixed $_dat
-     *
-     * @return string
+     * @return ?\Aether\Http\Auth\User\UserInstance
      */
-    protected static function _encodeNode(string $_key, mixed $_dat) : string {
-        if (is_array($_dat))
-            $_dat = json_encode($_dat);
-
-        return base64_encode($_dat . ":::" . hash_hmac('sha256', $_dat, $_ENV["SESSION_HMAC"]));
+    public function _getUser() : ?UserInstance {
+        return UserFactory::_fromSession();
     }
 }

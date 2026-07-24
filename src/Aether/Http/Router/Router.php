@@ -22,11 +22,11 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Router;
+namespace Aether\Http\Router;
 
 use Aether\Exception\RouterControllerException;
+use Aether\Http\Router\Route\Route;
 use Aether\Middleware\Pipeline;
-use Aether\Router\Route\Route;
 use Aether\Security\UserInputValidatorTrait;
 
 
@@ -94,7 +94,7 @@ final class Router {
 
 
     /**
-     * @param Route $route
+     * @param \Aether\Http\Router\Route\Route $route
      * @param array|null $_params
      *
      * @return mixed

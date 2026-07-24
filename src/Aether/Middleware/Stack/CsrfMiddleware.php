@@ -44,7 +44,7 @@ final class CsrfMiddleware implements MiddlewareInterface {
         }
 
         # - Stricter verification when http req is POST|PUT|DELETE|PATCH
-        $submitted = Aether()->_http()->_parameters(HttpParameterTypeEnum::PHP_INPUT)->_getAttribute("csrf_token")
+        $submitted = Aether()->_http()->_context()->_getParameters(HttpParameterTypeEnum::PHP_INPUT)->_getAttribute("csrf_token")
             ?? $_SERVER['HTTP_X_CSRF_TOKEN']
             ?? '';
 

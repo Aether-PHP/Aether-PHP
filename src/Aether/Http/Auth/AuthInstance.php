@@ -22,51 +22,61 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Session;
+namespace Aether\Http\Auth;
 
-use Aether\Exception\SessionConfigurationException;
-use Aether\Session\Security\SessionSecurityLayer;
-
-
-final class SessionHandler extends SessionSecurityLayer {
-
-    /** @var ?Session $_session */
-    private static ?Session $_session = null;
+use Aether\Database\DatabaseWrapper;
 
 
-    /**
-     * @return void
-     * @throws SessionConfigurationException
-     */
-    public static function _load() : void {
-        if (empty($_ENV['SESSION_FOLDER_PATH']))
-            throw new SessionConfigurationException("Session config missing. Set SESSION_FOLDER_PATH in .env.");
+abstract class AuthInstance implements AuthInterface {
 
-        # - Secure cookies should be enabled only on HTTPS (or if forced by env)
-        $secure = false;
-        if (($_ENV['SESSION_COOKIE_SECURE'] ?? "") !== "")
-            $secure = (($_ENV['SESSION_COOKIE_SECURE'] ?? "0") === "1");
-        else if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-            $secure = true;
+    /** @var string $_email */
+    protected string $_email;
 
-        session_set_cookie_params([
-            'httponly' => true,
-            'secure' => $secure,
-            'samesite' => 'Strict'
-        ]);
+    /** @var string $_password */
+    protected string $_password;
 
-        ini_set('session.save_path', $_ENV['SESSION_FOLDER_PATH']);
-        ini_set('session.cookie_lifetime', 60 * 60 * 24 * (int)$_ENV['COOKIE_SESSION_TTL']);
-        ini_set('session.gc_maxlifetime', 60 * 60 * 24 * (int)$_ENV['COOKIE_SESSION_TTL']);
-        session_start();
+    /** @var string $_status */
+    protected string $_status;
 
-        if (is_null(self::$_session))
-            self::$_session = new Session();
+    /** @var DatabaseWrapper $_dbconn */
+    protected DatabaseWrapper $_dbconn;
 
+    public function __construct(string $email, string $password){
+        $this->_email = $email;
+        $this->_password = $password;
+        $this->_status = "";
+        $this->_dbconn = Aether()->_db()->_mysql($_ENV["AUTH_DATABASE_GATEWAY"]);
     }
 
     /**
-     * @return Session|null
+     * @return string
      */
-    public static function _getSession() : ?Session { return self::$_session; }
+    protected function _getEmail() : string { return $this->_email; }
+
+    /**
+     * @return string
+     */
+    protected function _getPassword() : string { return $this->_password; }
+
+    /**
+     * @return string
+     */
+    public function _getStatus() : string { return $this->_status; }
+
+    /**
+     * @param string $message
+     * @param bool $status
+     *
+     * @return bool
+     */
+    protected function _setStatus(string $message, bool $status) : bool {
+        $this->_status = $message;
+        return $status;
+    }
+
+    /**
+     * @return bool
+     */
+    abstract public function _tryAuth() : bool;
+
 }

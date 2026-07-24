@@ -24,22 +24,22 @@ declare(strict_types=1);
 
 namespace Aether\Service\Hub;
 
-use Aether\Auth\AuthHandler;
-use Aether\Session\Session;
-use Aether\Session\SessionHandler;
+use Aether\Http\Auth\AuthHandler;
+use Aether\Http\Session\Session;
+use Aether\Http\Session\SessionHandler;
 
 
 final class SessionServiceHub {
 
     /**
-     * @return Session
+     * @return \Aether\Http\Session\Session
      */
     public function _get() : Session {
         return SessionHandler::_getSession();
     }
 
     /**
-     * @return AuthHandler
+     * @return \Aether\Http\Auth\AuthHandler
      */
     public function _auth() : AuthHandler {
         return new AuthHandler();

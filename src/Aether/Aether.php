@@ -25,10 +25,10 @@ declare(strict_types=1);
 namespace Aether;
 
 use Aether\Config\ProjectConfig;
+use Aether\Http\Router\Controller\ControllerGateway;
+use Aether\Http\Session\SessionHandler;
 use Aether\Middleware\Pipeline;
-use Aether\Router\Controller\ControllerGateway;
 use Aether\Service\ServiceManager;
-use Aether\Session\SessionHandler;
 use App\App;
 
 /*

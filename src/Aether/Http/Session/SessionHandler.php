@@ -22,29 +22,51 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Router\Route;
+namespace Aether\Http\Session;
+
+use Aether\Exception\SessionConfigurationException;
+use Aether\Http\Session\Security\SessionSecurityLayer;
 
 
-interface RouteInterface {
+final class SessionHandler extends SessionSecurityLayer {
+
+    /** @var ?Session $_session */
+    private static ?Session $_session = null;
+
 
     /**
-     * Get Route's HTTP method
-     *
-     * @return string
+     * @return void
+     * @throws SessionConfigurationException
      */
-    public function _getMethod() : string;
+    public static function _load() : void {
+        if (empty($_ENV['SESSION_FOLDER_PATH']))
+            throw new SessionConfigurationException("Session config missing. Set SESSION_FOLDER_PATH in .env.");
+
+        # - Secure cookies should be enabled only on HTTPS (or if forced by env)
+        $secure = false;
+        if (($_ENV['SESSION_COOKIE_SECURE'] ?? "") !== "")
+            $secure = (($_ENV['SESSION_COOKIE_SECURE'] ?? "0") === "1");
+        else if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            $secure = true;
+
+        session_set_cookie_params([
+            'httponly' => true,
+            'secure' => $secure,
+            'samesite' => 'Strict'
+        ]);
+
+        ini_set('session.save_path', $_ENV['SESSION_FOLDER_PATH']);
+        ini_set('session.cookie_lifetime', 60 * 60 * 24 * (int)$_ENV['COOKIE_SESSION_TTL']);
+        ini_set('session.gc_maxlifetime', 60 * 60 * 24 * (int)$_ENV['COOKIE_SESSION_TTL']);
+        session_start();
+
+        if (is_null(self::$_session))
+            self::$_session = new Session();
+
+    }
 
     /**
-     * Get Route's name
-     *
-     * @return string
+     * @return Session|null
      */
-    public function _getRoute() : string;
-
-    /**
-     * Get Route's callable function
-     *
-     * @return
-     */
-    public function _getCallable();
+    public static function _getSession() : ?Session { return self::$_session; }
 }

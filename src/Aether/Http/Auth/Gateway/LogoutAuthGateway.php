@@ -22,75 +22,42 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Auth\Gateway;
+namespace Aether\Http\Auth\Gateway;
 
-use Aether\Auth\AuthInstance;
-use Aether\Auth\User\UserFactory;
-use Aether\Auth\User\UserInstance;
-use Aether\Config\ProjectConfig;
-use Aether\Security\PasswordHashingTrait;
+use Aether\Http\Auth\AuthInstance;
+use Aether\Http\Auth\User\UserFactory;
 
 
-class RegisterAuthGateway extends AuthInstance implements AuthGatewayEventInterface {
-    use PasswordHashingTrait;
+class LogoutAuthGateway extends AuthInstance implements AuthGatewayEventInterface {
 
-    /** @var string $_username */
-    private string $_username;
-
-    public function __construct(string $_username, string $_email, string $_password){
-        parent::__construct($_email, $_password);
-        $this->_username = $_username;
+    public function __construct(){
+        parent::__construct("", "");
     }
 
-
     /**
-     * Auth job's purpose : check if provided email is not already used.
+     * Auth job's purpose : check if user is already logged out.
      *
      * @return bool
      */
     public function _tryAuth() : bool {
-        if ($this->_dbconn->_table($_ENV["AUTH_TABLE_GATEWAY"])->_exist()->_where("email", $this->_email)->_send())
+        if (!Aether()->_session()->_auth()->_isLoggedIn())
             return $this->_setStatus($this->_onFailure(), false);
 
         return $this->_setStatus($this->_onSuccess([]), true);
     }
 
-
-    /**
+    /***
      * @param array $_data
      *
      * @return string
      */
     public function _onSuccess(array $_data) : string {
-        $this->_dbconn->_table($_ENV["AUTH_TABLE_GATEWAY"])
-            ->_insert("username", $this->_username)
-            ->_insert("email", $this->_email)
-            ->_insert("password_hash", $this->_hashPassword($this->_password))
-            ->_insert("perms", "[]")
-            ->_send();
-
-        $user_db = $this->_dbconn->_table($_ENV["AUTH_TABLE_GATEWAY"])
-            ->_select('*')
-            ->_where("email", $this->_email)
-            ->_send()[0];
-
-        $user = new UserInstance(
-            $user_db["uid"],
-            $user_db["username"],
-            $user_db["email"],
-            $user_db["perms"]
-        );
-
-        Aether()->_session()->_get()->_setValue(
-            UserFactory::SESSION_KEY, UserFactory::_toSession($user)
-        );
-        return "user successfullly signed up.";
+        Aether()->_session()->_get()->_removeValue(UserFactory::SESSION_KEY);
+        return "user successfullly logged out.";
     }
 
     /**
      * @return string
      */
-    public function _onFailure() : string {
-        return "provided email is already used.";
-    }
+    public function _onFailure() : string { return "failed"; }
 }

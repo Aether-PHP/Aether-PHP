@@ -22,13 +22,13 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Router\Controller;
+namespace Aether\Http\Router\Controller;
 
 use Aether\Exception\RouterControllerException;
-use Aether\Router\Router;
-use \ReflectionClass;
-use \ReflectionException;
-use \ReflectionMethod;
+use Aether\Http\Router\Router;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionMethod;
 
 
 final class ControllerGateway {

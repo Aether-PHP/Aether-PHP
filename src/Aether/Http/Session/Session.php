@@ -22,62 +22,60 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Auth;
+namespace Aether\Http\Session;
 
-use Aether\Database\DatabaseWrapper;
-use Aether\Database\Drivers\DatabaseDriverEnum;
+use Aether\Http\Session\Security\SessionSecurityLayer;
 
 
-abstract class AuthInstance implements AuthInterface {
+class Session extends SessionSecurityLayer {
 
-    /** @var string $_email */
-    protected string $_email;
 
-    /** @var string $_password */
-    protected string $_password;
+    /**
+     * @param string $_key
+     *
+     * @return mixed
+     */
+    public function _getValue(string $_key) : mixed {
+        if (!$this->_valueExist($_key))
+            return null;
 
-    /** @var string $_status */
-    protected string $_status;
-
-    /** @var DatabaseWrapper $_dbconn */
-    protected DatabaseWrapper $_dbconn;
-
-    public function __construct(string $email, string $password){
-        $this->_email = $email;
-        $this->_password = $password;
-        $this->_status = "";
-        $this->_dbconn = Aether()->_db()->_mysql($_ENV["AUTH_DATABASE_GATEWAY"]);
+        return self::_decodeNode($_key);
     }
 
     /**
-     * @return string
+     * @param string $_key
+     * @param mixed $_dat
+     *
+     * @return void
      */
-    protected function _getEmail() : string { return $this->_email; }
+    public function _setValue(string $_key, mixed $_dat) : void {
+        $_SESSION[$_key] = self::_encodeNode($_key, $_dat);
+    }
 
     /**
-     * @return string
-     */
-    protected function _getPassword() : string { return $this->_password; }
-
-    /**
-     * @return string
-     */
-    public function _getStatus() : string { return $this->_status; }
-
-    /**
-     * @param string $message
-     * @param bool $status
+     * @param string $_key
      *
      * @return bool
      */
-    protected function _setStatus(string $message, bool $status) : bool {
-        $this->_status = $message;
-        return $status;
+    public function _valueExist(string $_key) : bool {
+        return isset($_SESSION[$_key]);
     }
+
+    /**
+     * @param string $_key
+     *
+     * @return void
+     */
+    public function _removeValue(string $_key) : void { unset($_SESSION[$_key]); }
+
+    /**
+     * @return false|string
+     */
+    public function _getSessId() : false|string { return session_id(); }
 
     /**
      * @return bool
      */
-    abstract public function _tryAuth() : bool;
+    public function _regenerateId() : bool { return session_regenerate_id(true); }
 
 }

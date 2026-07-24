@@ -22,49 +22,68 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Router\Route;
+namespace Aether\Http\Auth\Gateway;
+
+use Aether\Http\Auth\AuthInstance;
+use Aether\Http\Auth\User\UserFactory;
+use Aether\Http\Auth\User\UserInstance;
+use Aether\Security\PasswordHashingTrait;
 
 
-class Route implements RouteInterface {
+class LoginAuthGateway extends AuthInstance implements AuthGatewayEventInterface {
+    use PasswordHashingTrait;
 
-    /** @var string $_method */
-    private string $_method;
+    public function __construct(string $_email, string $_password){
+        parent::__construct($_email, $_password);
+    }
 
-    /** @var string $_route */
-    private string $_route;
+    /**
+     * Auth job's purpose : check if provided data are corrects
+     *
+     * @return bool
+     */
+    public function _tryAuth() : bool {
+        if (!$this->_dbconn->_table($_ENV["AUTH_TABLE_GATEWAY"])->_exist()->_where("email", $this->_email)->_send())
+            return $this->_setStatus($this->_onFailure(), false);
 
-    /** @var $_callable */
-    private $_callable;
+        $_data = Aether()->_db()->_mysql($_ENV["AUTH_DATABASE_GATEWAY"])
+            ->_table($_ENV["AUTH_TABLE_GATEWAY"])
+            ->_select('*')
+            ->_where("email", $this->_email)
+            ->_send()[0];
 
-    /** @var $_middlewares */
-    private $_middlewares;
+        if (!$this->_checkPassword($this->_password, $_data["password_hash"]))
+            return $this->_setStatus($this->_onFailure(), false);
 
+        return $this->_setStatus($this->_onSuccess($_data), true);
+    }
 
-    public function __construct(string $_method, string $_route, $_callable, $_middlewares){
-        $this->_method = $_method;
-        $this->_route = $_route;
-        $this->_callable = $_callable;
-        $this->_middlewares = $_middlewares;
+    /***
+     * @param array $_data
+     *
+     * @return string
+     */
+    public function _onSuccess(array $_data) : string {
+        $user_db = $_data;
+
+        $user = new UserInstance(
+            $user_db["uid"],
+            $user_db["username"],
+            $user_db["email"],
+            $user_db["perms"]
+        );
+
+        Aether()->_session()->_get()->_setValue(
+            UserFactory::SESSION_KEY, UserFactory::_toSession($user)
+        );
+
+        return "user successfullly logged in.";
     }
 
     /**
      * @return string
      */
-    public function _getMethod() : string { return $this->_method; }
-
-    /**
-     * @return string
-     */
-    public function _getRoute() : string {  return $this->_route; }
-
-    /**
-     * @return
-     */
-    public function _getCallable() { return $this->_callable; }
-
-    /**
-     * @return
-     */
-    public function _getMiddlewares() { return $this->_middlewares; }
-
+    public function _onFailure() : string {
+        return "user login failed.";
+    }
 }

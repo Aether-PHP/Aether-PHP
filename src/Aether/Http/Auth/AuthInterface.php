@@ -22,32 +22,16 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Router\Controller;
-
-use Aether\View\ViewInstance;
+namespace Aether\Http\Auth;
 
 
-class Controller {
+interface AuthInterface {
 
     /**
-     * Render the provided view (with parameters)
+     * Triggered function when user is either loging in or signing up or signing out
      *
-     * @param string $_view
-     * @param array $_params
+     * @return bool
      */
-    protected function _render(string $_view, array $_params = []) : void {
-        ViewInstance::_make($_view, $_params);
-    }
+    public function _tryAuth() : bool;
 
-    /**
-     * Redirect safely
-     *
-     * @param string $_url
-     *
-     * @return void
-     */
-    protected function _redirect(string $_url) : void {
-        header("Location: " . $_url, true, 302);
-        exit;
-    }
 }

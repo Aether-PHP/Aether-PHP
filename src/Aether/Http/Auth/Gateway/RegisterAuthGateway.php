@@ -22,50 +22,56 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Auth\Gateway;
+namespace Aether\Http\Auth\Gateway;
 
-use Aether\Auth\AuthInstance;
-use Aether\Auth\User\UserFactory;
-use Aether\Auth\User\UserInstance;
-use Aether\Config\ProjectConfig;
+use Aether\Http\Auth\AuthInstance;
+use Aether\Http\Auth\User\UserFactory;
+use Aether\Http\Auth\User\UserInstance;
 use Aether\Security\PasswordHashingTrait;
 
 
-class LoginAuthGateway extends AuthInstance implements AuthGatewayEventInterface {
+class RegisterAuthGateway extends AuthInstance implements AuthGatewayEventInterface {
     use PasswordHashingTrait;
 
-    public function __construct(string $_email, string $_password){
+    /** @var string $_username */
+    private string $_username;
+
+    public function __construct(string $_username, string $_email, string $_password){
         parent::__construct($_email, $_password);
+        $this->_username = $_username;
     }
 
+
     /**
-     * Auth job's purpose : check if provided data are corrects
+     * Auth job's purpose : check if provided email is not already used.
      *
      * @return bool
      */
     public function _tryAuth() : bool {
-        if (!$this->_dbconn->_table($_ENV["AUTH_TABLE_GATEWAY"])->_exist()->_where("email", $this->_email)->_send())
+        if ($this->_dbconn->_table($_ENV["AUTH_TABLE_GATEWAY"])->_exist()->_where("email", $this->_email)->_send())
             return $this->_setStatus($this->_onFailure(), false);
 
-        $_data = Aether()->_db()->_mysql($_ENV["AUTH_DATABASE_GATEWAY"])
-            ->_table($_ENV["AUTH_TABLE_GATEWAY"])
-            ->_select('*')
-            ->_where("email", $this->_email)
-            ->_send()[0];
-
-        if (!$this->_checkPassword($this->_password, $_data["password_hash"]))
-            return $this->_setStatus($this->_onFailure(), false);
-
-        return $this->_setStatus($this->_onSuccess($_data), true);
+        return $this->_setStatus($this->_onSuccess([]), true);
     }
 
-    /***
+
+    /**
      * @param array $_data
      *
      * @return string
      */
     public function _onSuccess(array $_data) : string {
-        $user_db = $_data;
+        $this->_dbconn->_table($_ENV["AUTH_TABLE_GATEWAY"])
+            ->_insert("username", $this->_username)
+            ->_insert("email", $this->_email)
+            ->_insert("password_hash", $this->_hashPassword($this->_password))
+            ->_insert("perms", "[]")
+            ->_send();
+
+        $user_db = $this->_dbconn->_table($_ENV["AUTH_TABLE_GATEWAY"])
+            ->_select('*')
+            ->_where("email", $this->_email)
+            ->_send()[0];
 
         $user = new UserInstance(
             $user_db["uid"],
@@ -77,14 +83,13 @@ class LoginAuthGateway extends AuthInstance implements AuthGatewayEventInterface
         Aether()->_session()->_get()->_setValue(
             UserFactory::SESSION_KEY, UserFactory::_toSession($user)
         );
-
-        return "user successfullly logged in.";
+        return "user successfullly signed up.";
     }
 
     /**
      * @return string
      */
     public function _onFailure() : string {
-        return "user login failed.";
+        return "provided email is already used.";
     }
 }

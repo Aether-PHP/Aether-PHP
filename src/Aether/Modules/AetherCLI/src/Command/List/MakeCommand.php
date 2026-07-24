@@ -80,8 +80,6 @@ class MakeCommand extends Command {
             
             namespace App\Controller;
             
-            use Aether\Router\Controller\Controller;
-            
             
             class {{CLASSNAME}} extends Controller {
             

@@ -24,7 +24,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Api;
 
-use Aether\Router\Controller\Controller;
+use Aether\Http\Router\Controller\Controller;
 
 
 /**

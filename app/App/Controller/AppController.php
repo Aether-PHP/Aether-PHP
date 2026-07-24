@@ -24,7 +24,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use Aether\Router\Controller\Controller;
+use Aether\Http\Router\Controller\Controller;
 
 
 class AppController extends Controller {

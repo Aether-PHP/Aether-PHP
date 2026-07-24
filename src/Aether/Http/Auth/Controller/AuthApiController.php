@@ -22,20 +22,19 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Auth\Controller;
+namespace Aether\Http\Auth\Controller;
 
-use Aether\Auth\Gateway\LoginAuthGateway;
-use Aether\Auth\Gateway\LogoutAuthGateway;
-use Aether\Auth\Gateway\RegisterAuthGateway;
+use Aether\Http\Auth\Gateway\LoginAuthGateway;
+use Aether\Http\Auth\Gateway\LogoutAuthGateway;
+use Aether\Http\Auth\Gateway\RegisterAuthGateway;
 use Aether\Http\HttpParameterTypeEnum;
-use Aether\Router\Controller\Controller;
 use Aether\Security\UserInputValidatorTrait;
 
 
 /**
  * [@base] => /api/v1/auth
  */
-class AuthApiController extends Controller {
+class AuthApiController extends \Aether\Http\Router\Controller\Controller {
     use UserInputValidatorTrait;
 
     /**
@@ -45,7 +44,7 @@ class AuthApiController extends Controller {
      * [@route] => /login
      */
     public function login(){
-        $http_params = Aether()->_http()->_parameters(HttpParameterTypeEnum::PHP_INPUT);
+        $http_params = Aether()->_http()->_context()->_getParameters(HttpParameterTypeEnum::PHP_INPUT);
 
         $email = $http_params->_getAttribute("email") == false ? "" : $http_params->_getAttribute("email");
         $password = $http_params->_getAttribute("password") == false ? "" : $http_params->_getAttribute("password");
@@ -88,7 +87,7 @@ class AuthApiController extends Controller {
      * [@route] => /register
      */
     public function register(){
-        $http_params = Aether()->_http()->_parameters(HttpParameterTypeEnum::PHP_INPUT);
+        $http_params = Aether()->_http()->_context()->_getParameters(HttpParameterTypeEnum::PHP_INPUT);
 
         $username = $this->_sanitizeInput($http_params->_getAttribute("username") == false ? "" : $http_params->_getAttribute("username"));
         $email = $http_params->_getAttribute("email") == false ? "" : $http_params->_getAttribute("email");

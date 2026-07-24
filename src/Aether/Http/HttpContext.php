@@ -69,4 +69,13 @@ final class HttpContext {
      * @return string
      */
     public function _getRoute() : string { return $this->_route; }
+
+    /**
+     * @param HttpParameterTypeEnum $_parameterType
+     *
+     * @return HttpParameterUnpacker
+     */
+    public function _getParameters(HttpParameterTypeEnum $_parameterType) : HttpParameterUnpacker {
+        return $_parameterType->_make();
+    }
 }

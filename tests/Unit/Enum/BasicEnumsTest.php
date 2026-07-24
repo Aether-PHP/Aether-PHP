@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Enum;
 
-use Aether\Auth\User\Permission\PermissionEnum;
+use Aether\Http\Auth\User\Permission\PermissionEnum;
 use Aether\IO\IOTypeEnum;
 use PHPUnit\Framework\TestCase;
 

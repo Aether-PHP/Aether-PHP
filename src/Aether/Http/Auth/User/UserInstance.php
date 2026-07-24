@@ -22,10 +22,10 @@
 */
 declare(strict_types=1);
 
-namespace Aether\Auth\User;
+namespace Aether\Http\Auth\User;
 
-use Aether\Auth\User\Permission\PermissionEnum;
-use Aether\Auth\User\Permission\PermissionLayer;
+use Aether\Http\Auth\User\Permission\PermissionEnum;
+use Aether\Http\Auth\User\Permission\PermissionLayer;
 use Aether\Security\UserInputValidatorTrait;
 
 
