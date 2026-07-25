@@ -27,7 +27,7 @@ namespace Aether\Middleware\Stack;
 use Aether\Middleware\MiddlewareInterface;
 
 
-class CorsMiddleware implements MiddlewareInterface {
+class CspMiddleware implements MiddlewareInterface {
 
     /**
      * @param callable $_next

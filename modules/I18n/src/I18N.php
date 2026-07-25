@@ -54,7 +54,7 @@ final class I18N extends AetherModule {
 
 
     public function _onLoad() : void {
-        LangHandler::_loadLangFile("en_US");
+        LangHandler::_loadLangFile("en_EN");
         include __DIR__ . "/I18nFunctionHelper.php";
     }
 

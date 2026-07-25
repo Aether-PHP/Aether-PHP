@@ -21,8 +21,8 @@ The divine secure and lightweight PHP framework
 
 
 <p align="center">
-A ground-up PHP 8.3+ framework built for speed, security, and surgical precision.<br/>
-No Composer. No vendor directory. No runtime dependencies. Just PHP.
+A ground-up PHP 8.3+ framework built for security, speed, and surgical precision.<br/>
+No Composer. No runtime dependencies. Just pure HP.
 </p>
 
 ---
@@ -31,7 +31,7 @@ No Composer. No vendor directory. No runtime dependencies. Just PHP.
 
 Aether is a self-contained backend framework that ships everything needed to build REST APIs, web applications, and SaaS backends in a single directory under 1MB. It has its own autoloader, its own query builder, its own session layer, its own middleware pipeline. Nothing is imported. Everything is strict-typed.
 
-It is designed to be dropped into any project and run immediately — no package manager, no install step, no configuration ceremony.
+It is designed to be dropped into any project and run immediately - no package manager, no install step, no configuration ceremony.
 
 ```
 public/index.php  →  autoload.php  →  Aether::_run()  →  your controllers
@@ -43,7 +43,7 @@ public/index.php  →  autoload.php  →  Aether::_run()  →  your controllers
 
 ```
 .
-├── public/             # Web root — index.php + .htaccess
+├── public/             # Web root - index.php + .htaccess
 ├── app/App/            # Your application code (controllers, models)
 ├── src/Aether/         # Framework core (router, DB, auth, HTTP, security...)
 ├── storage/            # Runtime data (sessions, file cache)
@@ -89,7 +89,7 @@ class UserController extends Controller {
      * [@middlewares] => AuthMiddleware
      */
     public function create() {
-        // POST /api/users — requires authentication
+        // POST /api/users - requires authentication
     }
 }
 ```
@@ -227,9 +227,9 @@ Auth tables and database are configurable via `.env` (`AUTH_DATABASE_GATEWAY`, `
 Sessions are stored as files in `storage/sessions/` with a security layer that encodes all session values as `base64(data + ":::" + HMAC-SHA256(data, secret))`. This prevents tampering even if session files are leaked.
 
 Configuration:
-- `SESSION_HMAC` — 32-character secret key for HMAC signing
-- `COOKIE_SESSION_TTL` — session lifetime in minutes
-- `SESSION_COOKIE_SECURE` — enforce Secure flag on cookie
+- `SESSION_HMAC` - 32-character secret key for HMAC signing
+- `COOKIE_SESSION_TTL` - session lifetime in minutes
+- `SESSION_COOKIE_SECURE` - enforce Secure flag on cookie
 
 ---
 
@@ -246,7 +246,7 @@ $response = $request->_send();
 SSRF hardening (enabled by default):
 - Only `http://` and `https://` schemes allowed
 - Private/reserved IP ranges blocked (127.x, 10.x, 192.168.x, etc.)
-- DNS resolution checked — no rebinding bypasses
+- DNS resolution checked - no rebinding bypasses
 - Disable with `HTTP_ALLOW_PRIVATE=1` for internal services
 
 ### Response Factory
@@ -300,8 +300,8 @@ class CustomModule extends AetherModule {
 
 ### Included modules
 
-- **AetherCLI** — Command-line interface accessible via `php bin/aether`. Argument parsing, colored output, extensible command system.
-- **I18n** — Internationalization via `__('key')` helper. Translation files organized by locale (`lang/en/`, `lang/fr/`).
+- **AetherCLI** - Command-line interface accessible via `php bin/aether`. Argument parsing, colored output, extensible command system.
+- **I18n** - Internationalization via `__('key')` helper. Translation files organized by locale (`lang/en/`, `lang/fr/`).
 
 ---
 
@@ -444,7 +444,7 @@ Test coverage includes: query builder, route matching, security traits (password
 
 ## License
 
-**Source-Available** — not open-source.
+**Source-Available** - not open-source.
 
 You may view, study, use (personal and commercial), and modify Aether-PHP for your own projects.
 

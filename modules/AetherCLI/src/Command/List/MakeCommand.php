@@ -55,7 +55,7 @@ class MakeCommand extends Command {
 
             $baseControllerContent = <<<'PHP'
             <?php
-            
+
             /*
              *
              *      █████╗ ███████╗████████╗██╗  ██╗███████╗██████╗         ██████╗ ██╗  ██╗██████╗
@@ -80,6 +80,8 @@ class MakeCommand extends Command {
             
             namespace App\Controller;
             
+            use Aether\Http\Router\Controller\Controller;
+            
             
             class {{CLASSNAME}} extends Controller {
             
@@ -88,7 +90,7 @@ class MakeCommand extends Command {
                  * [@route] => /{{ROUTE}}
                  */
                 public function {{FUNCNAME}}(){
-                    echo "{{CLASSNAME}} Route created.";
+                    echo "{{CLASSNAME}} route created.";
                 }
             
             }
@@ -101,7 +103,7 @@ class MakeCommand extends Command {
 
             IOFile::_open(
                 IOTypeEnum::PHP,
-                __DIR__ . "/../../../../../../../app/App/Controller/{$path}Controller.php"
+                "../app/App/Controller/{$path}Controller.php"
             )->_write($baseControllerContent);
 
             echo CliColorEnum::FG_BRIGHT_GREEN->_paint("[MakeCommand:Controller] - Successfully created controller '{$name}'." . PHP_EOL);

@@ -25,13 +25,14 @@ declare(strict_types=1);
 namespace App;
 
 use Aether\Aether;
-use Aether\Middleware\Stack\CorsMiddleware;
+use Aether\Modules\ModuleFactory;
+
+use Aether\Middleware\Stack\CspMiddleware;
 use Aether\Middleware\Stack\CsrfMiddleware;
 use Aether\Middleware\Stack\HttpFilteringMiddleware;
 use Aether\Middleware\Stack\MaintenanceMiddleware;
 use Aether\Middleware\Stack\RatelimitMiddleware;
 use Aether\Middleware\Stack\SecurityHeadersMiddleware;
-use Aether\Modules\ModuleFactory;
 
 
 /**
@@ -49,10 +50,10 @@ class App {
             HttpFilteringMiddleware::class,
             CsrfMiddleware::class,
             SecurityHeadersMiddleware::class,
-            CorsMiddleware::class
+            CspMiddleware::class
         ];
 
         # - Modules load
-        ModuleFactory::_load([ ]);
+        ModuleFactory::_load([  ]);
     }
 }
