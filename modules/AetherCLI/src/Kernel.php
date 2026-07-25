@@ -28,6 +28,7 @@ use Aether\Modules\AetherCLI\Cli\CliArgParser;
 use Aether\Modules\AetherCLI\Cli\CliColorEnum;
 use Aether\Modules\AetherCLI\Cli\CliLogger;
 use Aether\Modules\AetherCLI\Command\CommandDispatcher;
+use Aether\Modules\AetherCLI\Command\List\DatabaseCommand;
 use Aether\Modules\AetherCLI\Command\List\MakeCommand;
 use Aether\Modules\AetherCLI\Command\List\SourceCommand;
 use Aether\Modules\AetherCLI\Command\List\SetupCommand;
@@ -65,7 +66,8 @@ final class Kernel extends AetherModule {
         $registered = CommandDispatcher::_register([
             MakeCommand::class,
             SetupCommand::class,
-            SourceCommand::class
+            SourceCommand::class,
+            DatabaseCommand::class
         ], $extra);
 
         # - Dispatch all commands
