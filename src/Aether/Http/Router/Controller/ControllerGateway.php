@@ -41,8 +41,9 @@ final class ControllerGateway {
      */
     public static function _link() : void {
         $router = new Router();
+        $useCache = Aether()->_config()->_get("ENABLE_ROUTE_CACHING");
 
-        if (Aether()->_cache()->_apcu()->_has(self::CACHE_KEY)){
+        if ($useCache && Aether()->_cache()->_apcu()->_has(self::CACHE_KEY)){
             # - Fetch from cache
             $routes = json_decode(Aether()->_cache()->_apcu()->_get(self::CACHE_KEY), true);
 
@@ -58,17 +59,22 @@ final class ControllerGateway {
             self::_scanForController(_root("app/App/Controller/Api/*.php"), "App\Controller\Api\\", $router);
 
             # - Cache the compiled route table
-            $compiled = [];
-            foreach ($router->_routes as $method => $routes)
-                foreach ($routes as $route)
-                    $compiled[] = [
-                        'method' => $method,
-                        'route' => $route->_getRoute(),
-                        'callable' => $route->_getCallable(),
-                        'middlewares' => $route->_getMiddlewares(),
-                    ];
+            if ($useCache){
+                $compiled = [];
 
-            Aether()->_cache()->_apcu()->_set(self::CACHE_KEY, json_encode($compiled), _ttl: self::CACHE_TTL);
+                foreach ($router->_routes as $method => $routes){
+                    foreach ($routes as $route){
+                        $compiled[] = [
+                            'method' => $method,
+                            'route' => $route->_getRoute(),
+                            'callable' => $route->_getCallable(),
+                            'middlewares' => $route->_getMiddlewares()
+                        ];
+                    }
+                }
+
+                Aether()->_cache()->_apcu()->_set(self::CACHE_KEY, json_encode($compiled), _ttl: self::CACHE_TTL);
+            }
         }
 
         $router->_run();
