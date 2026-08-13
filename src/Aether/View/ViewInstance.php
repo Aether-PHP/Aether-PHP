@@ -58,7 +58,7 @@ final class ViewInstance implements  ViewInterface {
         $path = str_replace("\\", "/", trim($this->_path));
         $path = ltrim($path, "/");
 
-        if ($path === "" || str_contains($path, "..") || !preg_match('/^[a-zA-Z0-9_\\-\\/]+$/', $path))
+        if ($path === "" || str_contains($path, "..") || !preg_match('/^[a-zA-Z0-9_.\-\/]+$/', $path))
             throw new ViewTemplateException("Invalid view path provided.");
 
         $fullpath = $viewsRoot . "/" . $path . "." . self::$_ext;

@@ -59,7 +59,7 @@ class Aether {
      *
      * @return void
      */
-    private function _init() : void {
+    protected function __init() : void {
 
         # - Dev Env-related
         if (self::$_globalAppState === "DEV"){
@@ -83,8 +83,7 @@ class Aether {
      * @return void
      */
     public function _run() : void {
-        $this->_init();
-        App::_init();
+        $this->__init();
 
         # - Middlewares Pipeline
         Pipeline::_run(self::$_middlewares, function (){

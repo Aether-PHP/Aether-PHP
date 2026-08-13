@@ -36,15 +36,16 @@ use Aether\Middleware\Stack\SecurityHeadersMiddleware;
 
 
 /**
- * @class App : will handle App-related stuff
+ * @class App extending from Aether core : will handle App-related stuff
  */
-class App {
+class App extends Aether {
 
 
-    public static function _init() : void {
+    public function _run() : void {
+        parent::_run();
 
         # - Middlewares load
-        Aether::$_middlewares = [
+        self::$_middlewares = [
             MaintenanceMiddleware::class,
             RatelimitMiddleware::class,
             HttpFilteringMiddleware::class,
