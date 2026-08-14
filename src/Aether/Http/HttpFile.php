@@ -98,17 +98,30 @@ final class HttpFile {
      * Save the temp file to a real location
      *
      * @param string $_path
+     * @param bool $_override
      *
      * @return bool
      */
-    public function _save(string $_path) : bool {
+    public function _save(string $_path, bool $_override = false) : bool {
         if ($this->_fileData === [])
             return false;
 
-        if (is_null(IOFile::_open(IOTypeEnum::OTHER, $_path)->_write(file_get_contents($this->_fileData["tmp_name"]))))
+        $file = IOFile::_open(IOTypeEnum::OTHER, $_path);
+
+        if (!is_null($file->_read()) && !$_override)
+            return false;
+
+        if (is_null($file->_write(file_get_contents($this->_fileData["tmp_name"]))))
             return false;
 
         return true;
+    }
+
+    /**
+     * @return string
+     */
+    public function _genRandomName() : string {
+        return bin2hex(openssl_random_pseudo_bytes(16));
     }
 
 }

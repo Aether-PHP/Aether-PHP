@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace Aether\Service\Hub;
 
 use Aether\Http\HttpContext;
+use Aether\Http\HttpFile;
 use Aether\Http\HttpParameterTypeEnum;
 use Aether\Http\HttpParameterUnpacker;
 use Aether\Http\Methods\HttpMethod;
@@ -76,5 +77,12 @@ final class HttpServiceHub {
      */
     public function _parameters(HttpParameterTypeEnum $_parameterType) : HttpParameterUnpacker {
         return $_parameterType->_make();
+    }
+
+    /**
+     * @return HttpFile
+     */
+    public function _file(string $_key, array $_allowedExtensions, array $_allowedMimeTypes, int $_maxSize = -1) : HttpFile {
+        return new HttpFile($_key, $_allowedExtensions, $_allowedMimeTypes, $_maxSize);
     }
 }
