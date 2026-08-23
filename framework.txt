@@ -1,7 +1,7 @@
 ================================================================================
 AETHER-PHP FRAMEWORK — COMPLETE INTERNAL REFERENCE
 ================================================================================
-Version: 3.6.7
+Version: 4.0
 PHP: 8.3+ (strict_types=1 everywhere)
 Dependencies: 0 (no Composer, no vendor)
 Footprint: < 1 MB
@@ -16,27 +16,27 @@ Repository: https://github.com/Aether-PHP/Aether-PHP
 ================================================================================
 
 HTTP Request
-  → public/index.php
-    → require autoload.php (custom PSR-4 spl_autoload_register)
-    → new \Aether\Aether()
-    → $app->_run()
-      → Aether::_init()
-        1. Error reporting (DEV mode = E_ALL + display_errors)
-        2. include CoreHelperFunctions.php (Aether(), _debug(), _root())
-        3. ProjectConfig::_load() — merges .env into $_ENV
-        4. SessionHandler::_load() — starts session with secure cookies
-      → App::_init()
-        1. Registers global middleware stack into Aether::$_middlewares
-        2. Loads modules via ModuleFactory::_load([])
-      → Pipeline::_run(middlewares, finalHandler)
-        - Uses array_reduce(array_reverse(middlewares)) to build nested closures
-        - Each middleware calls $_next() to pass control forward
-        - Final handler: ControllerGateway::_link()
-          → Checks APCu for cached route table (key: "aether::routes::compiled", TTL: 3600s)
-          → If miss: scans controllers via ReflectionClass, extracts PHPDoc annotations
-          → Builds Route objects, caches compiled table
-          → Router::_run() matches REQUEST_URI against routes
-          → Executes matched controller method with sanitized params
+  -> public/index.php
+    -> require ../autoload.php (custom PSR-4 spl_autoload_register)
+    -> new \App\App()
+    -> $app->_run()
+      -> App::_run() calls parent::_run() (Aether::_run())
+        -> Aether::__init()
+          1. Error reporting (DEV mode = E_ALL + display_errors)
+          2. include_once CoreHelperFunctions.php (Aether(), _debug(), _root())
+          3. ProjectConfig::_load() — merges .env into $_ENV (APCu-cached 10min)
+          4. SessionHandler::_load() — starts session with secure cookies
+        -> Pipeline::_run(self::$_middlewares, fn() => ControllerGateway::_link())
+      -> App sets self::$_middlewares (middleware class list)
+      -> App calls ModuleFactory::_load([])
+
+      Pipeline final handler: ControllerGateway::_link()
+        -> Checks ENABLE_ROUTE_CACHING config flag
+        -> If enabled + APCu hit: loads cached route table
+        -> If miss: scans controllers via ReflectionClass, extracts PHPDoc annotations
+        -> Builds Route objects, optionally caches compiled table in APCu (TTL 3600s)
+        -> Router::_run() matches REQUEST_URI against routes
+        -> Executes matched controller method with sanitized params
 
 
 ================================================================================
@@ -44,58 +44,68 @@ HTTP Request
 ================================================================================
 
 /
-├── public/
-│   ├── index.php               Entry point — requires autoload, runs Aether
-│   ├── .htaccess               Apache rewrite (all to index.php), blocks .env/.sql
-│   └── views/                  PHP template files (home.php, etc.)
-│       └── home.php            Default view (echo "Aether-PHP default homeview.")
-│
-├── app/
-│   └── App/
-│       ├── App.php             Middleware + module registration
-│       └── Controller/
-│           ├── AppController.php    View controllers (extends Controller)
-│           └── Api/
-│               └── ApiController.php    API controllers ([@base] => /api/v1)
-│
-├── src/
-│   └── Aether/                 FRAMEWORK CORE (detailed below)
-│
-├── storage/
-│   ├── sessions/               Session files (HMAC-signed)
-│   └── cache/                  File cache (SHA256-keyed .cache.json)
-│
-├── bin/
-│   └── aether                  CLI entry point (loads AetherCLI module)
-│
-├── tests/
-│   ├── bootstrap.php
-│   └── Unit/                   PHPUnit test suite
-│
-├── benchmarks/
-│   ├── BootTimeBench.php       Framework boot-time measurement
-│   └── __boot_time_template.php
-│
-├── autoload.php                Custom PSR-4 autoloader
-├── .env.example                Environment template
-├── .env                        Active config (gitignored)
-├── phpunit.xml                 PHPUnit config
-└── LICENSE                     Source-Available license
+|-- public/
+|   |-- index.php               Entry point — requires autoload, runs App
+|   |-- .htaccess               Apache rewrite, blocks .env/.sql/.php (except index)
+|   +-- views/                  PHP template files
+|       +-- home.php            Default view
+|
+|-- app/
+|   +-- App/
+|       |-- App.php             Extends Aether — middleware + module registration
+|       +-- Controller/
+|           |-- AppController.php    View controllers (extends Controller)
+|           +-- Api/
+|               +-- ApiController.php    API controllers ([@base] => /api/v1)
+|
+|-- src/
+|   +-- Aether/                 FRAMEWORK CORE (detailed below)
+|
+|-- modules/                    EXTERNAL MODULES (separate from core)
+|   |-- AetherCLI/
+|   |   +-- src/                CLI module source
+|   |-- Analytics/
+|   |   +-- src/                Analytics module (placeholder)
+|   +-- I18n/
+|       +-- src/                Internationalization module
+|
+|-- storage/
+|   |-- sessions/               Session files (HMAC-signed)
+|   +-- cache/                  File cache (SHA256-keyed .cache.json)
+|
+|-- bin/
+|   |-- aether                  CLI entry point (loads AetherCLI module)
+|   |-- databases/              Database schema files (db_schem.json)
+|   +-- scripts/                Custom user scripts (ScriptExample.php)
+|
+|-- tests/
+|   |-- bootstrap.php
+|   +-- Unit/                   PHPUnit test suite
+|
+|-- benchmarks/
+|   |-- BootTimeBench.php       Framework boot-time measurement
+|   +-- __boot_time_template.php
+|
+|-- autoload.php                Custom PSR-4 autoloader
+|-- .env                        Active config (gitignored)
+|-- phpunit.xml                 PHPUnit config
++-- LICENSE                     Source-Available license
 
 
 ================================================================================
 3. AUTOLOADER (autoload.php)
 ================================================================================
 
-Custom spl_autoload_register with 4 namespaces:
+Custom spl_autoload_register with 4 namespace prefixes:
 
-  Aether\         → ../src/Aether/...
-  Aether\Modules\ → ../src/Aether/Modules/{ModuleName}/src/...
-  App\            → ../app/App/...
-  benchmarks\     → ../benchmarks/...
-  bin\            → ../bin/...
+  Aether\Modules\{ModuleName}\...  -> ../modules/{ModuleName}/src/...
+  Aether\...                       -> ../src/Aether/...
+  App\...                          -> ../app/App/...
+  benchmarks\...                   -> ../{class}.php
+  bin\...                          -> ../{class}.php
 
 No Composer. Paths are relative to public/ (since index.php lives there).
+Module autoloading uses regex: /^Aether\\Modules\\([^\\]+)\\(.+)$/
 
 
 ================================================================================
@@ -103,31 +113,50 @@ No Composer. Paths are relative to public/ (since index.php lives there).
 ================================================================================
 
 Namespace: Aether
-Class: Aether (final-ish, not marked final)
+Class: Aether
 
 Properties:
-  - static string $_globalAppState = "DEV"    ("DEV" or "PROD")
-  - static ServiceManager $_services          Lazy singleton
-  - static array $_middlewares = []           Populated by App::_init()
+  - public static string $_globalAppState = "DEV"    ("DEV" or "PROD")
+  - private static ServiceManager $_services         Lazy singleton
+  - public static array $_middlewares = []           Populated by App::_run()
 
 Methods:
-  - _init() : void (private)
-    1. DEV → error_reporting(E_ALL), display_errors=1
-    2. Includes CoreHelperFunctions.php
+  - protected __init() : void
+    1. DEV -> error_reporting(E_ALL), display_errors=1
+    2. include_once CoreHelperFunctions.php
     3. ProjectConfig::_load()
     4. SessionHandler::_load()
 
-  - _run() : void (public)
-    1. $this->_init()
-    2. App::_init()
-    3. Pipeline::_run(self::$_middlewares, fn() => ControllerGateway::_link())
+  - public _run() : void
+    1. $this->__init()
+    2. Pipeline::_run(self::$_middlewares, fn() => ControllerGateway::_link())
 
-  - static _getServices() : ServiceManager
+  - public static _getServices() : ServiceManager
     Lazy instantiation with ??= operator
 
 
 ================================================================================
-5. SERVICE MANAGER (src/Aether/Service/ServiceManager.php)
+5. APPLICATION LAYER (app/App/App.php)
+================================================================================
+
+Namespace: App
+Class: App extends Aether\Aether
+
+Methods:
+  - public _run() : void
+    1. Calls parent::_run() (core init + pipeline dispatch)
+    2. Sets self::$_middlewares:
+       - MaintenanceMiddleware
+       - RatelimitMiddleware
+       - HttpFilteringMiddleware
+       - CsrfMiddleware
+       - SecurityHeadersMiddleware
+       - CspMiddleware
+    3. Calls ModuleFactory::_load([]) — no modules loaded by default
+
+
+================================================================================
+6. SERVICE MANAGER (src/Aether/Service/ServiceManager.php)
 ================================================================================
 
 Namespace: Aether\Service
@@ -135,49 +164,128 @@ Class: ServiceManager
 
 Central access point for all framework services. Accessed globally via Aether().
 
-Service Hubs (instantiated in constructor):
-  - _db()       → DatabaseServiceHub
-  - _cache()    → CacheServiceHub
-  - _http()     → HttpServiceHub
-  - _io()       → IoServiceHub
-  - _config()   → ConfigServiceHub
-  - _session()  → SessionServiceHub
+All hubs instantiated eagerly in constructor:
+  - _db()       -> DatabaseServiceHub
+  - _cache()    -> CacheServiceHub
+  - _http()     -> HttpServiceHub
+  - _io()       -> IoServiceHub
+  - _config()   -> ConfigServiceHub
+  - _session()  -> SessionServiceHub
 
 
 ================================================================================
-6. GLOBAL HELPER FUNCTIONS (src/Aether/Utils/CoreHelperFunctions.php)
+7. GLOBAL HELPER FUNCTIONS (src/Aether/Utils/CoreHelperFunctions.php)
 ================================================================================
 
   Aether() : ServiceManager
-    → Returns Aether::_getServices() (the singleton service manager)
+    -> Returns Aether::_getServices() (the singleton service manager)
 
   _debug(mixed ...$vars) : void
-    → var_dump each var inside <pre> tags
+    -> var_dump each var inside <pre> tags
 
   _root(string $path = "") : string
-    → Returns "../" . $path (relative to public/)
+    -> Returns "../" . $path (relative to public/)
 
 
 ================================================================================
-7. ROUTER SYSTEM
+8. SERVICE HUBS
 ================================================================================
 
---- 7.1 ControllerGateway (src/Aether/Router/Controller/ControllerGateway.php) ---
+--- 8.1 HttpServiceHub (src/Aether/Service/Hub/HttpServiceHub.php) ---
 
-Namespace: Aether\Router\Controller
+Namespace: Aether\Service\Hub
+Class: HttpServiceHub (final)
+
+Methods:
+  _context() : HttpContext                 — Current request context
+  _request(HttpMethodEnum, string) : HttpRequest — Outbound HTTP request
+  _response() : ResponseFactory            — Response builder
+  _method(HttpMethodEnum) : HttpMethod     — Method object factory
+  _parameters(HttpParameterTypeEnum) : HttpParameterUnpacker — Input parsing
+  _file(string $key, array $exts, array $mimes, int $maxSize = -1) : HttpFile — File upload handler
+
+
+--- 8.2 SessionServiceHub (src/Aether/Service/Hub/SessionServiceHub.php) ---
+
+Namespace: Aether\Service\Hub
+Class: SessionServiceHub (final)
+
+Methods:
+  _get() : Session             — Returns current Session (via SessionHandler::_getSession())
+  _auth() : AuthHandler        — Returns new AuthHandler instance
+
+
+--- 8.3 DatabaseServiceHub (src/Aether/Service/Hub/DatabaseServiceHub.php) ---
+
+Namespace: Aether\Service\Hub
+Class: DatabaseServiceHub (final)
+
+Properties: public array $_databases = []  (connection cache)
+
+Methods:
+  _mysql(string $dbname) : DatabaseWrapper
+  _sqlite(string $dbname) : DatabaseWrapper
+  private _createConn(string $dbname, DatabaseDriverEnum $driver) : DatabaseWrapper
+    -> Caches by "{driver}_{dbname}"
+
+
+--- 8.4 CacheServiceHub (src/Aether/Service/Hub/CacheServiceHub.php) ---
+
+Namespace: Aether\Service\Hub
+Class: CacheServiceHub (final)
+
+Properties: private ?Redis $_redis = null
+
+Methods:
+  _apcu() : Apcu        -> via CacheFactory::_get(CacheAdapterEnum::APCU)
+  _files() : Files       -> via CacheFactory::_get(CacheAdapterEnum::FILES)
+  _redis() : Redis       -> lazy-initialized, cached in $_redis
+
+
+--- 8.5 ConfigServiceHub (src/Aether/Service/Hub/ConfigServiceHub.php) ---
+
+Namespace: Aether\Service\Hub
+Class: ConfigServiceHub (final)
+
+Methods:
+  _get(string $key) : mixed -> delegates to ProjectConfig::_get($key)
+
+
+--- 8.6 IoServiceHub (src/Aether/Service/Hub/IoServiceHub.php) ---
+
+Namespace: Aether\Service\Hub
+Class: IoServiceHub (final)
+
+Methods:
+  _file(string $path, IOTypeEnum $type) : IOFile     -> IOFile::_open()
+  _stream(string $path, IOTypeEnum $type) : IOStream -> IOStream::_open()
+  _folder(string $path) : IOFolder                   -> IOFolder::_path()
+
+
+================================================================================
+9. ROUTER SYSTEM
+================================================================================
+
+--- 9.1 ControllerGateway (src/Aether/Http/Router/Controller/ControllerGateway.php) ---
+
+Namespace: Aether\Http\Router\Controller
 Class: ControllerGateway (final)
 
-Purpose: Scans controller directories, extracts route annotations via Reflection,
-builds route table, caches in APCu, then dispatches to Router.
+Constants:
+  CACHE_KEY = "aether::routes::compiled//"
+  CACHE_TTL = 3600
 
 Flow:
-  1. Check APCu cache (key "aether::routes::compiled", TTL 3600)
-  2. On miss: glob("app/App/Controller/*.php") + glob("app/App/Controller/Api/*.php")
-  3. For each file: ReflectionClass → get @base from class doc
-  4. For each public method: extract @method, @route, @middlewares
-  5. Register route: router->_addRoute(METHOD, base + route, "Class@method", middlewares)
-  6. Cache compiled route table as JSON in APCu
-  7. Call router->_run()
+  1. Check ENABLE_ROUTE_CACHING env flag
+  2. If enabled + APCu hit: load cached routes JSON
+  3. On miss: scan controllers:
+     - glob("app/App/Controller/*.php") with namespace "App\Controller\"
+     - glob("app/App/Controller/Api/*.php") with namespace "App\Controller\Api\"
+  4. For each file: ReflectionClass -> get @base from class doc
+  5. For each public method: extract @method, @route, @middlewares
+  6. Register route: router->_addRoute(METHOD, base + route, "Class@method", middlewares)
+  7. If caching enabled: serialize route table as JSON in APCu
+  8. Call router->_run()
 
 Annotation format (in PHPDoc):
   [@base] => /api/v1                     (optional, on class)
@@ -185,65 +293,70 @@ Annotation format (in PHPDoc):
   [@route] => /users/{id}                (required, on method)
   [@middlewares] => AuthMiddleware        (optional, comma-separated)
 
-Regex for extraction: /\[@{annotation}\]\s*=>\s*(\S+)/
+Regex for extraction: /\[@{annotation}\]\s*=>?\s*(\S+)/
 
 
---- 7.2 Router (src/Aether/Router/Router.php) ---
+--- 9.2 Router (src/Aether/Http/Router/Router.php) ---
 
-Namespace: Aether\Router
+Namespace: Aether\Http\Router
 Class: Router (final)
 Traits: UserInputValidatorTrait
 
 Properties:
-  - $_routes = ["GET" => [], "POST" => [], "DELETE" => [], "PUT" => []]
+  - $_routes = ["GET" => [], "POST" => [], "DELETE" => [], "PUT" => [], "QUERY" => []]
 
 Methods:
   - _addRoute(string $method, string $route, $callable, $middlewares) : Router
   - _run() : bool
-    1. Parse REQUEST_URI (path only)
+    1. Parse REQUEST_URI (path only via parse_url)
     2. Check exact match (trimmed slashes)
-    3. Check regex match: {param} → ([^/]+)
-    4. If matched → _execute(route, params)
-    5. No match → 404
-  - _execute(Route $route, ?array $params) : mixed
+    3. Check regex match: {param} -> ([^/]+)
+    4. If matched -> _execute(route, params)
+    5. No match -> 404
+  - private _execute(Route $route, ?array $params) : mixed
     1. Run per-route middlewares via Pipeline::_runForRoute()
     2. Sanitize params via _sanitizeInput()
-    3. Resolve callable: string "Class@method" → instantiate + call
+    3. Resolve callable: string "Class@method" -> instantiate + call
 
 
---- 7.3 Route (src/Aether/Router/Route/Route.php) ---
+--- 9.3 Route (src/Aether/Http/Router/Route/Route.php) ---
 
-Namespace: Aether\Router\Route
+Namespace: Aether\Http\Router\Route
 Class: Route (implements RouteInterface)
 
-Properties: $_method, $_route, $_callable, $_middlewares
-Simple data class with getters.
+Properties: $_method, $_route, $_callable, $_middlewares (all private)
+Constructor + getters: _getMethod(), _getRoute(), _getCallable(), _getMiddlewares()
 
 
---- 7.4 Controller (src/Aether/Router/Controller/Controller.php) ---
+--- 9.4 RouteInterface (src/Aether/Http/Router/Route/RouteInterface.php) ---
 
-Namespace: Aether\Router\Controller
+Contract: _getMethod() : string, _getRoute() : string, _getCallable()
+
+
+--- 9.5 Controller (src/Aether/Http/Router/Controller/Controller.php) ---
+
+Namespace: Aether\Http\Router\Controller
 Class: Controller (base class for all controllers)
 
 Methods:
   - protected _render(string $view, array $params = []) : void
-    → ViewInstance::_make($view, $params)
+    -> ViewInstance::_make($view, $params)
   - protected _redirect(string $url) : void
-    → header("Location: $url", true, 302); exit;
+    -> header("Location: $url", true, 302); exit;
 
 
 ================================================================================
-8. MIDDLEWARE SYSTEM
+10. MIDDLEWARE SYSTEM
 ================================================================================
 
---- 8.1 MiddlewareInterface (src/Aether/Middleware/MiddlewareInterface.php) ---
+--- 10.1 MiddlewareInterface (src/Aether/Middleware/MiddlewareInterface.php) ---
 
 interface MiddlewareInterface {
     public function _handle(callable $_next);
 }
 
 
---- 8.2 Pipeline (src/Aether/Middleware/Pipeline.php) ---
+--- 10.2 Pipeline (src/Aether/Middleware/Pipeline.php) ---
 
 Namespace: Aether\Middleware
 Class: Pipeline (final)
@@ -255,25 +368,33 @@ Methods:
 
   - static _runForRoute(array $middlewares, callable $finalHandler) : void
     Resolves short class names to full "Aether\Middleware\Stack\" namespace.
-    Filters out non-existent classes. Then calls _run().
+    Filters out empty strings and non-existent classes. Then calls _run().
 
 
---- 8.3 Built-in Middleware (src/Aether/Middleware/Stack/) ---
+--- 10.3 Built-in Middleware (src/Aether/Middleware/Stack/) ---
 
 MaintenanceMiddleware:
-  - If $_ENV["MAINTENANCE"] === "true" → 503 response + exit
+  - If $_ENV["MAINTENANCE"] === "true" -> 503 response (JSON or HTML) + exit
 
 RatelimitMiddleware:
-  - Uses file-based cache (Aether()->_cache()->_files())
+  - Uses APCu cache (Aether()->_cache()->_apcu())
   - Key: "ratelimit://{IP}"
   - Configurable: RATELIMIT_MAX_LIMIT (default 100), RATELIMIT_SECOND_INTERVAL (default 60)
   - On exceed: 403 response (JSON or HTML based on Accept header)
+  - TTL: 1 hour per entry
 
-CsrfMiddleware:
-  - Skips GET/HEAD/OPTIONS requests
-  - Validates X-CSRF-Token header against session token
+HttpFilteringMiddleware:
+  - Anti-replay protection for non-GET requests
+  - Skips GET requests (EXCLUDE_GET = true)
+  - Key: "filtering://{METHOD}:{IP}:{ROUTE}" in APCu (TTL: 1 second)
+  - Blocks duplicate identical requests within 1 second window
+  - On block: 403 response (JSON or HTML)
+
+CsrfMiddleware (final):
+  - On GET/HEAD/OPTIONS: exposes token via X-CSRF-Token header
+  - On POST/PUT/DELETE/PATCH: validates csrf_token from body (php://input) or X-CSRF-TOKEN header
   - Uses CsrfToken::_verify() (timing-safe, anti-replay: regenerates after use)
-  - Exposes new token via X-CSRF-Token response header
+  - On failure: 403 response (JSON or HTML)
 
 SecurityHeadersMiddleware:
   - X-Content-Type-Options: nosniff
@@ -282,41 +403,433 @@ SecurityHeadersMiddleware:
   - Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
   - Cross-Origin-Opener-Policy: same-origin
   - Cross-Origin-Resource-Policy: same-origin
+  - Strict-Transport-Security: max-age=31536000; preload (HTTPS only)
 
-CorsMiddleware:
-  - Cross-origin resource sharing headers
+CspMiddleware:
+  - Content-Security-Policy header:
+    default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self';
+    font-src 'self'; connect-src 'self'; frame-src 'none'; object-src 'none';
+    base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+
+JwtMiddleware (final):
+  - Extracts Bearer token from Authorization header or ?token query param
+  - Verifies via JWToken::_verify()
+  - On failure: 401 response (JSON or HTML)
+  - On success: injects decoded payload into $_REQUEST['__jwt_payload']
 
 AuthMiddleware:
-  - Rejects unauthenticated requests
+  - Checks Aether()->_session()->_auth()->_isLoggedIn()
+  - On failure: 403 response (JSON or HTML)
 
 
 ================================================================================
-9. DATABASE LAYER
+11. HTTP LAYER
 ================================================================================
 
---- 9.1 DatabaseServiceHub (src/Aether/Service/Hub/DatabaseServiceHub.php) ---
+--- 11.1 HttpContext (src/Aether/Http/HttpContext.php) ---
+
+Namespace: Aether\Http
+Class: HttpContext (final)
+
+Properties: $_ipaddr, $_useragent, $_method (HttpMethod), $_route
+Constructor: populates from $_SERVER (REMOTE_ADDR, HTTP_USER_AGENT, REQUEST_METHOD, REQUEST_URI)
 
 Methods:
-  - _mysql(string $dbname) : DatabaseWrapper
-  - _sqlite(string $dbname) : DatabaseWrapper
+  _getIpaddr() : string
+  _getUseragent() : string
+  _getMethod() : HttpMethod
+  _getRoute() : string
+  _getParameters(HttpParameterTypeEnum) : HttpParameterUnpacker
 
-Caches connections internally: key = "{driver}_{dbname}"
+
+--- 11.2 HttpFile (src/Aether/Http/HttpFile.php) ---
+
+Namespace: Aether\Http
+Class: HttpFile (final)
+
+File upload handler with validation.
+
+Properties: $_maxSize (default 2MB), $_allowedExtensions, $_allowedMimeTypes, $_fileData
+Constructor: reads from $_FILES[$key] if UPLOAD_ERR_OK
+
+Methods:
+  _checkExtensions() : bool    — validates file extension via pathinfo
+  _checkMimeTypes() : bool     — validates against allowed MIME types
+  _checkSize() : bool          — checks size <= maxSize
+  _save(string $path, bool $override = false) : bool — saves temp file via IOFile
+  _genRandomName() : string    — bin2hex(openssl_random_pseudo_bytes(16)) = 32-char hex
 
 
---- 9.2 DatabaseWrapper (src/Aether/Database/DatabaseWrapper.php) ---
+--- 11.3 Outbound HTTP Client (src/Aether/Http/Request/HttpRequest.php) ---
 
-Extends: QueryBuilder
+Namespace: Aether\Http\Request
+Class: HttpRequest (implements RequestInterface)
+
+cURL-based HTTP client with SSRF protection.
+
+SSRF Hardening:
+  - Only http:// and https:// schemes
+  - Private IPs blocked (127.x, 10.x, 172.16-31.x, 192.168.x)
+  - Reserved IPs blocked
+  - DNS resolution verified (gethostbyname then re-check)
+  - Bypass with HTTP_ALLOW_PRIVATE=1 in .env
+
+_send() -> returns ?HttpResponse (code, body, headers parsed) or null on failure
+
+
+--- 11.4 RequestFactory (src/Aether/Http/RequestFactory.php) ---
+
+Namespace: Aether\Http
+Class: RequestFactory
+
+Methods:
+  static _create(HttpMethodEnum $method, string $destination) : HttpRequest
+
+
+--- 11.5 Response Factory (src/Aether/Http/ResponseFactory.php) ---
+
+Namespace: Aether\Http
+Class: ResponseFactory
+
+Methods (all return HttpResponse):
+  _html(body, code, url?, method?)
+  _json(body, code, url?, method?)
+  _xml(body, code, url?, method?)
+  _text(body, code, url?, method?)
+  _pdf(body, code, url?, method?)
+  static _create(format, body, statusCode, url?, method?)
+
+
+--- 11.6 HttpResponse (src/Aether/Http/Response/HttpResponse.php) ---
+
+Namespace: Aether\Http\Response
+Class: HttpResponse (implements ResponseInterface)
+
+Properties: $_url, $_method, $_body, $_statusCode, $_format
+
+_send() : void
+  1. http_response_code($statusCode)
+  2. header(Content-Type from format)
+  3. If JSON format -> json_encode body
+  4. echo body
+  5. exit
+
+
+--- 11.7 Response Formats (src/Aether/Http/Response/Format/) ---
+
+HttpResponseFormat (base class): $_name, $_header, getters
+  - HttpResponseFormatJson:  Content-Type: application/json; charset=UTF-8
+  - HttpResponseFormatHtml:  Content-Type: text/html; charset=UTF-8
+  - HttpResponseFormatXml:   Content-Type: application/xml; charset=UTF-8
+  - HttpResponseFormatText:  Content-Type: text/plain; charset=UTF-8
+  - HttpResponseFormatPdf:   Content-Type: application/pdf
+
+HttpResponseFormatEnum: JSON, HTML, XML, TEXT, PDF
+  _get() -> string value
+  _make() -> instantiates correct format class
+
+
+--- 11.8 HTTP Methods (src/Aether/Http/Methods/) ---
+
+HttpMethodEnum: GET, POST, QUERY, PUT, DELETE, PATCH (TODO), OPTIONS (TODO), HEAD (TODO)
+  _get() -> string value
+  _make() -> returns concrete HttpMethod instance
+
+HttpMethod (abstract, implements MethodInterface): $_name
+
+MethodInterface (RFC 9110 semantics):
+  _getName() : string
+  _isSafe() : bool         — safe methods don't alter server state
+  _isCacheable() : bool    — cacheable (GET, HEAD)
+  _allowsBody() : bool     — can accept a body
+  _requiresBody() : bool   — must have a body
+
+Concrete implementations:
+  HttpGet:    safe=true,  cacheable=true,  allowsBody=false, requiresBody=false
+  HttpPost:   safe=false, cacheable=false, allowsBody=true,  requiresBody=true
+  HttpPut:    safe=false, cacheable=false, allowsBody=true,  requiresBody=true
+  HttpDelete: safe=false, cacheable=false, allowsBody=true,  requiresBody=false
+  HttpQuery:  safe=true,  cacheable=true,  allowsBody=true,  requiresBody=true
+
+
+--- 11.9 Parameter Unpacker (src/Aether/Http/HttpParameterUnpacker.php) ---
+
+Namespace: Aether\Http
+Class: HttpParameterUnpacker
+
+HttpParameterTypeEnum:
+  - PHP_INPUT  -> json_decode(file_get_contents('php://input'))
+  - POST_INPUT -> $_POST
+  - GET_INPUT  -> $_GET
+
+Methods:
+  _getAttribute(string $attr) : mixed -> returns value or false if not present
+
+
+================================================================================
+12. AUTHENTICATION SYSTEM
+================================================================================
+
+--- 12.1 AuthHandler (src/Aether/Http/Auth/AuthHandler.php) ---
+
+Namespace: Aether\Http\Auth
+Class: AuthHandler (final)
+
+Facade for auth state. Accessed via Aether()->_session()->_auth().
+  - _isLoggedIn() : bool -> delegates to UserFactory::_isLoggedIn()
+  - _getUser() : ?UserInstance -> delegates to UserFactory::_fromSession()
+
+
+--- 12.2 AuthInstance (src/Aether/Http/Auth/AuthInstance.php) ---
+
+Namespace: Aether\Http\Auth
+Class: AuthInstance (abstract, implements AuthInterface)
+
+Properties: $_email (string), $_password (string), $_status (string), $_dbconn (DatabaseWrapper)
+Constructor: sets email, password, connects to AUTH_DATABASE_GATEWAY via Aether()->_db()->_mysql()
+
+Methods:
+  protected _getEmail() : string
+  protected _getPassword() : string
+  _getStatus() : string
+  protected _setStatus(string $message, bool $status) : bool
+  abstract _tryAuth() : bool
+
+
+--- 12.3 Auth Gateways (src/Aether/Http/Auth/Gateway/) ---
+
+LoginAuthGateway (extends AuthInstance, implements AuthGatewayEventInterface):
+  - Uses PasswordHashingTrait
+  - _tryAuth(): checks email exists, fetches user row, verifies password hash
+  - _onSuccess(): creates UserInstance, stores in session
+  - _onFailure(): returns "user login failed."
+
+RegisterAuthGateway (extends AuthInstance, implements AuthGatewayEventInterface):
+  - Uses PasswordHashingTrait
+  - Additional property: $_username
+  - _tryAuth(): checks email NOT already used
+  - _onSuccess(): INSERTs user (username, email, Argon2ID hash, perms="[]"), stores in session
+  - _onFailure(): returns "provided email is already used."
+
+LogoutAuthGateway (extends AuthInstance, implements AuthGatewayEventInterface):
+  - Constructor: empty email/password
+  - _tryAuth(): checks user IS logged in
+  - _onSuccess(): removes user key from session
+  - _onFailure(): returns "failed"
+
+AuthGatewayEventInterface:
+  - _onSuccess(array $data) : string
+  - _onFailure() : string
+
+
+--- 12.4 User System (src/Aether/Http/Auth/User/) ---
+
+UserInstance (extends PermissionLayer, implements UserInterface):
+  - Traits: UserInputValidatorTrait
+  - Properties: $_uid (int), $_username (string), $_email (string)
+  - Constructor: (int $uid, string $username, string $email, string $perms)
+  - Methods: _getUid(), _getUsername() (sanitized), _getEmail() (sanitized)
+  - Permission: _hasPerm(), _addPerm(), _removePerm(), _getPerms(), _isAdmin()
+  - _update() -> re-stores self in session after perm change
+
+UserFactory:
+  - SESSION_KEY = 'user'
+  - static _isLoggedIn() : bool -> checks session key exists + can decode
+  - static _fromSession() : ?UserInstance -> decodes session data into UserInstance
+  - static _toSession(mixed $val) : ?array -> serializes to {id, username, email, perms}
+
+
+--- 12.5 Permission System (src/Aether/Http/Auth/User/Permission/) ---
+
+PermissionLayer:
+  - protected array $_perms
+  - _hasPermission(mixed $perm) : bool -> in_array (supports enum->value or string)
+  - _setPermission(mixed $perm, int $uid) : PermissionLayer -> push + UPDATE DB
+  - _deletePermission(mixed $perm, int $uid) : PermissionLayer -> filter + UPDATE DB
+  - _stringify() -> json_encode (for DB)
+  - _serialize(string) -> json_decode (from DB)
+
+PermissionEnum: string
+  - PERM_ADMIN = "PERM.AETHER.ADMIN"
+  - PERM_MOD = "PERM.AETHER.MOD"
+
+
+--- 12.6 Auth API Controller (src/Aether/Http/Auth/Controller/AuthApiController.php) ---
+
+Namespace: Aether\Http\Auth\Controller
+Class: AuthApiController (extends Controller)
+Traits: UserInputValidatorTrait
+Base path: [@base] => /api/v1/auth
+
+Endpoints:
+  POST /api/v1/auth/login     — expects {email, password} in php://input
+  POST /api/v1/auth/register  — expects {username, email, password}
+  POST /api/v1/auth/logout    — no body required
+
+All return JSON: { status: "success"|"error", message: "..." }
+Parameters accessed via: Aether()->_http()->_context()->_getParameters(HttpParameterTypeEnum::PHP_INPUT)
+
+
+================================================================================
+13. SESSION SYSTEM
+================================================================================
+
+--- 13.1 SessionHandler (src/Aether/Http/Session/SessionHandler.php) ---
+
+Namespace: Aether\Http\Session
+Class: SessionHandler (final, extends SessionSecurityLayer)
+
+Properties: private static ?Session $_session = null
+
+_load() : void
+  1. Validates SESSION_FOLDER_PATH in $_ENV
+  2. Auto-detects secure cookie (HTTPS or SESSION_COOKIE_SECURE env)
+  3. session_set_cookie_params: httponly=true, secure, samesite=Strict
+  4. Sets session.save_path, cookie_lifetime, gc_maxlifetime
+  5. session_start()
+  6. Creates Session singleton
+
+static _getSession() : ?Session
+
+
+--- 13.2 Session (src/Aether/Http/Session/Session.php) ---
+
+Namespace: Aether\Http\Session
+Class: Session (extends SessionSecurityLayer)
+
+Methods:
+  _getValue(string $key) : mixed      -> decodes from $_SESSION via HMAC verification
+  _setValue(string $key, mixed $data)  -> encodes with HMAC into $_SESSION
+  _valueExist(string $key) : bool     -> isset check
+  _removeValue(string $key) : void    -> unset
+  _getSessId() : string|false         -> session_id()
+  _regenerateId() : bool              -> session_regenerate_id(true)
+
+
+--- 13.3 SessionSecurityLayer (src/Aether/Http/Session/Security/SessionSecurityLayer.php) ---
+
+Namespace: Aether\Http\Session\Security
+Class: SessionSecurityLayer (abstract)
+
+All session values are stored encoded.
+
+Encoding: base64( json_data + ":::" + HMAC-SHA256(json_data, SESSION_HMAC) )
+
+_encodeNode($key, $data) : string
+  1. If array -> json_encode
+  2. Concatenate: data + ":::" + hash_hmac('sha256', data, SESSION_HMAC)
+  3. base64_encode result
+
+_decodeNode($key) : mixed
+  1. base64_decode $_SESSION[$key]
+  2. Split on ":::" -> rawData + hmacSignStr
+  3. Verify HMAC with HmacSignature::_hmacEquals()
+  4. json_decode rawData (returns raw string if not valid JSON)
+  5. Return decoded data (or null on tamper)
+
+
+================================================================================
+14. SECURITY COMPONENTS
+================================================================================
+
+--- 14.1 CsrfToken (src/Aether/Security/Token/CsrfToken.php) ---
+
+Namespace: Aether\Security\Token
+Class: CsrfToken (final)
+
+Constant: KEY = 'csrf_token'
+
+  _generate() : string -> bin2hex(random_bytes(32)), stores in $_SESSION['csrf_token']
+  _get() : string -> returns existing or generates new
+  _verify(string $submitted) : bool
+    -> hash_equals (timing-safe)
+    -> Anti-replay: regenerates token after successful verification
+  _exposeHeader() -> header('X-CSRF-Token: ...')
+
+
+--- 14.2 JWToken (src/Aether/Security/Token/JWToken.php) ---
+
+Namespace: Aether\Security\Token
+Class: JWToken (final)
+
+Full JWT implementation with HS256 (HMAC-SHA256).
+
+Constants: ALGORITHM = 'sha256', TOKEN_TYPE = 'JWT', DEFAULT_TTL = 3600
+
+Methods:
+  static _encode(array $payload, ?int $ttl = null) : string
+    -> Creates JWT with header (alg: HS256, typ: JWT)
+    -> Injects registered claims: iat, exp, nbf
+    -> Signs with JWT_SECRET env var
+    -> Returns header.payload.signature
+
+  static _decode(string $token) : array|false
+    -> Validates 3 segments
+    -> Algorithm pinning: rejects non-HS256 headers
+    -> Timing-safe signature verification
+    -> Temporal claims validation (exp, nbf)
+    -> Returns payload array or false
+
+  static _verify(string $token) : bool
+    -> _decode() !== false
+
+  static _refresh(string $token, ?int $ttl = null) : string|false
+    -> Decodes, strips registered claims, re-encodes with new TTL
+
+  static _getPayload(string $token) : array|false
+    -> Decodes payload WITHOUT signature verification (for inspection)
+
+  static _expiresIn(string $token) : int|false
+    -> Returns seconds remaining before expiration
+
+  Private helpers: _sign(), _base64UrlEncode(), _base64UrlDecode()
+
+
+--- 14.3 HmacSignature (src/Aether/Security/Token/HmacSignature.php) ---
+
+Namespace: Aether\Security\Token
+Class: HmacSignature (final)
+
+Constant: HASH_ALGORITHM = "sha256"
+
+  static _hmacEquals(string $signature, string $json) : bool
+    -> hash_equals($signature, hash_hmac('sha256', $json, $_ENV["SESSION_HMAC"]))
+
+
+--- 14.4 PasswordHashingTrait (src/Aether/Security/PasswordHashingTrait.php) ---
+
+  _hashPassword(string) : string -> password_hash($password, PASSWORD_ARGON2ID)
+  _checkPassword(string, string) : bool -> password_verify($password, $hash)
+
+
+--- 14.5 UserInputValidatorTrait (src/Aether/Security/UserInputValidatorTrait.php) ---
+
+  _sanitizeInput(string $str) : string
+    -> htmlspecialchars($str, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
+
+
+================================================================================
+15. DATABASE LAYER
+================================================================================
+
+--- 15.1 DatabaseWrapper (src/Aether/Database/DatabaseWrapper.php) ---
+
+Namespace: Aether\Database
+Class: DatabaseWrapper (extends QueryBuilder)
 
 Constructor: new DatabaseWrapper($database, DatabaseDriverEnum)
-Additional method: _raw(string $query) : mixed → direct query execution
+Additional method: _raw(string $query) : mixed -> direct query execution
 
 
---- 9.3 QueryBuilder (src/Aether/Database/QueryBuilder.php) ---
+--- 15.2 QueryBuilder (src/Aether/Database/QueryBuilder.php) ---
 
 Namespace: Aether\Database
 Class: QueryBuilder (abstract)
 
 Fluent interface. Type determined by first operation called.
+
+Properties: $_type, $_database, $_table, $_rows, $_wheres, $_inserts, $_sets,
+            $_joins, $_countCol, $_orderBy, $_orderByOrd, $_limit, $_driver
 
 Operations:
   _table(string) : self                  — Set target table
@@ -330,432 +843,146 @@ Operations:
   _drop() : self                         — DROP TABLE
   _where(string $key, mixed $val) : self — WHERE clause (AND-combined)
   _join(string $table, string $on) : self — INNER JOIN
-  _orderBy(string $field, string $order) : self — ORDER BY (ASC/DESC)
+  _orderBy(string $field, string $order = "ASC") : self — ORDER BY
   _limit(int $limit) : self              — LIMIT clause
   _send() : mixed                        — Execute query, reset state
 
 Security:
   - _isSafeIdentifier(): regex /^[a-zA-Z0-9_\.]+(\\s+[a-zA-Z0-9_]+)?$/
   - _isSafeJoinClause(): regex /^[a-zA-Z0-9_\.\s=]+$/
+  - _placeholder(): sanitizes keys for PDO named placeholders
   - All values bound via PDO prepared statements with typed binding
   - Resets all state after each _send() call
 
 
---- 9.4 Database Drivers ---
+--- 15.3 Database Drivers ---
 
-DatabaseDriver (abstract):
+DatabaseConnectable (interface):
+  - _connect() : DatabaseDriver
+  - _query(string $query, array $params) : mixed
+  - _dump() : array
+
+DatabaseDriver (abstract, implements DatabaseConnectable):
   - Properties: $_database, $_driver (enum)
   - Gets credentials from ProjectConfig (DATABASE_USERNAME, DATABASE_PASSWORD, DATABASE_ADDRESS)
+  - _database(string) : self — set active database
   - Abstract: _connect(), _query(), _escape(), _dump()
 
-DatabaseMySQLDriver:
+DatabaseMySQLDriver (final):
   - PDO with mysql: DSN
   - Persistent connections (PDO::ATTR_PERSISTENT = true)
   - ERRMODE_EXCEPTION
   - Auto-connects when _database() is called
   - Typed parameter binding (int, bool, null, str)
+  - _escape() -> backtick quoting
 
-DatabaseSQLiteDriver:
+DatabaseSQLiteDriver (final):
   - PDO with sqlite: DSN
   - Supports :memory: databases
-  - Creates directory if not exists
+  - Creates directory if not exists (via IoServiceHub)
   - ERRMODE_EXCEPTION, FETCH_ASSOC, no emulated prepares
+  - _escape() -> double-quote quoting
 
 DatabaseDriverEnum:
   - MYSQL = 'mysql'
   - SQLITE = 'sqlite'
-  - _get() → instantiates correct driver class
+  - _get() -> instantiates correct driver class
 
 
---- 9.5 Models ---
+--- 15.4 Models ---
 
 DatabaseModel (abstract, extends StdClass):
   - Receives a QueryBuilder, executes _send(), maps result columns as object properties
-  - _map(callable $func) : iterates over result data
+  - _map(callable $func) : bool — iterates over result data
 
-ModelTemplate:
-  - Helper to build query templates: sets db, table, conditions
-  - _template() → returns configured QueryBuilder ready for _send()
-
-
-================================================================================
-10. HTTP LAYER
-================================================================================
-
---- 10.1 HttpServiceHub ---
-
-Methods:
-  _context() : HttpContext               — Current request context (IP, UA, method, route)
-  _request(HttpMethodEnum, string) : HttpRequest — Outbound HTTP request
-  _response() : ResponseFactory          — Response builder
-  _method(HttpMethodEnum) : HttpMethod   — Method object factory
-  _parameters(HttpParameterTypeEnum) : HttpParameterUnpacker — Input parsing
-
-
---- 10.2 HttpContext (src/Aether/Http/HttpContext.php) ---
-
-Captures current request metadata:
-  - $_ipaddr = $_SERVER['REMOTE_ADDR']
-  - $_useragent = $_SERVER['HTTP_USER_AGENT']
-  - $_method = HttpMethodEnum::{REQUEST_METHOD}->_make()
-  - $_route = $_SERVER['REQUEST_URI']
-
-
---- 10.3 Outbound HTTP Client (src/Aether/Http/Request/HttpRequest.php) ---
-
-cURL-based HTTP client with SSRF protection.
-
-SSRF Hardening:
-  - Only http:// and https:// schemes
-  - Private IPs blocked (127.x, 10.x, 172.16-31.x, 192.168.x)
-  - Reserved IPs blocked
-  - DNS resolution verified (gethostbyname then re-check)
-  - Bypass with HTTP_ALLOW_PRIVATE=1 in .env
-
-cURL settings:
-  - CURLOPT_RETURNTRANSFER = true
-  - CURLOPT_TIMEOUT = 10
-  - CURLOPT_FOLLOWLOCATION = configurable (HTTP_FOLLOW_REDIRECTS)
-  - CURLOPT_PROTOCOLS = HTTP | HTTPS only
-
-_send() → returns HttpResponse (code, body, headers parsed)
-
-
---- 10.4 Response Factory (src/Aether/Http/ResponseFactory.php) ---
-
-Methods (all return HttpResponse):
-  _html(body, code, url?, method?)
-  _json(body, code, url?, method?)
-  _xml(body, code, url?, method?)
-  _text(body, code, url?, method?)
-  _pdf(body, code, url?, method?)
-
-
---- 10.5 HttpResponse (src/Aether/Http/Response/HttpResponse.php) ---
-
-Properties: $_url, $_method, $_body, $_statusCode, $_format
-
-_send() : void
-  1. http_response_code($statusCode)
-  2. header(Content-Type from format)
-  3. If JSON format → json_encode body
-  4. echo body
-  5. exit
-
-
---- 10.6 Response Formats (src/Aether/Http/Response/Format/) ---
-
-HttpResponseFormat (abstract): $_name, $_header, getters
-  - HttpResponseFormatJson:  Content-Type: application/json; charset=UTF-8
-  - HttpResponseFormatHtml:  Content-Type: text/html; charset=UTF-8
-  - HttpResponseFormatXml:   Content-Type: application/xml; charset=UTF-8
-  - HttpResponseFormatText:  Content-Type: text/plain; charset=UTF-8
-  - HttpResponseFormatPdf:   Content-Type: application/pdf
-
-HttpResponseFormatEnum:
-  JSON, HTML, XML, TEXT, PDF
-  _make() → instantiates correct format class
-
-
---- 10.7 HTTP Methods ---
-
-HttpMethodEnum: GET, POST, QUERY, PUT, DELETE, PATCH, OPTIONS, HEAD
-  _make() → returns HttpGet, HttpPost, HttpQuery, HttpPut, HttpDelete instances
-
-HttpMethod (abstract): $_name (string), getter
-  - HttpGet, HttpPost, HttpPut, HttpDelete, HttpQuery — concrete implementations
-
-
---- 10.8 Parameter Unpacker (src/Aether/Http/HttpParameterUnpacker.php) ---
-
-Extracts request body data.
-
-HttpParameterTypeEnum:
-  - PHP_INPUT  → json_decode(file_get_contents('php://input'))
-  - POST_INPUT → $_POST
-  - GET_INPUT  → $_GET
-
-Methods:
-  _getAttribute(string $attr) : mixed → returns value or false if not present
+ModelTemplate (final):
+  - Properties: $_dbName, $_table, $_rows, $_count, $_conditions
+  - _template() -> returns configured QueryBuilder ready for _send()
 
 
 ================================================================================
-11. AUTHENTICATION SYSTEM
+16. CACHE SYSTEM
 ================================================================================
 
---- 11.1 AuthHandler (src/Aether/Auth/AuthHandler.php) ---
+--- 16.1 CacheInterface (src/Aether/Cache/CacheInterface.php) ---
 
-Facade for auth state. Accessed via Aether()->_session()->_auth().
-  - _isLoggedIn() : bool → delegates to UserFactory::_isLoggedIn()
-  - _getUser() : ?UserInstance → delegates to UserFactory::_fromSession()
+Contract: _get, _getFallback, _set, _delete, _clear, _has
 
 
---- 11.2 AuthInstance (src/Aether/Auth/AuthInstance.php) ---
+--- 16.2 CacheFactory (src/Aether/Cache/CacheFactory.php) ---
 
-Abstract base class for auth gateways.
-  - Stores: $_email, $_password, $_status, $_dbconn
-  - $_dbconn = Aether()->_db()->_mysql(AUTH_DATABASE_GATEWAY)
-  - Abstract: _tryAuth() : bool
-  - _setStatus(message, bool) : returns the bool (for chaining with return)
+  static _get(CacheAdapterEnum $adapter) : CacheInterface
 
 
---- 11.3 Auth Gateways ---
+--- 16.3 CacheAdapterEnum (src/Aether/Cache/Adapter/CacheAdapterEnum.php) ---
 
-LoginAuthGateway:
-  - Uses PasswordHashingTrait
-  - _tryAuth():
-    1. Check email exists in AUTH_TABLE_GATEWAY
-    2. Fetch user row
-    3. Verify password with password_verify()
-    4. On success: create UserInstance, store in session
-  - Implements AuthGatewayEventInterface (_onSuccess, _onFailure)
+  FILES, APCU, REDIS, MEMCACHED (memcached falls back to APCu)
+  _make() -> instantiates correct adapter
 
-RegisterAuthGateway:
-  - Takes: $_username, $_email, $_password
-  - _tryAuth():
-    1. Check email NOT already used
-    2. INSERT new user (username, email, password_hash via Argon2ID, perms="[]")
-    3. Fetch created user, store in session
-  - Auto-logs-in after registration
 
-LogoutAuthGateway:
-  - Constructor: empty email/password
-  - _tryAuth():
-    1. Check user IS logged in
-    2. Remove "user" key from session
-
-AuthGatewayEventInterface:
-  - _onSuccess(array $data) : string
-  - _onFailure() : string
-
-
---- 11.4 User System ---
-
-UserInstance (extends PermissionLayer, implements UserInterface):
-  - Properties: $_uid (int), $_username (string), $_email (string)
-  - Uses UserInputValidatorTrait (sanitizes output)
-  - Methods: _getUid(), _getUsername(), _getEmail(), _getPerms()
-  - Permission methods: _hasPerm(), _addPerm(), _removePerm(), _isAdmin()
-  - _update() → re-stores self in session after perm change
-
-UserFactory:
-  - SESSION_KEY = 'user'
-  - _isLoggedIn() : bool → checks session key exists + can decode
-  - _fromSession() : ?UserInstance → decodes session data into UserInstance
-  - _toSession(UserInstance) : array → serializes user for session storage
-    Format: { id, username, email, perms (JSON string) }
-
-UserInterface:
-  - Contract for _getUid, _getUsername, _getEmail, _hasPerm, _addPerm, _removePerm, _getPerms, _isAdmin
-
-
---- 11.5 Permission System ---
-
-PermissionLayer:
-  - $_perms : string[] (decoded from JSON in DB)
-  - _hasPermission(mixed $perm) : bool → in_array check (supports enum or string)
-  - _setPermission(mixed $perm, int $uid) → push to array + UPDATE DB
-  - _deletePermission(mixed $perm, int $uid) → filter array + UPDATE DB
-  - _stringify() → json_encode (for DB storage)
-  - _serialize(string) → json_decode (from DB)
-
-PermissionEnum:
-  - PERM_ADMIN = "PERM.AETHER.ADMIN"
-  - PERM_MOD = "PERM.AETHER.MOD"
-
-
---- 11.6 Auth API Controller (src/Aether/Auth/Controller/AuthApiController.php) ---
-
-Base path: /api/v1/auth
-
-Endpoints:
-  POST /api/v1/auth/login     — expects {email, password} in php://input
-  POST /api/v1/auth/register  — expects {username, email, password}
-  POST /api/v1/auth/logout    — no body required
-
-All return JSON: { status: "success"|"error", message: "..." }
-Validates non-empty inputs, checks already-logged-in state.
-
-
---- 11.7 DB Schema (src/Aether/Auth/db_structure.sql) ---
-
-CREATE TABLE users (
-    uid              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    username         VARCHAR(250),
-    email            VARCHAR(250),
-    password_hash    VARCHAR(500),
-    perms            TEXT
-);
-
-Default admin: Admin / admin@gmail.com / Argon2ID hash / empty perms
-
-
-================================================================================
-12. SESSION SYSTEM
-================================================================================
-
---- 12.1 SessionHandler (src/Aether/Session/SessionHandler.php) ---
-
-Static loader. Called during Aether::_init().
-
-_load():
-  1. Validates SESSION_FOLDER_PATH in .env
-  2. Configures cookie params: httponly=true, secure (auto-detected or env), samesite=Strict
-  3. Sets session.save_path, cookie_lifetime, gc_maxlifetime
-  4. session_start()
-  5. Creates Session singleton
-
-
---- 12.2 Session (src/Aether/Session/Session.php) ---
-
-Extends SessionSecurityLayer.
-
-Methods:
-  _getValue(string $key) : mixed      → decodes from $_SESSION via HMAC verification
-  _setValue(string $key, mixed $data)  → encodes with HMAC into $_SESSION
-  _valueExist(string $key) : bool     → isset check
-  _removeValue(string $key) : void    → unset
-  _getSessId() : string|false         → session_id()
-  _regenerateId() : bool              → session_regenerate_id(true)
-
-
---- 12.3 SessionSecurityLayer (src/Aether/Session/Security/SessionSecurityLayer.php) ---
-
-All session values are stored encoded.
-
-Encoding: base64( json_data + ":::" + HMAC-SHA256(json_data, SESSION_HMAC) )
-
-_encodeNode($key, $data):
-  1. If array → json_encode
-  2. Concatenate: data + ":::" + hash_hmac('sha256', data, SESSION_HMAC)
-  3. base64_encode result
-
-_decodeNode($key):
-  1. base64_decode $_SESSION[$key]
-  2. Split on ":::" → rawData + hmacSignStr
-  3. Verify HMAC with HmacSignature::_hmacEquals()
-  4. json_decode rawData
-  5. Return decoded data (or null on tamper)
-
-
-================================================================================
-13. SECURITY COMPONENTS
-================================================================================
-
---- 13.1 CsrfToken (src/Aether/Security/Token/CsrfToken.php) ---
-
-  _generate() : string → bin2hex(random_bytes(32)), stores in $_SESSION['csrf_token']
-  _get() : string → returns existing or generates new
-  _verify(string $submitted) : bool
-    → hash_equals (timing-safe)
-    → Anti-replay: regenerates token after successful verification
-  _exposeHeader() → header('X-CSRF-Token: ...')
-
-
---- 13.2 HmacSignature (src/Aether/Security/Token/HmacSignature.php) ---
-
-  _hmacEquals(string $signature, string $json) : bool
-    → hash_equals($signature, hash_hmac('sha256', $json, SESSION_HMAC))
-
-
---- 13.3 JWToken (src/Aether/Security/Token/JWToken.php) ---
-
-  Empty class. Placeholder for future JWT implementation.
-
-
---- 13.4 PasswordHashingTrait (src/Aether/Security/PasswordHashingTrait.php) ---
-
-  _hashPassword(string) : string → password_hash($password, PASSWORD_ARGON2ID)
-  _checkPassword(string, string) : bool → password_verify($password, $hash)
-
-
---- 13.5 UserInputValidatorTrait (src/Aether/Security/UserInputValidatorTrait.php) ---
-
-  _sanitizeInput(string $str) : string
-    → htmlspecialchars($str, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
-
-
-================================================================================
-14. CACHE SYSTEM
-================================================================================
-
---- 14.1 CacheInterface ---
-
-Contract: _get, _set, _delete, _clear, _has
-
-
---- 14.2 CacheServiceHub (src/Aether/Service/Hub/CacheServiceHub.php) ---
-
-Methods:
-  _apcu() : Apcu        → APCu adapter
-  _files() : Files       → File-based adapter
-  _redis() : Redis       → Redis adapter
-
-
---- 14.3 APCu Adapter (src/Aether/Cache/Adapter/Apcu.php) ---
+--- 16.4 APCu Adapter (src/Aether/Cache/Adapter/Apcu.php) ---
 
 Wraps apcu_fetch, apcu_store, apcu_delete, apcu_clear_cache.
-Used by: route table caching (ControllerGateway)
+Additional: _getFallback(string $key, callable $fallback) : mixed
+  -> Returns cached value if hit, else calls fallback
+
+Used by: route table caching, env caching, rate limiting, HTTP filtering
 
 
---- 14.4 File Adapter (src/Aether/Cache/Adapter/Files.php) ---
+--- 16.5 File Adapter (src/Aether/Cache/Adapter/Files.php) ---
 
 Storage: storage/cache/ (or CACHE_FILES_PATH env var)
 Filename: SHA256(key) + ".cache.json"
 Format: { "v": value, "e": expiresAt (unix timestamp, 0=never) }
 
-_get: reads JSON, checks TTL, deletes if expired
-_set: ensures directory, writes { v, e } as JSON
-_has: reads, checks TTL
-_clear: globs *.cache.json, deletes all
-_delete: unlinks specific file
-
-Used by: RatelimitMiddleware
+Uses IoServiceHub for all file/folder operations.
+Additional: _getFallback() same pattern as APCu.
 
 
---- 14.5 Redis Adapter (src/Aether/Cache/Adapter/Redis.php) ---
+--- 16.6 Redis Adapter (src/Aether/Cache/Adapter/Redis.php) ---
 
 Uses PHP's Redis extension (phpredis).
 Config: REDIS_ADDRESS, REDIS_PORT from .env
 Wraps: get, set/setEx, del, exists, flushDB
-
-
---- 14.6 CacheAdapterEnum ---
-
-  FILES, APCU, REDIS, MEMCACHED (memcached falls back to APCu)
-  _make() → instantiates correct adapter
+Additional: _getFallback() same pattern.
+Throws CacheRedisException if config missing.
 
 
 ================================================================================
-15. CONFIGURATION SYSTEM
+17. CONFIGURATION SYSTEM
 ================================================================================
 
---- 15.1 ProjectConfig (src/Aether/Config/ProjectConfig.php) ---
+--- 17.1 ProjectConfig (src/Aether/Config/ProjectConfig.php) ---
 
-  _load() → merges EnvDataUnpacker output into $_ENV
-  _get(string $key, mixed $default = null) : mixed → $_ENV[strtoupper($key)] ?? $default
-  _ensureLoaded() → lazy-loads if $_ENV is empty
+Namespace: Aether\Config
+Class: ProjectConfig (final)
 
-
---- 15.2 EnvDataUnpacker (src/Aether/Config/EnvDataUnpacker.php) ---
-
-  Constructor: reads .env file via IOFile::_open(ENV, _root(".env"))->_readDecoded()
-  Throws EnvConfigException if missing/invalid
-  _get(key), _raw() → access parsed data
+  static _load() -> merges EnvDataUnpacker()->_raw() into $_ENV
+  static _get(string $key, mixed $default = null) : mixed -> $_ENV[strtoupper($key)] ?? $default
+  private static _ensureLoaded() -> lazy-loads if $_ENV is empty
 
 
---- 15.3 ConfigServiceHub ---
+--- 17.2 EnvDataUnpacker (src/Aether/Config/EnvDataUnpacker.php) ---
 
-  _get(string $key, mixed $default = null) : mixed → ProjectConfig::_get(key, default)
+Namespace: Aether\Config
+Class: EnvDataUnpacker (final)
+
+Constructor:
+  - Uses APCu fallback cache pattern (key: "env://", TTL: 10 minutes)
+  - On cache miss: reads .env via IOFile::_open(IOTypeEnum::ENV, _root(".env"))->_readDecoded()
+  - Stores result in APCu for subsequent requests
+  - Throws EnvConfigException if missing/invalid
+
+Methods: _get(key), _raw() : array
 
 
---- 15.4 Configable Interface ---
+--- 17.3 Configable Interface (src/Aether/Config/Configable.php) ---
 
-  _unpack(array $data) : Configable → array to class
-  _pack(Configable $config) : array → class to array
+  _unpack(array $data) : Configable — array to class
+  _pack(Configable $config) : array — class to array
 
 
---- 15.5 .env Variables ---
+--- 17.4 .env Variables ---
 
   PROJECT_NAME              App name
   DATABASE_ADDRESS          DB host (127.0.0.1)
@@ -765,7 +992,7 @@ Wraps: get, set/setEx, del, exists, flushDB
   AUTH_TABLE_GATEWAY        Users table name
   COOKIE_SESSION_TTL        Session TTL in days
   SESSION_FOLDER_PATH       Session file storage path
-  SESSION_HMAC              32-char HMAC key
+  SESSION_HMAC              HMAC key for session signing
   SESSION_COOKIE_SECURE     Force Secure cookie (0/1)
   RATELIMIT_SECOND_INTERVAL Rate limit window (seconds)
   RATELIMIT_MAX_LIMIT       Max requests per window
@@ -774,177 +1001,242 @@ Wraps: get, set/setEx, del, exists, flushDB
   REDIS_PORT                Redis port
   HTTP_FOLLOW_REDIRECTS     Follow redirects in HTTP client (0/1)
   HTTP_ALLOW_PRIVATE        Allow private IPs in HTTP client (0/1)
+  ENABLE_ROUTE_CACHING      Enable APCu route caching (truthy)
+  JWT_SECRET                Secret key for JWT signing
+  JWT_TTL                   JWT token TTL in seconds (default 3600)
+  CACHE_FILES_PATH          Custom file cache directory path
 
 
 ================================================================================
-16. FILE I/O SYSTEM
+18. FILE I/O SYSTEM
 ================================================================================
 
---- 16.1 IoServiceHub ---
+--- 18.1 IOTypeEnum (src/Aether/IO/IOTypeEnum.php) ---
 
-  _file(string $path, IOTypeEnum $type) : IOFile
-  _stream(string $path, IOTypeEnum $type) : IOStream
-  _folder(string $path) : IOFolder
+Enum cases: TEXT, JSON, XML, PHP, JS, CSS, YAML, ENV, CSV, PNG, JPG, WEBP, GIF, PDF, OTHER
 
 
---- 16.2 IOFile (src/Aether/IO/IOFile.php) ---
+--- 18.2 IOFile (src/Aether/IO/IOFile.php) ---
+
+Namespace: Aether\IO
+Class: IOFile (final)
 
 File operations using file_get_contents/file_put_contents.
 
 Methods:
   _write(mixed $content, bool $append = false) : ?IOFile
-    → Uses parser to encode, LOCK_EX for atomicity
+    -> Uses parser to encode, LOCK_EX for atomicity
   _writeLine(string $line, ?int $lineNumber) : ?IOFile
-    → Append or insert at specific line
-  _read() : ?string → raw file content
-  _readLines() : array → FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES
-  _readDecoded() : mixed → reads then decodes via parser
-  _delete() : bool → unlink
+    -> Append or insert at specific line
+  _read() : ?string -> raw file content
+  _readLines() : array -> FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES
+  _readDecoded() : mixed -> reads then decodes via parser
+  _delete() : bool -> unlink
   static _open(IOTypeEnum, string $path) : IOFile
 
 
---- 16.3 IOStream (src/Aether/IO/IOStream.php) ---
+--- 18.3 IOStream (src/Aether/IO/IOStream.php) ---
+
+Namespace: Aether\IO
+Class: IOStream (final)
 
 Stream-based I/O using fopen/flock (shared/exclusive locks).
 
 Same interface as IOFile but with:
-  - Explicit flock(LOCK_EX) for writes
-  - flock(LOCK_SH) for reads
-  - _readEachLine(callable $callback) : IOStream → line-by-line streaming with early exit
+  - Explicit flock(LOCK_EX) for writes (mode 'wb' or 'ab')
+  - flock(LOCK_SH) for reads (mode 'rb')
+  - _readEachLine(callable $callback) : IOStream
+    -> Line-by-line streaming, callback receives (string $line, int $lineNumber)
+    -> If callback returns false, reading stops early
 
-Advantages: better for large files, concurrent access safety.
+  static _open(IOTypeEnum, string $path) : IOStream
 
 
---- 16.4 IOFolder (src/Aether/IO/IOFolder.php) ---
+--- 18.4 IOFolder (src/Aether/IO/IOFolder.php) ---
 
+Namespace: Aether\IO
+Class: IOFolder (final)
+
+Methods:
   _getPath() : string
-  _exist() : bool → is_dir
-  _setPerm(int $perms) : bool → chmod
-  _create(bool $check = false) : bool → mkdir recursive
-  _listFiles(string $pattern) : array|false → glob
+  _exist() : bool -> is_dir
+  _setPerm(int $perms) : bool -> chmod
+  _create(bool $check = false) : bool -> mkdir recursive (0777)
+  _listFiles(string $pattern) : array|false -> glob
   _createFile(string $name) : ?IOFile
-  _getFile(string $name, bool $forceCreate) : ?IOFile
+  _getFile(string $name, bool $forceCreate = false) : ?IOFile
   _setFilePerm(string $file, int $perms) : bool
+  static _path(string $path) : IOFolder
 
 
---- 16.5 IOTypeEnum ---
-
-  TEXT, JSON, XML, PHP, JS, CSS, YAML, ENV, CSV, PNG, JPG, WEBP, GIF, PDF, OTHER
-
-
---- 16.6 Parsers ---
+--- 18.5 Parsers (src/Aether/IO/Parser/) ---
 
 ParserInterface: _encode(mixed) : string, _decode(string) : mixed
 
 JsonParser:
-  _encode → json_encode(data, PRETTY_PRINT | UNESCAPED_UNICODE) + newline
-  _decode → json_decode(content, assoc=true), null on error
+  _encode -> json_encode(data, PRETTY_PRINT | UNESCAPED_UNICODE) + newline
+  _decode -> json_decode(content, assoc=true), null on error
 
 EnvParser:
-  _encode → "KEY=value\n" format from array
-  _decode → splits on "=", trims quotes, skips comments (lines without =)
+  _encode -> "KEY=value\n" format from array
+  _decode -> splits on "=", trims quotes, skips lines without =
 
 Default (anonymous class for TEXT/OTHER):
-  _encode → is_string ? passthrough : var_export
-  _decode → passthrough
+  _encode -> is_string ? passthrough : var_export
+  _decode -> passthrough
 
 
 ================================================================================
-17. VIEW SYSTEM
+19. VIEW SYSTEM
 ================================================================================
 
---- 17.1 ViewInstance (src/Aether/View/ViewInstance.php) ---
+ViewInstance (src/Aether/View/ViewInstance.php)
+
+Namespace: Aether\View
+Class: ViewInstance (final, implements ViewInterface)
 
 PHP template renderer with security hardening.
 
+Properties: $_path, $_vars, static $_ext = "php"
+
 _render():
   1. Resolve views root: realpath("views") (relative to public/)
-  2. Validate path: no "..", no absolute, alphanumeric + _ - / only
+  2. Validate path: no "..", no absolute, regex /^[a-zA-Z0-9_.\-\/]+$/
   3. Build full path: viewsRoot/path.{ext}
   4. realpath() check: must stay within viewsRoot (no traversal)
-  5. If extension != "php" → file_get_contents (no execution)
+  5. If extension != "php" -> file_get_contents (no execution)
   6. If extension == "php":
-     - extract($vars, EXTR_SKIP) → make vars available
-     - ob_start() + require_once + ob_get_clean()
+     - extract($vars, EXTR_SKIP) -> make vars available
+     - ob_start() + require_once + ob_get_clean() + echo
 
 Static:
-  _make(string $path, array $vars) → shortcut constructor + render
-  _getExtension() / _setExtension() → default "php", configurable
+  _make(string $path, array $vars) -> shortcut constructor + render
+  _getExtension() / _setExtension() -> default "php", configurable
+
+ViewInterface:
+  _render(), static _make(string $path, array $vars)
 
 
 ================================================================================
-18. MODULE SYSTEM
+20. MODULE SYSTEM
 ================================================================================
 
---- 18.1 ModuleFactory (src/Aether/Modules/ModuleFactory.php) ---
+--- 20.1 Module Core (src/Aether/Modules/) ---
 
-  static _load(array $modules) : void
-    → Instantiates each module class, verifies instanceof AetherModule, calls _onLoad()
-  static _isLoaded(string $class) : bool
+ModuleInterface:
+  _getName() : string, _getVersion() : float, _getDescription() : string, _onLoad()
 
-
---- 18.2 AetherModule (src/Aether/Modules/AetherModule.php) ---
-
-Abstract base for all modules.
+AetherModule (abstract, extends ModuleFactory, implements ModuleInterface):
   Properties: $_name, $_version, $_description
+  Constructor: (string $name, float $version, string $description)
   Abstract: _onLoad() : void, static _make() : AetherModule
 
+ModuleFactory (abstract):
+  static _load(array $modules) : void
+    -> Instantiates each, verifies instanceof AetherModule, calls _onLoad()
+  static _isLoaded(string $class) : bool
+  abstract static _make() : AetherModule
 
---- 18.3 AetherCLI Module ---
 
-Location: src/Aether/Modules/AetherCLI/
+--- 20.2 Module Location ---
+
+Modules live in /modules/ at project root (NOT in src/).
+Autoload mapping: Aether\Modules\{ModuleName}\... -> modules/{ModuleName}/src/...
+
+
+--- 20.3 AetherCLI Module (modules/AetherCLI/) ---
+
+Namespace: Aether\Modules\AetherCLI
 
 Kernel (extends AetherModule):
   - Name: "Aether-CLI", version 1.0
   - _onLoad(): prints ASCII banner, parses CLI args, registers commands, dispatches
 
 Components:
-  - CliArgParser: parses $argv into structured array
-  - CliLogger: colored terminal output with ASCII art
-  - CliColorEnum: ANSI color codes (FG_RED, FG_BRIGHT_CYAN, etc.) with _paint() method
-  - CommandDispatcher: registers + matches commands
+  - Cli/CliArgParser: parses $argv into structured array
+  - Cli/CliLogger: colored terminal output with ASCII art
+  - Cli/CliColorEnum: ANSI color codes with _paint() method
+  - Command/CommandDispatcher: registers + matches commands
   - Commands:
     - SetupCommand: project initialization
     - MakeCommand: scaffolding (make:controller, etc.)
-    - SourceCommand: source inspection
+    - SourceCommand: source:[script|db]
+      - source:script {path} — loads + executes a BaseScript from bin/scripts/ (path-jailed)
+      - source:db {file.json} — imports JSON schema into MySQL (CREATE DATABASE + CREATE TABLE)
+    - DatabaseCommand: database:[shell|import|export]
+      - database:shell — lists all databases + tables (REPL in progress)
+      - database:import / database:export — stubs (import already handled by source:db)
+  - Script/BaseScript (abstract): base for custom scripts
+  - Script/ScriptInterface: contract
 
-Script system:
-  - BaseScript (abstract): base for custom scripts
-  - ScriptInterface: contract
-  - ScriptExample.php: template for user scripts
-
-CLI entry: bin/aether (loads Kernel module)
+CLI entry: bin/aether (loads ProjectConfig, then ModuleFactory with CliKernel)
 
 
---- 18.4 I18n Module ---
+--- 20.4 I18n Module (modules/I18n/) ---
 
-Location: src/Aether/Modules/I18n/
+Namespace: Aether\Modules\I18n
 
 I18N (extends AetherModule):
-  - _onLoad(): loads "en_US" language file, includes helper function file
-  - static __($identifier, ?$params, ?$language) : string → translates key
+  - Name: "I18n Module", version 1.0
+  - _onLoad(): loads "en_EN" language file, includes I18nFunctionHelper.php
+  - static __($identifier, ?$params, ?$language) : string -> translates key
 
 Components:
-  - LangHandler: loads/manages language files, resolves keys
+  - Lang/LangHandler: loads/manages language files, resolves keys
   - I18nFunctionHelper.php: registers global __() function
-  - lang/en/, lang/fr/: translation files per locale
 
 
---- 18.5 Analytics Module (placeholder) ---
+--- 20.5 Analytics Module (modules/Analytics/) ---
 
-Location: src/Aether/Modules/Analytics/
+Namespace: Aether\Modules\Analytics
 
-Components:
-  - Analytics.php: module entry
-  - Http/HttpPacketModel.php: request data model
-  - Maths/Statistics.php: statistical utilities
-  - Provider/LogProvider.php: log data provider
+Self-hosted, zero-JS, server-side HTTP analytics.
+Storage: SQLite database at modules/Analytics/ressources/db.sqlite (auto-created).
 
-Status: In development / placeholder phase
+Analytics (extends AetherModule):
+  - Name: "Analytics Module", version 1.0
+  - static $_path: path to SQLite DB
+  - _onLoad():
+    1. HttpPacketModel::_build() — captures current request
+    2. _initDatabase() — CREATE TABLE IF NOT EXISTS analytics (ip_addr, user_agent, protocol, domain, route, http_method, http_data, phptimestamp)
+    3. LogProvider->_log($httpPacket) — persists to DB
+  - _initDatabase(): raw CREATE TABLE via SQLite driver
+
+HttpPacketModel (final):
+  - Captures: protocol (http/https), domain, route, method, body/query data, IP, user-agent, timestamp
+  - static _build(): auto-detects HTTPS, parses REQUEST_URI, reads php://input for POST/PUT/DELETE/PATCH, json_encode($_GET) for GET
+  - _craftUrl(): reconstructs full URL from components
+
+LogProvider (final):
+  - Constructor: opens SQLite connection, sets table to "analytics"
+  - _log(HttpPacketModel): INSERT all fields via QueryBuilder (safe, parameterized)
+  - _retrieve(key, val): SELECT * WHERE key=val via QueryBuilder
+  - _distinct(key): raw SELECT DISTINCT
+  - _distinctRetrieve(key, v1, v2): raw SELECT DISTINCT WHERE
+  - _count(key): COUNT via QueryBuilder
+
+Statistics (final):
+  - static _getAllVisitorCount(): total rows in analytics table
+  - static _getUniqueVisitorCount(): DISTINCT ip_addr count
+  - static _getPageVisitorCount(route): visits to specific route
+  - static _getUniquePageVisitorCount(route): unique IPs for a route
+
+Usage: add Analytics::class to ModuleFactory::_load([]) in App.php
 
 
 ================================================================================
-19. EXCEPTION SYSTEM
+21. EVENT & TASK SYSTEM (placeholders)
+================================================================================
+
+EventDispatcher (src/Aether/Event/EventDispatcher.php):
+  Namespace: Aether\Event — Class: EventDispatcher — #todo
+
+TaskScheduler (src/Aether/Task/TaskScheduler.php):
+  Namespace: Aether\Task — Class: TaskScheduler — #todo
+
+
+================================================================================
+22. EXCEPTION SYSTEM
 ================================================================================
 
 All in src/Aether/Exception/:
@@ -959,7 +1251,7 @@ All in src/Aether/Exception/:
 
 
 ================================================================================
-20. TESTING
+23. TESTING
 ================================================================================
 
 Framework: PHPUnit
@@ -984,7 +1276,7 @@ Test files:
 
 
 ================================================================================
-21. BENCHMARKS
+24. BENCHMARKS
 ================================================================================
 
 BootTimeBench.php:
@@ -993,74 +1285,98 @@ BootTimeBench.php:
 
 
 ================================================================================
-22. APPLICATION LAYER (app/)
-================================================================================
-
---- 22.1 App.php (app/App/App.php) ---
-
-Registers:
-  Middleware stack:
-    1. MaintenanceMiddleware
-    2. RatelimitMiddleware
-    3. CsrfMiddleware
-    4. SecurityHeadersMiddleware
-    5. CorsMiddleware
-
-  Modules: currently empty array (no modules loaded by default)
-
-
---- 22.2 AppController (app/App/Controller/AppController.php) ---
-
-Extends Controller. Default view routes:
-  GET /        → renders "home" view
-  GET /test    → renders "home" view
-
-
---- 22.3 ApiController (app/App/Controller/Api/ApiController.php) ---
-
-[@base] => /api/v1
-
-  GET /api/v1/     → JSON: API description with route listing
-  GET /api/v1/test → JSON: { test: "api test endpoint" }
-
-
-================================================================================
-23. WEB SERVER CONFIGURATION
+25. WEB SERVER CONFIGURATION
 ================================================================================
 
 .htaccess (public/):
   - RewriteEngine on
-  - All non-file requests → index.php
+  - Blocks ALL .php files EXCEPT index.php
+  - All non-file/non-directory requests -> index.php
   - DirectorySlash Off
-  - Blocks access to .env and .sql files
+  - Blocks access to .env, .ht*, and .sql files
 
 
 ================================================================================
-24. DESIGN PATTERNS USED
+26. DESIGN PATTERNS USED
 ================================================================================
 
   - Service Locator / Facade: Aether() global accessor
+  - Inheritance-based App: App extends Aether core
   - Middleware Pipeline: functional array_reduce composition
   - Strategy Pattern: database drivers, cache adapters, response formats
   - Gateway Pattern: auth gateways (login, register, logout)
   - Factory Method: CacheFactory, RequestFactory, ResponseFactory
   - Template Method: AetherModule (_onLoad hook), DatabaseModel (_build)
-  - Annotation-based routing: PHPDoc reflection at boot, cached
+  - Annotation-based routing: PHPDoc reflection at boot, optionally cached
   - HMAC-signed storage: session tamper protection
   - Lazy singleton: ServiceManager via ??= operator
+  - RFC 9110 method semantics: MethodInterface with safe/cacheable/body flags
+  - APCu fallback pattern: _getFallback(key, callable) for transparent caching
 
 
 ================================================================================
-25. NAMING CONVENTIONS
+27. NAMING CONVENTIONS
 ================================================================================
 
   - All public methods prefixed with underscore: _methodName()
   - All private/protected properties prefixed with underscore: $_property
+  - Protected/private methods: __methodName() (double underscore for core init)
   - Enums use PascalCase values
   - Namespaces mirror directory structure
   - Interfaces suffixed with "Interface"
   - Traits suffixed with "Trait"
   - Exception classes suffixed with "Exception"
+  - Service hubs suffixed with "ServiceHub"
+  - Final classes for leaf implementations (drivers, handlers, adapters)
+
+
+================================================================================
+28. NAMESPACE MAP (complete)
+================================================================================
+
+  Aether\                              -> src/Aether/Aether.php
+  Aether\Cache\                        -> src/Aether/Cache/
+  Aether\Cache\Adapter\                -> src/Aether/Cache/Adapter/
+  Aether\Config\                       -> src/Aether/Config/
+  Aether\Database\                     -> src/Aether/Database/
+  Aether\Database\Drivers\             -> src/Aether/Database/Drivers/
+  Aether\Database\Drivers\List\        -> src/Aether/Database/Drivers/List/
+  Aether\Database\Models\              -> src/Aether/Database/Models/
+  Aether\Event\                        -> src/Aether/Event/
+  Aether\Exception\                    -> src/Aether/Exception/
+  Aether\Http\                         -> src/Aether/Http/
+  Aether\Http\Auth\                    -> src/Aether/Http/Auth/
+  Aether\Http\Auth\Controller\         -> src/Aether/Http/Auth/Controller/
+  Aether\Http\Auth\Gateway\            -> src/Aether/Http/Auth/Gateway/
+  Aether\Http\Auth\User\               -> src/Aether/Http/Auth/User/
+  Aether\Http\Auth\User\Permission\    -> src/Aether/Http/Auth/User/Permission/
+  Aether\Http\Methods\                 -> src/Aether/Http/Methods/
+  Aether\Http\Request\                 -> src/Aether/Http/Request/
+  Aether\Http\Response\                -> src/Aether/Http/Response/
+  Aether\Http\Response\Format\         -> src/Aether/Http/Response/Format/
+  Aether\Http\Router\                  -> src/Aether/Http/Router/
+  Aether\Http\Router\Controller\       -> src/Aether/Http/Router/Controller/
+  Aether\Http\Router\Route\            -> src/Aether/Http/Router/Route/
+  Aether\Http\Session\                 -> src/Aether/Http/Session/
+  Aether\Http\Session\Security\        -> src/Aether/Http/Session/Security/
+  Aether\IO\                           -> src/Aether/IO/
+  Aether\IO\Parser\                    -> src/Aether/IO/Parser/
+  Aether\Middleware\                   -> src/Aether/Middleware/
+  Aether\Middleware\Stack\             -> src/Aether/Middleware/Stack/
+  Aether\Modules\                      -> src/Aether/Modules/ (core contracts)
+  Aether\Modules\AetherCLI\           -> modules/AetherCLI/src/
+  Aether\Modules\I18n\                -> modules/I18n/src/
+  Aether\Modules\Analytics\           -> modules/Analytics/src/
+  Aether\Security\                     -> src/Aether/Security/
+  Aether\Security\Token\               -> src/Aether/Security/Token/
+  Aether\Service\                      -> src/Aether/Service/
+  Aether\Service\Hub\                  -> src/Aether/Service/Hub/
+  Aether\Task\                         -> src/Aether/Task/
+  Aether\Utils\                        -> src/Aether/Utils/
+  Aether\View\                         -> src/Aether/View/
+  App\                                 -> app/App/
+  App\Controller\                      -> app/App/Controller/
+  App\Controller\Api\                  -> app/App/Controller/Api/
 
 
 ================================================================================
