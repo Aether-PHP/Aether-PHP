@@ -42,7 +42,6 @@ class App extends Aether {
 
 
     public function _run() : void {
-        parent::_run();
 
         # - Middlewares load
         self::$_middlewares = [
@@ -56,5 +55,7 @@ class App extends Aether {
 
         # - Modules load
         ModuleFactory::_load([  ]);
+
+        $this->_runCore();
     }
 }

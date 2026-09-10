@@ -43,10 +43,11 @@ class HttpFilteringMiddleware implements MiddlewareInterface {
         $method = Aether()->_http()->_context()->_getMethod();
         $route = Aether()->_http()->_context()->_getRoute();
 
-        if (self::EXCLUDE_GET && $method->_getName() == "GET")
+        if (self::EXCLUDE_GET && $method->_getName() === "GET")
             return $_next();
 
-        # - The goal here is to filter strange http requests
+        # - The goal here is to filter strange and repeated http requests
+        # - prevent from smuggling and duplicate requests
         $key = "filtering://" . $method->_getName() . ":" . $ip . ':' . $route;
 
         if ($cache->_has($key)){

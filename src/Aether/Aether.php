@@ -82,7 +82,7 @@ class Aether {
      *
      * @return void
      */
-    public function _run() : void {
+    protected function _runCore() : void {
         $this->__init();
 
         # - Middlewares Pipeline
