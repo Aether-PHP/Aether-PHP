@@ -24,7 +24,9 @@ declare(strict_types=1);
 
 namespace Aether\Http\Router\Route;
 
+use Attribute;
 
+#[Attribute(Attribute::TARGET_METHOD|Attribute::TARGET_CLASS|Attribute::TARGET_PARAMETER)]
 class Route implements RouteInterface {
 
     /** @var string $_method */
@@ -36,11 +38,11 @@ class Route implements RouteInterface {
     /** @var $_callable */
     private $_callable;
 
-    /** @var $_middlewares */
-    private $_middlewares;
+    /** @var array $_middlewares */
+    private array $_middlewares;
 
 
-    public function __construct(string $_method, string $_route, $_callable, $_middlewares){
+    public function __construct(string $_method, string $_route, $_callable, array $_middlewares){
         $this->_method = $_method;
         $this->_route = $_route;
         $this->_callable = $_callable;
@@ -63,8 +65,8 @@ class Route implements RouteInterface {
     public function _getCallable() { return $this->_callable; }
 
     /**
-     * @return
+     * @return array
      */
-    public function _getMiddlewares() { return $this->_middlewares; }
+    public function _getMiddlewares() : array { return $this->_middlewares; }
 
 }

@@ -50,19 +50,8 @@ final class Pipeline {
      * @return void
      */
     public static function _runForRoute(array $_middlewares, callable $_finalHandler) : void {
-        $middlewares = array_filter(array_map(function($middleware){
-            if ($middleware === "")
-                return null;
-            return "Aether\\Middleware\\Stack\\" . $middleware;
-        }, $_middlewares), function ($middleware){
-            if (is_null($middleware))
-                return false;
 
-            if (!class_exists($middleware))
-                return false;
-            return true;
-        });
 
-        self::_run($middlewares, $_finalHandler);
+        self::_run($_middlewares, $_finalHandler);
     }
 }

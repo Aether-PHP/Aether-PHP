@@ -25,19 +25,15 @@ declare(strict_types=1);
 namespace App\Controller\Api;
 
 use Aether\Http\Router\Controller\Controller;
+use Aether\Http\Router\Route\Route;
+use Aether\Http\Router\Route\Base;
 
 
-/**
- * [@base] => /api/v1
- */
+#[Base( '/api/v1' )]
 class ApiController extends Controller {
 
-    /**
-     * API listing route
-     *
-     * [@method] => GET
-     * [@route] => /
-     */
+
+    #[Route( 'GET', '/' )]
     public function api(){
         Aether()->_http()->_response()->_json([
             "name" => $_ENV["PROJECT_NAME"] . " backend | Powered by Aether-PHP framework.",
@@ -73,12 +69,8 @@ class ApiController extends Controller {
         ], 200)->_send();
     }
 
-    /**
-     * Test API route
-     *
-     * [@method] => GET
-     * [@route] => /test
-     */
+
+    #[Route( 'GET', '/test' )]
     public function test(){
         Aether()->_http()->_response()->_json([
             "test" => "api test endpoint"

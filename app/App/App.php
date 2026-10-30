@@ -46,7 +46,6 @@ class App extends Aether {
         # - Middlewares load
         self::$_middlewares = [
             MaintenanceMiddleware::class,
-            RatelimitMiddleware::class,
             HttpFilteringMiddleware::class,
             CsrfMiddleware::class,
             SecurityHeadersMiddleware::class,

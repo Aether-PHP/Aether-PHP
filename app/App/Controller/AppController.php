@@ -25,15 +25,15 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use Aether\Http\Router\Controller\Controller;
+use Aether\Http\Router\Route\Route;
 
 
 class AppController extends Controller {
 
-    /**
-     * [@method] => GET
-     * [@route] => /
-     */
+
+    #[Route( 'GET', '/' )]
     public function home(){
         $this->_render("home");
     }
+
 }

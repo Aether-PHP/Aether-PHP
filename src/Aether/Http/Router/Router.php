@@ -48,10 +48,11 @@ final class Router {
      * @param string $method
      * @param string $route
      * @param $callable
+     * @param array $middlewares
      *
      * @return Router
      */
-    public function _addRoute(string $method, string $route, $callable, $middlewares) : Router {
+    public function _addRoute(string $method, string $route, $callable, array $middlewares) : Router {
         array_push($this->_routes[$method], new Route($method, $route, $callable, $middlewares));
         return $this;
     }
@@ -94,7 +95,7 @@ final class Router {
 
 
     /**
-     * @param \Aether\Http\Router\Route\Route $route
+     * @param Route $route
      * @param array|null $_params
      *
      * @return mixed

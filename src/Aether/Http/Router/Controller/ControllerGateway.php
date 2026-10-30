@@ -104,42 +104,29 @@ final class ControllerGateway {
             }
 
             # - We allow developers to add a base path for their controller
-            $base = $reflection->getDocComment() === false ? "" : self::_extractAnnotation($reflection->getDocComment(), 'base');
+            $base = $reflection->getAttributes() !== [] && $reflection->getAttributes()[0]->getName() === "Aether\Http\Router\Route\Base" ? $reflection->getAttributes()[0]->getArguments()[0] : "";
             $base = is_null($base) ? "" : $base;
 
             foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method){
-                $doc = $method->getDocComment();
-                if (!$doc) continue;
+                $doc = $method->getAttributes();
+                if (!isset($doc[0])) continue;
 
-                # - We gather the 'Method' and 'Route' and 'Middlewares' phpdoc annotations
-                $method_type = self::_extractAnnotation($doc, 'method');
-                $route = self::_extractAnnotation($doc, 'route');
-                $middlewares = self::_extractAnnotation($doc, 'middlewares');
+                if ($doc[0]->getName() !== "Aether\Http\Router\Route\Route")
+                    continue;
+
+                $args = $doc[0]->getArguments();
+
+                # - We gather the 'Method' and 'Route' and 'Middlewares' from php attributes
+                $method_type = $args[0];
+                $route = $args[1];
+                $middlewares = isset($args[2]) ? $args[2] : [];
 
                 if (!$method_type || !$route)
-                    throw new RouterControllerException("[ControllerGateway] - ERROR - Wrong PHP Doc for {$class_name} Controller, method {$method->getName()}");
+                    throw new RouterControllerException("[ControllerGateway] - ERROR - Wrong PHP Attributes for {$class_name} Controller, method {$method->getName()}");
 
-                if (!is_null($middlewares)){
-                    $_router->_addRoute(strtoupper($method_type), $base . $route, "{$class_name}@{$method->getName()}", explode(",", $middlewares));
-                } else {
-                    $_router->_addRoute(strtoupper($method_type), $base . $route, "{$class_name}@{$method->getName()}", []);
-                }
+                $_router->_addRoute(strtoupper($method_type), $base . $route, "{$class_name}@{$method->getName()}", $middlewares);
             }
         }
     }
 
-    /**
-     * Regexp to exract wanted data from phpdoc
-     *
-     * @param string $_docComment
-     * @param string $_annotation
-     *
-     * @return string|null
-     */
-    private static function _extractAnnotation(string $_docComment, string $_annotation) : ?string {
-        if (preg_match("/\\[@{$_annotation}\\]\\s*=>\\s*(\\S+)/", $_docComment, $matches))
-            return $matches[1];
-
-        return null;
-    }
 }
