@@ -25,7 +25,7 @@ declare(strict_types=1);
 namespace Aether\Http\Router\Route;
 
 
-#[Attribute(Attribute::TARGET_METHOD|Attribute::TARGET_CLASS|Attribute::TARGET_PARAMETER)]
+#[Attribute( Attribute::TARGET_METHOD | Attribute::TARGET_CLASS | Attribute::TARGET_PARAMETER )]
 final class Base {
 
 

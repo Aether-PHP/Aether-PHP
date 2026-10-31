@@ -26,8 +26,10 @@ namespace Aether\Http\Router\Route;
 
 use Attribute;
 
-#[Attribute(Attribute::TARGET_METHOD|Attribute::TARGET_CLASS|Attribute::TARGET_PARAMETER)]
+
+#[Attribute( Attribute::TARGET_METHOD | Attribute::TARGET_CLASS | Attribute::TARGET_PARAMETER )]
 class Route implements RouteInterface {
+
 
     /** @var string $_method */
     private string $_method;

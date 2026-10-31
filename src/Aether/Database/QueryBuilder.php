@@ -318,6 +318,7 @@ abstract class QueryBuilder {
         $this->_countCol = "*";
         $this->_orderBy = null;
         $this->_orderByOrd = "";
+        $this->_limit = null;
     }
 
     /**
